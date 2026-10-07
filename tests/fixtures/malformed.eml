@@ -1,0 +1,11 @@
+From: broken@@example..com
+To: <<not-an-address
+Subject: =?unknown-charset-xyz?B?SGVsbG8=?=
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="never-closed"
+
+--never-closed
+Content-Type: text/plain; charset="x-nonexistent-charset"
+Content-Transfer-Encoding: base64
+
+!!!not base64 at all!!!

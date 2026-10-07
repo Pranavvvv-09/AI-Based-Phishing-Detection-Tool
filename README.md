@@ -19,7 +19,7 @@ phishing from your own mailbox.
 
 ## Progress
 - [x] Day 1: Project setup, secure repo hygiene, config validation
-- [ ] Day 2: Safe `.eml` parser
+- [x] Day 2: Safe `.eml` parser (size, MIME-bomb, header-flood and charset defences)
 - [ ] Day 3: Header checks
 - [ ] Day 4: URL checks
 - [ ] Day 5: Email ML model

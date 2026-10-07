@@ -1,0 +1,22 @@
+Return-Path: <news@example.com>
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@example.com;
+       spf=pass (google.com: domain of news@example.com designates 192.0.2.10 as permitted sender) smtp.mailfrom=news@example.com;
+       dmarc=pass (p=REJECT) header.from=example.com
+Received-SPF: pass (google.com: domain of news@example.com designates 192.0.2.10 as permitted sender)
+Received: from mail.example.com (mail.example.com [192.0.2.10])
+        by mx.google.com with ESMTPS id abc123; Mon, 05 Oct 2026 09:00:00 -0700
+From: Example News <news@example.com>
+To: student@example.org
+Subject: Your weekly newsletter
+Date: Mon, 05 Oct 2026 09:00:00 -0700
+Message-ID: <weekly-42@example.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+Hi there,
+
+Here is this week's summary. Read more at https://www.example.com/news/42.
+
+Thanks,
+The Example team

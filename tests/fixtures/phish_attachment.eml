@@ -1,0 +1,26 @@
+From: "HR Department" <hr@company.test>
+To: student@example.org
+Subject: Salary revision letter - action required
+Date: Wed, 07 Oct 2026 10:00:00 +0530
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset="utf-8"
+
+Please open the attached document to view your revised salary.
+
+--mix
+Content-Type: text/html; name="salary.html"
+Content-Disposition: attachment; filename="salary.html"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+RmFrZSBsb2dpbiBwYWdlPC9ib2R5PjwvaHRtbD4=
+
+--mix
+Content-Type: application/octet-stream; name="../../etc/passwd"
+Content-Disposition: attachment; filename="../../etc/passwd"
+Content-Transfer-Encoding: base64
+
+aGFybWxlc3M=
+--mix--
