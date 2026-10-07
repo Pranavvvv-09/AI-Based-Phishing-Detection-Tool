@@ -1,0 +1,50 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---------- Secrets (never commit) ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# ---------- Email samples / datasets ----------
+# Real emails contain personal data and live malicious links.
+data/raw/
+data/processed/
+*.eml
+*.mbox
+*.msg
+# Hand-written, sanitised test fixtures ARE committed
+!tests/fixtures/*.eml
+
+# ---------- Runtime output ----------
+quarantine/*
+!quarantine/.gitkeep
+reports/*
+!reports/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# ---------- Model artifacts (rebuilt by training) ----------
+models/*.joblib
+models/*.pkl
+
+# ---------- Editors / OS ----------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
