@@ -21,7 +21,8 @@ The full download is about 1.7 GB, most of it honeypot attachments that are neve
 | `SpamAssasin.csv` | 4,073 (`label == 0` only) | legitimate (personal/lists, 2002) | Apache SpamAssassin public corpus | Apache-hosted public corpus |
 | **`CEAS_08.csv`** | **16,968** (`label == 0` only) | legitimate (2008) | CEAS 2008 challenge corpus | Research use |
 | **`Ling.csv`** | **2,396** (`label == 0` only) | legitimate (academic mailing list) | Ling-Spam (Androutsopoulos et al.) | Research use |
-| `sms.tsv` | 5,572 | SMS (Day 6) | UCI SMS Spam Collection | CC BY 4.0 |
+| `sms.tsv` | 194 ham (UCI-only; the rest overlaps Mendeley) of 5,574 | legitimate SMS | UCI SMS Spam Collection (2011) | CC BY 4.0 |
+| **`sms_mendeley_5971.csv`** | **4,832 ham + 434 smishing** (of 5,971) | legitimate SMS / smishing | Mishra & Soni (2022), Mendeley Data | CC BY 4.0 (as listed on the Mendeley record) |
 | `data/curated/modern_lures.csv` | 112 (committed) | modern phishing + legitimate | Hand-written for this project | Same as this repository |
 
 **Total training rows: 6,125 phishing and 30,304 legitimate,** plus the curated train half.
@@ -67,7 +68,8 @@ The email CSVs are the per-source files behind the Kaggle "Phishing Email Datase
 blocked in some environments, so the script downloads public **GitHub mirrors**:
 
 - Email CSVs: `github.com/rokibulroni/Phishing-Email-Dataset` (unofficial mirror, no licence file)
-- SMS: `github.com/justmarkham/pycon-2016-tutorial` (`data/sms.tsv`)
+- SMS: `github.com/justmarkham/pycon-2016-tutorial` (`data/sms.tsv`) and
+  `github.com/nmbenton/INFO-4360-Project` (`Dataset_5971.csv`, the Mendeley file)
 - Honeypot: `github.com/rf-peixoto/phishing_pot` (sparse checkout of `email/` only)
 
 CSV files are pinned by SHA-256. The honeypot is pinned to a full git commit
@@ -95,6 +97,28 @@ email exists, because real inboxes are private. Genuine modern account notices
 3 of 28 legitimate messages in the modern test, one of them above the 0.8
 quarantine threshold. The Day 6 scorer counters this with header evidence:
 genuine notices come from authenticated, official domains.
+
+## SMS data: decisions and shortcuts found
+- **Labels:** Mendeley re-labelled UCI's "spam" into *smishing* (266) vs marketing *spam*
+  (311) on the 4,933 shared messages. Mendeley labels win. Marketing spam is excluded
+  (as for email), and UCI-only "spam" is excluded because it can't be told apart.
+- **Parsing:** UCI must be read with `quoting=QUOTE_NONE`. pandas' default treats stray
+  quote characters as quoting and merges messages (5,572 rows instead of 5,574).
+- **Digits dropped (decided before training):** 97% of smishing but only 16% of the
+  2011-era legitimate chats contain digits. Modern legitimate SMS (OTPs, bank alerts)
+  are full of numbers, so the SMS model never sees digits.
+- **Fingerprints removed:** UCI anonymisation placeholders (`&lt;#&gt;`, `&lt;TIME&gt;`,
+  ...; in 5% of ham, 0% of spam), plus the words `uk` (2011 British spam) and `covid`
+  (only 2020–22 scams mention it).
+- **Rejected dataset:** an "Indian SMS spam" set (junioralive, MIT) labels *all* of its
+  credit/OTP/delivery messages as spam and has only personal chat as ham. Adding it
+  would have made the problem below worse.
+- **Residual bias (honest limitation):** every legitimate training SMS is casual
+  personal chat, so the model learned "formal = scam". It flags **21.4%** of modern
+  legitimate messages (bank alerts, deliveries, OTP-style notices) in the hand-written
+  test as suspicious, though only 3.6% reach the quarantine threshold. No public
+  corpus of legitimate transactional SMS exists (it is personal data). The fix is
+  consented, anonymised examples from your *own* phone.
 
 ## Handling rules
 - These files contain **real phishing**, with live malicious links and, in the honeypot,

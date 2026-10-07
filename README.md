@@ -23,7 +23,7 @@ phishing from your own mailbox.
 - [x] Day 3: Header checks (SPF/DKIM/DMARC trust model, spoofing, lookalike domains, BEC)
 - [x] Day 4: URL & attachment checks (punycode, @-trick, obfuscated IPs, link-text mismatch, risky files)
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
-- [ ] Day 6: SMS model + scorer
+- [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail)
 - [ ] Day 7: IMAP poller + quarantine
 - [ ] Day 8: Web UI, API, admin dashboard
 - [ ] Day 9: Tests + CI hardening
@@ -33,13 +33,24 @@ phishing from your own mailbox.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[web,dev]"
-python scripts/bootstrap.py   # download datasets + train the email model (~1 min)
+python scripts/bootstrap.py   # download datasets + train email and SMS models (~7 min first run)
 cp .env.example .env          # then fill in secrets (see docs/lab-setup.md)
 pre-commit install
 pytest
 ruff check .
 bandit -c pyproject.toml -r src
 ```
+
+## Score a message
+```bash
+python -m phishguard.scorer email path/to/message.eml
+python -m phishguard.scorer sms "Your SBI account is blocked. Update KYC at sbi-kyc-update.in/verify"
+```
+Prints a JSON verdict: `score` (0–1), `label` (phishing / suspicious / legitimate),
+`action` (quarantine / review / deliver) and the `reasons`, each with a signed weight
+showing how much it moved the score. Errors and partly-analysed messages always
+return `review`, never `deliver`. Full-system results are in `models/scorer_metrics.json`
+(reproduce with `python scripts/evaluate_scorer.py`).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)**: requirements,
