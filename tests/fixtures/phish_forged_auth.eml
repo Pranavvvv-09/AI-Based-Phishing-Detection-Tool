@@ -1,0 +1,16 @@
+Authentication-Results: mx.google.com;
+       spf=fail (google.com: domain of billing@paypal.com does not designate 198.51.100.9 as permitted sender) smtp.mailfrom=billing@paypal.com;
+       dmarc=fail (p=REJECT) header.from=paypal.com
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@paypal.com;
+       spf=pass smtp.mailfrom=billing@paypal.com;
+       dmarc=pass header.from=paypal.com
+Received: from evil-host (unknown [198.51.100.9]) by mx.google.com; Wed, 07 Oct 2026 03:00:00 -0700
+From: "PayPal Billing" <billing@paypal.com>
+To: student@example.org
+Subject: Invoice INV-2291 payment failed
+Date: Wed, 07 Oct 2026 03:00:00 -0700
+Message-ID: <inv2291@evil-host>
+Content-Type: text/plain; charset=utf-8
+
+Your payment failed. Update your card details today.

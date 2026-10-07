@@ -33,6 +33,7 @@ class Settings:
     max_email_bytes: int
     admin_username: str
     intel_enabled: bool
+    trusted_authserv_id: str
     # Secrets: hidden from repr() so printing settings never leaks them.
     imap_app_password: str = field(repr=False)
     api_key: str = field(repr=False)
@@ -105,6 +106,10 @@ def load_settings(
     if not folder or not all(c.isalnum() or c in "-_/" for c in folder):
         raise ConfigError("IMAP_QUARANTINE_FOLDER may only contain letters, digits, - _ /")
 
+    authserv = env.get("TRUSTED_AUTHSERV_ID", "mx.google.com").strip().lower()
+    if not authserv or not all(c.isalnum() or c in ".-" for c in authserv):
+        raise ConfigError("TRUSTED_AUTHSERV_ID must be a hostname such as mx.google.com")
+
     return Settings(
         imap_host=env.get("IMAP_HOST", "imap.gmail.com").strip(),
         imap_user=env.get("IMAP_USER", "").strip(),
@@ -116,6 +121,7 @@ def load_settings(
         max_email_bytes=_int(env, "MAX_EMAIL_BYTES", 5 * 1024 * 1024, 1024, MAX_EMAIL_BYTES_LIMIT),
         admin_username=env.get("ADMIN_USERNAME", "admin").strip(),
         intel_enabled=_bool(env, "INTEL_ENABLED", False),
+        trusted_authserv_id=authserv,
         imap_app_password=env.get("IMAP_APP_PASSWORD", ""),
         api_key=env.get("API_KEY", ""),
         flask_secret_key=env.get("FLASK_SECRET_KEY", ""),

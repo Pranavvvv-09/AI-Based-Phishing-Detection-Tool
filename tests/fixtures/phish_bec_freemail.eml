@@ -1,0 +1,12 @@
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com;
+       spf=pass (google.com: domain of md.office.desk@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=md.office.desk@gmail.com;
+       dmarc=pass (p=NONE) header.from=gmail.com
+From: "Rajesh Kumar (Managing Director) ceo@company.example" <md.office.desk@gmail.com>
+To:
+Subject: Quick task - are you at your desk?
+Date: Wed, 07 Oct 2026 12:30:00 +0530
+Message-ID: <CAbec123@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+
+I'm in a meeting. I need you to buy 5 gift cards for a client urgently. Reply with the codes.

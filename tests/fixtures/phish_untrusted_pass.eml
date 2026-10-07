@@ -1,0 +1,12 @@
+Authentication-Results: relay.attacker.test;
+       dkim=pass header.i=@hdfcbank.com;
+       spf=pass smtp.mailfrom=alerts@hdfcbank.com;
+       dmarc=pass header.from=hdfcbank.com
+From: "HDFC Bank" <alerts@hdfcbank.com>
+To: student@example.org
+Subject: KYC update pending
+Date: Wed, 07 Oct 2026 11:00:00 +0530
+Message-ID: <kyc1@relay.attacker.test>
+Content-Type: text/plain; charset=utf-8
+
+Your KYC is pending. Update within 24 hours to avoid account freeze.
