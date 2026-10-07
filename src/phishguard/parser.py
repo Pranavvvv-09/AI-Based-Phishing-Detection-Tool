@@ -232,7 +232,8 @@ def _header_list(msg: EmailMessage, name: str) -> list[str]:
     return [clean_header(v) for v in _raw_headers(msg, name)]
 
 
-def _text_urls(text: str) -> list[str]:
+def extract_urls(text: str) -> list[str]:
+    """Bare URLs in free text (email or SMS), bounded and linear-time."""
     urls = []
     for match in _URL_RE.finditer(text):
         urls.append(match.group(0).rstrip(_TRAILING_PUNCT))
@@ -364,7 +365,7 @@ def parse_email(raw: bytes, max_bytes: int = DEFAULT_MAX_BYTES) -> ParsedEmail:
     # A URL that only appears as an anchor's *visible text* is not a link target.
     known = {link.href for link in links}
     anchor_texts = [link.text for link in links if link.source == "html" and link.text]
-    for url in _text_urls(result.body):
+    for url in extract_urls(result.body):
         if len(links) >= MAX_LINKS:
             result.truncated = True
             break
