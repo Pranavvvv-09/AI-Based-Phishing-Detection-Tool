@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-10-07T20:38:19Z",
+  "parameters": {
+    "rule_scale": 4.0,
+    "text_clip": 4.0,
+    "verified_sender_credit": 2.0,
+    "aligned_links_credit": 1.0,
+    "review_threshold": 0.5,
+    "quarantine_threshold": 0.8
+  },
+  "honeypot_future_english": {
+    "n": 1005,
+    "unanalysed_review": 0,
+    "scorer_recall_flagged": 0.9423,
+    "scorer_recall_quarantined": 0.8328,
+    "text_only_recall_flagged": 0.8786,
+    "text_only_recall_quarantined": 0.6736
+  },
+  "honeypot_future_all_languages": {
+    "n": 5465,
+    "unanalysed_review": 0,
+    "scorer_recall_flagged": 0.9585,
+    "scorer_recall_quarantined": 0.6564,
+    "text_only_recall_flagged": 0.7321,
+    "text_only_recall_quarantined": 0.3758
+  },
+  "legit_test_content_mode": {
+    "all": {
+      "n": 7577,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.005,
+      "scorer_false_positive_rate_quarantined": 0.0008,
+      "text_only_false_positive_rate_flagged": 0.0041,
+      "text_only_false_positive_rate_quarantined": 0.0007
+    },
+    "CEAS_08.csv": {
+      "n": 3390,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.0074,
+      "scorer_false_positive_rate_quarantined": 0.0009,
+      "text_only_false_positive_rate_flagged": 0.0056,
+      "text_only_false_positive_rate_quarantined": 0.0006
+    },
+    "Enron.csv": {
+      "n": 2927,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.0031,
+      "scorer_false_positive_rate_quarantined": 0.001,
+      "text_only_false_positive_rate_flagged": 0.0031,
+      "text_only_false_positive_rate_quarantined": 0.001
+    },
+    "Ling.csv": {
+      "n": 464,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.0022,
+      "scorer_false_positive_rate_quarantined": 0.0,
+      "text_only_false_positive_rate_flagged": 0.0022,
+      "text_only_false_positive_rate_quarantined": 0.0
+    },
+    "SpamAssasin.csv": {
+      "n": 796,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.0038,
+      "scorer_false_positive_rate_quarantined": 0.0,
+      "text_only_false_positive_rate_flagged": 0.0025,
+      "text_only_false_positive_rate_quarantined": 0.0
+    }
+  },
+  "modern_test_as_email": {
+    "phishing": {
+      "n": 28,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.8571,
+      "scorer_recall_quarantined": 0.6429,
+      "text_only_recall_flagged": 0.8571,
+      "text_only_recall_quarantined": 0.6429
+    },
+    "legitimate": {
+      "n": 28,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.1071,
+      "scorer_false_positive_rate_quarantined": 0.0357,
+      "text_only_false_positive_rate_flagged": 0.1071,
+      "text_only_false_positive_rate_quarantined": 0.0357
+    }
+  },
+  "modern_test_as_sms": {
+    "phishing": {
+      "n": 28,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.8214,
+      "scorer_recall_quarantined": 0.7143,
+      "text_only_recall_flagged": 0.8214,
+      "text_only_recall_quarantined": 0.7143
+    },
+    "legitimate": {
+      "n": 28,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.2143,
+      "scorer_false_positive_rate_quarantined": 0.0357,
+      "text_only_false_positive_rate_flagged": 0.2143,
+      "text_only_false_positive_rate_quarantined": 0.0357
+    }
+  },
+  "sms_test_full_scorer": {
+    "smishing": {
+      "n": 87,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.9655,
+      "scorer_recall_quarantined": 0.8506,
+      "text_only_recall_flagged": 0.9655,
+      "text_only_recall_quarantined": 0.8506
+    },
+    "legitimate": {
+      "n": 1005,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.003,
+      "scorer_false_positive_rate_quarantined": 0.0,
+      "text_only_false_positive_rate_flagged": 0.003,
+      "text_only_false_positive_rate_quarantined": 0.0
+    }
+  },
+  "fixtures": {
+    "legit_newsletter.eml": {
+      "action": "deliver",
+      "score": 0.039
+    },
+    "malformed.eml": {
+      "action": "deliver",
+      "score": 0.397
+    },
+    "phish_attachment.eml": {
+      "action": "quarantine",
+      "score": 0.939
+    },
+    "phish_bec_freemail.eml": {
+      "action": "quarantine",
+      "score": 0.997
+    },
+    "phish_forged_auth.eml": {
+      "action": "quarantine",
+      "score": 0.999
+    },
+    "phish_spoofed_sender.eml": {
+      "action": "quarantine",
+      "score": 1.0
+    },
+    "phish_untrusted_pass.eml": {
+      "action": "quarantine",
+      "score": 0.985
+    }
+  },
+  "runtime_seconds": 297
+}

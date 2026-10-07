@@ -39,13 +39,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--force", action="store_true", help="retrain even if a valid model exists")
     args = parser.parse_args(argv)
 
-    if not args.force and model_is_valid():
-        print("[ok] email_model present and matches models/manifest.json - nothing to do")
+    todo = [name for name in ("email_model", "sms_model") if args.force or not model_is_valid(name)]
+    if not todo:
+        print("[ok] email_model and sms_model present and match models/manifest.json"
+              " - nothing to do")
         return 0
     if _download() != 0:
         print("[fail] dataset download failed - see messages above", file=sys.stderr)
         return 1
-    return text_model.main(["train-email"])
+    for name in todo:
+        command = "train-email" if name == "email_model" else "train-sms"
+        if text_model.main([command]) != 0:
+            return 1
+    return 0
 
 
 if __name__ == "__main__":

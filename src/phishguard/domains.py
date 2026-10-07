@@ -22,7 +22,10 @@ _EXTRACT = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None, extra_suff
 # Extend at runtime with ``load_extra_brands`` (config: EXTRA_BRANDS_FILE).
 BRANDS: dict[str, frozenset[str]] = {
     # --- global tech, payments, social ---
-    "paypal": frozenset({"paypal.com", "paypal.me"}),
+    "paypal": frozenset(
+        {"paypal.com", "paypal.me", "paypal.de", "paypal.co.uk", "paypal.fr", "paypal.it",
+         "paypal.es"}
+    ),
     "amazon": frozenset(
         {"amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonses.com", "amazonaws.com"}
     ),
@@ -30,6 +33,7 @@ BRANDS: dict[str, frozenset[str]] = {
         {
             "microsoft.com", "outlook.com", "live.com", "office.com", "office365.com",
             "microsoftonline.com", "sharepoint.com", "onedrive.com", "msn.com",
+            "microsoft365.com", "onmicrosoft.com",
         }
     ),
     "apple": frozenset({"apple.com", "icloud.com"}),
@@ -120,11 +124,16 @@ BRAND_PHRASES: dict[str, tuple[str, ...]] = {
 # Short names that are also ordinary words: only matched as whole tokens, never fuzzily.
 _MIN_FUZZY_LEN = 6
 
+# Domains where *anyone* can get an address. Some are official brand domains (gmail.com,
+# outlook.com, Microsoft 365's default tenant domain onmicrosoft.com), but an address
+# there says nothing about who is writing: never trusted, and a brand name in the
+# display name of such an address is spoofing.
 FREEMAIL_DOMAINS = frozenset(
     {
         "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "outlook.com",
         "hotmail.com", "live.com", "aol.com", "icloud.com", "proton.me",
         "protonmail.com", "rediffmail.com", "zoho.com", "gmx.com", "mail.com",
+        "onmicrosoft.com",
     }
 )
 
@@ -140,8 +149,8 @@ _TOKEN_SPLIT = re.compile(r"[^a-z0-9]+")
 
 
 def normalise_host(host: str) -> str:
-    """Lower-case, strip whitespace, brackets, port and trailing dot."""
-    host = host.strip().lower().strip("[]")
+    """Lower-case; strip whitespace, quotes, angle/square brackets, port and trailing dot."""
+    host = host.strip().lower().strip("\"'<>[]")
     if host.count(":") == 1:  # host:port (IPv6 has several colons)
         host = host.split(":", 1)[0]
     return host.rstrip(".")

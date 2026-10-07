@@ -164,3 +164,37 @@ def test_trusted_authserv_defaults_to_setting(monkeypatch):
     monkeypatch.delenv("TRUSTED_AUTHSERV_ID")
     r = check_headers(parse_email_file(FIXTURES / "phish_untrusted_pass.eml"))
     assert r.auth_source == "untrusted"
+
+
+# ---------- Day 6 regressions (found by evaluating on real honeypot mail) ----------
+
+
+def _hdr(from_line):
+    raw = f"From: {from_line}\r\nTo: b@example.org\r\nMessage-ID: <1@x>\r\n\r\nhi"
+    return check_headers(parse_email(raw.encode()), "mx.google.com")
+
+
+def test_default_m365_tenant_is_not_a_microsoft_lookalike():
+    r = _hdr("Contoso Sales <sales@contoso.onmicrosoft.com>")
+    assert "lookalike_sender_domain" not in r.codes  # it really is a Microsoft domain
+
+
+def test_brand_display_name_on_free_mail_is_spoofing():
+    assert "display_name_brand_spoof" in _hdr("Google Security <alert.team@gmail.com>").codes
+    assert "display_name_brand_spoof" in _hdr(
+        "Microsoft Account Team <it@tenant.onmicrosoft.com>"
+    ).codes
+    assert "display_name_brand_spoof" not in _hdr(
+        "Google <no-reply@accounts.google.com>"
+    ).codes
+
+
+def test_role_words_on_m365_tenant_are_freemail_impersonation():
+    assert "freemail_impersonation" in _hdr("IT Support <help@tenant.onmicrosoft.com>").codes
+
+
+def test_quote_residue_in_sender_domain():
+    from phishguard.domains import domain_of, lookalike_brand
+
+    assert domain_of('service@paypal.de"') == "paypal.de"
+    assert lookalike_brand('paypal.de"') is None

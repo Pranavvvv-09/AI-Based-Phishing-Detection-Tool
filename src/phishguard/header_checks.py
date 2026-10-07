@@ -198,7 +198,9 @@ def _check_sender(email: ParsedEmail, report: HeaderReport) -> None:
 
     display = email.from_display
     for brand in brands_in_text(display):
-        if from_domain not in BRANDS[brand]:
+        # A free-mail address is never the brand itself, even on the brand's own free-mail
+        # domain: "Google Security <x@gmail.com>", "Microsoft <x@tenant.onmicrosoft.com>".
+        if from_domain not in BRANDS[brand] or from_domain in FREEMAIL_DOMAINS:
             report.add(
                 "display_name_brand_spoof",
                 f"Display name claims '{brand}' but the address is @{from_domain}",

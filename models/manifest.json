@@ -85,5 +85,59 @@
     "sha256": "c27789bba68910c5e2fe895abb90433e5c8f2af2ba50683ce9b86990a0b79476",
     "sklearn_version": "1.9.1",
     "trained_at": "2026-10-07T19:25:40Z"
+  },
+  "sms_model": {
+    "file": "sms_model.joblib",
+    "metrics": {
+      "class_counts_train": {
+        "by_source": {
+          "sms.tsv": 155,
+          "sms_mendeley_5971.csv": 4213
+        },
+        "legitimate": 4021,
+        "smishing": 347
+      },
+      "modern_test": {
+        "errors_by_category": {
+          "bank_alert": 1,
+          "bec_giftcard": 2,
+          "delivery": 1,
+          "hinglish": 2,
+          "in_upi": 1,
+          "order": 1,
+          "security_notice": 1,
+          "utility": 1,
+          "vendor_legit": 1
+        },
+        "f1": 0.807,
+        "false_positive_rate": 0.2143,
+        "fn": 5,
+        "fp": 6,
+        "n": 56,
+        "pr_auc": 0.9311,
+        "precision": 0.7931,
+        "recall": 0.8214,
+        "roc_auc": 0.9082,
+        "tn": 22,
+        "tp": 23
+      },
+      "test_in_distribution": {
+        "f1": 0.9655,
+        "false_positive_rate": 0.003,
+        "fn": 3,
+        "fp": 3,
+        "n": 1092,
+        "pr_auc": 0.9882,
+        "precision": 0.9655,
+        "recall": 0.9655,
+        "roc_auc": 0.997,
+        "tn": 1002,
+        "tp": 84
+      }
+    },
+    "normalizer": "sms",
+    "sha256": "3f14287bc89d49710f700093c1d072a19c10e1d28f72fb6d77e1d29d6ce1cf3d",
+    "sklearn_version": "1.9.1",
+    "trained_at": "2026-10-07T20:20:12Z"
   }
 }

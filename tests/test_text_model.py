@@ -271,7 +271,7 @@ def test_bootstrap_is_noop_when_model_valid(monkeypatch):
     monkeypatch.setattr(boot, "model_is_valid", lambda name="email_model": True)
     monkeypatch.setattr(boot, "_download", lambda: calls.append("download") or 0)
     assert boot.main([]) == 0
-    assert calls == []  # nothing downloaded or trained
+    assert calls == []  # nothing downloaded or trained (both models valid)
 
 
 # ---------- honeypot corpus loading ----------
@@ -367,3 +367,87 @@ def test_download_gives_up_and_keeps_nothing_on_persistent_mismatch(tmp_path, mo
     with pytest.raises(dl.DownloadError, match="gave up after 3 attempts"):
         dl.download("x.csv", "https://example.com/x.csv", "0" * 64)
     assert list(tmp_path.iterdir()) == []  # no partial or unverified file left behind
+
+
+# ---------- SMS model (Day 6) ----------
+
+
+def test_normalize_sms_drops_digits_but_email_keeps_numtoken():
+    from phishguard.text_model import normalize_sms
+
+    msg = "Your OTP is 482913. Call 09061701461 or visit http://bit.ly/x1"
+    sms = normalize_sms(msg)
+    assert not any(ch.isdigit() for ch in sms) and "numtoken" not in sms
+    assert "bit" not in sms  # URL removed before digits
+    assert "numtoken" in normalize_text(msg)
+
+
+def _write_sms_sources(folder, mendeley_rows, uci_rows):
+    pd.DataFrame(mendeley_rows, columns=["LABEL", "TEXT", "URL", "EMAIL", "PHONE"]).to_csv(
+        folder / "sms_mendeley_5971.csv", index=False
+    )
+    (folder / "sms.tsv").write_text("".join(f"{lab}\t{text}\n" for lab, text in uci_rows))
+
+
+def test_sms_loader_labels_placeholders_and_quotes(tmp_path):
+    from phishguard.text_model import load_sms_corpus
+
+    _write_sms_sources(
+        tmp_path,
+        [
+            ["ham", "See you at lunch tomorrow then", "No", "No", "No"],
+            ["Smishing", "Your account is blocked, verify now", "No", "No", "No"],
+            ["Spam", "Big sale on shoes this weekend only", "No", "No", "No"],
+        ],
+        [
+            ("ham", "See you at lunch tomorrow then"),  # duplicate of a Mendeley ham
+            ("spam", "Big sale on shoes this weekend only"),  # Mendeley says spam: excluded
+            ("spam", "Win a free prize now txt to claim"),  # UCI-only spam: excluded
+            ("ham", 'I said "hi to him and left &lt;#&gt; mins ago'),  # stray quote
+            ("ham", "Pick me up at &lt;TIME&gt; ok"),
+        ],
+    )
+    corpus = load_sms_corpus(tmp_path)
+    assert sorted(corpus["label"]) == [0, 0, 0, 1]
+    assert corpus["text"].is_unique
+    text = " ".join(corpus["text"])
+    assert "lt" not in text.split() and "time" not in text.split()  # placeholders gone
+    assert "sale" not in text and "prize" not in text  # marketing spam excluded
+    assert "left" in text  # the quoted line was parsed as its own row
+
+
+def test_sms_model_trains_and_records_normalizer(tmp_path):
+    from phishguard.text_model import load_text_model, normalize_sms, train_sms_model
+
+    rows = [(f"verify your account now urgent link {i}x", 1, "m") for i in range(30)]
+    rows += [(f"see you at lunch tomorrow ok {i}y", 0, "m") for i in range(60)]
+    corpus = pd.DataFrame(rows, columns=["text", "label", "source"])
+    corpus["text"] = corpus["text"].map(normalize_sms)
+    result = train_sms_model(corpus)
+    assert result.metrics["test_in_distribution"]["recall"] >= 0.9
+    save_model(result.model, "sms_model", result.metrics, models_dir=tmp_path, normalizer="sms")
+    tm = load_text_model("sms_model", models_dir=tmp_path)
+    assert tm.normalizer == "sms"
+    assert tm.predict_proba("URGENT verify your account 12345") > 0.5
+
+
+def test_unknown_normalizer_rejected(tmp_path):
+    from phishguard.text_model import TextModel
+
+    result = train_email_model(tiny_corpus())
+    with pytest.raises(ValueError):
+        save_model(result.model, "m", {}, models_dir=tmp_path, normalizer="pickle-me")
+    with pytest.raises(ValueError):
+        TextModel(result.model, normalizer="nope")
+
+
+@pytest.mark.skipif(
+    not (ROOT / "models" / "sms_model.joblib").exists(), reason="run scripts/bootstrap.py first"
+)
+def test_real_sms_model_quality_bar():
+    manifest = json.loads((ROOT / "models" / "manifest.json").read_text())
+    entry = manifest["sms_model"]
+    assert entry["normalizer"] == "sms"
+    assert entry["metrics"]["test_in_distribution"]["recall"] >= 0.9
+    assert entry["metrics"]["test_in_distribution"]["false_positive_rate"] <= 0.01
+    assert entry["metrics"]["modern_test"]["recall"] >= 0.75

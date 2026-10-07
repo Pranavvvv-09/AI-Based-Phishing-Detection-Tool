@@ -43,9 +43,11 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import html
 import json
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -138,19 +140,38 @@ def normalize_text(text: str) -> str:
     return _SPACE.sub(" ", text).strip().lower()[:MAX_TEXT_CHARS]
 
 
+def normalize_sms(text: str) -> str:
+    """SMS normalisation: like ``normalize_text`` but digits are *dropped*.
+
+    In the SMS corpora 97% of smishing but only 16% of legitimate messages contain
+    digits, because the legitimate SMS are 2011-era personal chats. Modern legitimate
+    SMS (OTPs, bank alerts, delivery updates) are full of numbers, so letting the model
+    see them would teach "has a number = scam". Decided before training, not after.
+    """
+    text = text[: MAX_TEXT_CHARS * 2]
+    text = _URL.sub(" ", text)
+    text = _EMAIL.sub(" ", text)
+    text = _NUMBER.sub(" ", text)
+    return _SPACE.sub(" ", text).strip().lower()[:MAX_TEXT_CHARS]
+
+
+# Fixed registry: the manifest names a normaliser, it can never point at arbitrary code.
+NORMALIZERS: dict[str, Callable[[str], str]] = {"email": normalize_text, "sms": normalize_sms}
+
+
 def email_text(email: ParsedEmail) -> str:
     """The text the email model sees: subject + visible body."""
     return f"{email.subject}\n{email.body}"
 
 
-def build_pipeline() -> Pipeline:
+def build_pipeline(stop_words: list[str] | None = None) -> Pipeline:
     return Pipeline(
         [
             (
                 "tfidf",
                 TfidfVectorizer(
                     token_pattern=WORD_PATTERN,
-                    stop_words=CORPUS_ARTIFACTS,
+                    stop_words=CORPUS_ARTIFACTS if stop_words is None else stop_words,
                     ngram_range=(1, 2),
                     min_df=3,
                     max_df=0.9,
@@ -263,12 +284,18 @@ def load_curated(path: Path = CURATED) -> pd.DataFrame:
     return df.assign(text=df["text"].map(normalize_text), source="curated")
 
 
-def _fit(frame: pd.DataFrame, curated_train: pd.DataFrame | None) -> Pipeline:
+def _fit(
+    frame: pd.DataFrame,
+    curated_train: pd.DataFrame | None,
+    weight: float = CURATED_WEIGHT,
+    stop_words: list[str] | None = None,
+) -> Pipeline:
     weights = np.ones(len(frame))
     if curated_train is not None and len(curated_train):
         frame = pd.concat([frame, curated_train], ignore_index=True)
-        weights = np.concatenate([weights, np.full(len(curated_train), CURATED_WEIGHT)])
-    return build_pipeline().fit(frame["text"], frame["label"], clf__sample_weight=weights)
+        weights = np.concatenate([weights, np.full(len(curated_train), weight)])
+    pipeline = build_pipeline(stop_words)
+    return pipeline.fit(frame["text"], frame["label"], clf__sample_weight=weights)
 
 
 def _metrics(y_true, scores, threshold: float = 0.5) -> dict[str, float]:
@@ -360,6 +387,87 @@ def train_email_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None)
     return TrainResult(model=model, metrics=metrics)
 
 
+# --------------------------------------------------------------------------- SMS model
+
+SMS_UCI = "sms.tsv"
+SMS_MENDELEY = "sms_mendeley_5971.csv"
+# Curated rows are ~1% of the SMS training set; weight 3 gives them ~4% influence,
+# the same small share as the email model. Fixed before training, never tuned on tests.
+SMS_CURATED_WEIGHT = 3.0
+# UCI's anonymisation placeholders (&lt;#&gt;, &lt;DECIMAL&gt;, &lt;TIME&gt;, ...) occur in
+# 5% of legitimate and 0% of spam messages: a dataset fingerprint, removed on load.
+_UCI_PLACEHOLDER = re.compile(r"&lt;[#A-Z]{0,12}&gt;?")  # the ";" is sometimes missing
+# SMS-specific dataset fingerprints, found by inspecting the model's top words:
+# "uk" (the 2011 spam is British) and "covid" (only 2020-22 scams mention it, never the
+# 2011 chats, so genuine vaccination SMS would be flagged: an era shortcut).
+SMS_STOP_WORDS = [*CORPUS_ARTIFACTS, "uk", "covid"]
+
+
+def _sms_frame(texts: pd.Series, labels: pd.Series, source: str) -> pd.DataFrame:
+    clean = texts.map(lambda t: html.unescape(_UCI_PLACEHOLDER.sub(" ", t)))
+    return pd.DataFrame({"text": clean.map(normalize_sms), "label": labels, "source": source})
+
+
+def load_sms_corpus(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
+    """Legitimate SMS vs smishing from Mishra & Soni (2022) and UCI (2011).
+
+    Mendeley labels win where the corpora overlap (4,933 shared messages: Mendeley
+    re-labelled UCI "spam" into smishing vs marketing spam). Marketing spam is
+    excluded from both, exactly like the email model, and UCI-only "spam" is
+    excluded because it can't be told apart from marketing.
+    """
+    paths = {name: raw_dir / name for name in (SMS_MENDELEY, SMS_UCI)}
+    for path in paths.values():
+        if not path.exists():
+            raise FileNotFoundError(f"{path} missing - run scripts/download_data.py")
+    mendeley = pd.read_csv(paths[SMS_MENDELEY], dtype=str, keep_default_na=False)
+    mendeley_label = mendeley["LABEL"].str.strip().str.lower().map({"ham": 0, "smishing": 1})
+    uci = pd.read_csv(
+        paths[SMS_UCI], sep="\t", header=None, names=["label", "text"], dtype=str,
+        keep_default_na=False, quoting=csv.QUOTE_NONE,
+    )
+    uci_label = uci["label"].str.strip().map({"ham": 0})  # UCI "spam" -> NaN -> excluded
+    # Concatenate *before* dropping excluded rows so that a Mendeley "spam" message
+    # also removes its UCI copy (first copy wins in the de-duplication below).
+    corpus = pd.concat(
+        [_sms_frame(mendeley["TEXT"], mendeley_label, SMS_MENDELEY),
+         _sms_frame(uci["text"], uci_label, SMS_UCI)],
+        ignore_index=True,
+    )
+    corpus = corpus[corpus["text"].str.len() >= 2]
+    corpus = corpus.loc[~corpus["text"].str.slice(0, 2000).duplicated()]
+    corpus = corpus.dropna(subset=["label"]).astype({"label": int})
+    return corpus.reset_index(drop=True)
+
+
+def train_sms_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None) -> TrainResult:
+    """Stratified 80/20 split; curated train half added; curated test half = modern test."""
+    curated_train = curated[curated["split"] == "train"] if curated is not None else None
+    train, test = train_test_split(
+        corpus, test_size=0.2, stratify=corpus["label"], random_state=SEED
+    )
+    model = _fit(train, curated_train, weight=SMS_CURATED_WEIGHT, stop_words=SMS_STOP_WORDS)
+    metrics: dict = {
+        "test_in_distribution": _metrics(
+            test["label"].to_numpy(), model.predict_proba(test["text"])[:, 1]
+        ),
+        "class_counts_train": {
+            "smishing": int(train["label"].sum()),
+            "legitimate": int((train["label"] == 0).sum()),
+            "by_source": {k: int(v) for k, v in train["source"].value_counts().items()},
+        },
+    }
+    if curated is not None:
+        modern = curated[curated["split"] == "test"]  # caller supplies SMS-normalised text
+        scores = model.predict_proba(modern["text"])[:, 1]
+        metrics["modern_test"] = _metrics(modern["label"].to_numpy(), scores)
+        wrong = (scores >= 0.5).astype(int) != modern["label"].to_numpy()
+        metrics["modern_test"]["errors_by_category"] = (
+            modern.loc[wrong, "category"].value_counts().sort_index().to_dict()
+        )
+    return TrainResult(model=model, metrics=metrics)
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:
@@ -368,8 +476,16 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def save_model(model: Pipeline, name: str, metrics: dict, models_dir: Path = MODELS_DIR) -> Path:
-    """Write ``<name>.joblib`` and record its SHA-256 + metrics in the manifest."""
+def save_model(
+    model: Pipeline,
+    name: str,
+    metrics: dict,
+    models_dir: Path = MODELS_DIR,
+    normalizer: str = "email",
+) -> Path:
+    """Write ``<name>.joblib`` and record its SHA-256, normaliser and metrics in the manifest."""
+    if normalizer not in NORMALIZERS:
+        raise ValueError(f"unknown normalizer {normalizer!r}")
     models_dir.mkdir(parents=True, exist_ok=True)
     path = models_dir / f"{name}.joblib"
     tmp = path.with_suffix(".joblib.part")
@@ -382,6 +498,7 @@ def save_model(model: Pipeline, name: str, metrics: dict, models_dir: Path = MOD
         "sha256": sha256_file(path),
         "trained_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sklearn_version": sklearn.__version__,
+        "normalizer": normalizer,
         "metrics": metrics,
     }
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
@@ -409,18 +526,26 @@ def load_model(name: str, models_dir: Path = MODELS_DIR) -> Pipeline:
 class TextModel:
     """Thin wrapper used by the scorer: probability + the words that drove it."""
 
-    def __init__(self, pipeline: Pipeline) -> None:
+    def __init__(self, pipeline: Pipeline, normalizer: str = "email") -> None:
+        if normalizer not in NORMALIZERS:
+            raise ValueError(f"unknown normalizer {normalizer!r}")
+        self.normalizer = normalizer
+        self._normalize = NORMALIZERS[normalizer]
         self.pipeline = pipeline
         self._vec: TfidfVectorizer = pipeline.named_steps["tfidf"]
         self._coef = pipeline.named_steps["clf"].coef_[0]
         self._vocab = self._vec.get_feature_names_out()
 
+    def token_count(self, text: str) -> int:
+        """Words the model can actually see after normalisation."""
+        return len(re.findall(WORD_PATTERN, self._normalize(text)))
+
     def predict_proba(self, text: str) -> float:
-        return float(self.pipeline.predict_proba([normalize_text(text)])[0, 1])
+        return float(self.pipeline.predict_proba([self._normalize(text)])[0, 1])
 
     def top_terms(self, text: str, k: int = 5) -> list[tuple[str, float]]:
         """Terms in ``text`` that pushed the score most towards phishing."""
-        row = self._vec.transform([normalize_text(text)])
+        row = self._vec.transform([self._normalize(text)])
         contributions = row.multiply(self._coef).tocsr()
         pairs = sorted(
             zip(contributions.indices, contributions.data, strict=True), key=lambda p: -p[1]
@@ -428,10 +553,34 @@ class TextModel:
         return [(str(self._vocab[i]), round(float(v), 3)) for i, v in pairs[:k] if v > 0]
 
 
+def load_text_model(name: str, models_dir: Path = MODELS_DIR) -> TextModel:
+    """Hash-verified model wrapped with the normaliser recorded in its manifest entry."""
+    pipeline = load_model(name, models_dir)
+    entry = json.loads((models_dir / "manifest.json").read_text())[name]
+    return TextModel(pipeline, normalizer=entry.get("normalizer", "email"))
+
+
+def _train_sms() -> int:
+    corpus = load_sms_corpus()
+    counts = corpus.groupby(["source", "label"]).size().to_dict()
+    print("sms corpus after de-duplication:", {f"{s}:{lbl}": n for (s, lbl), n in counts.items()})
+    curated = None
+    if CURATED.exists():
+        raw = pd.read_csv(CURATED, dtype={"text": str})["text"]
+        curated = load_curated().assign(text=raw.map(normalize_sms).to_numpy())
+    result = train_sms_model(corpus, curated)
+    path = save_model(result.model, "sms_model", result.metrics, normalizer="sms")
+    print(json.dumps(result.metrics, indent=2))
+    print(f"saved {path.relative_to(ROOT)} (sha256 recorded in models/manifest.json)")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
+    if argv == ["train-sms"]:
+        return _train_sms()
     if argv != ["train-email"]:
-        print("usage: python -m phishguard.text_model train-email", file=sys.stderr)
+        print("usage: python -m phishguard.text_model {train-email|train-sms}", file=sys.stderr)
         return 2
     corpus = load_email_corpus()
     counts = corpus.groupby(["source", "label"]).size().to_dict()

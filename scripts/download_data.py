@@ -66,6 +66,11 @@ DATASETS: dict[str, tuple[str, str | None]] = {
         "https://raw.githubusercontent.com/justmarkham/pycon-2016-tutorial/master/data/sms.tsv",
         "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
     ),
+    # Mishra & Soni (2022) SMS phishing dataset (Mendeley, CC BY 4.0): ham/smishing/spam.
+    "sms_mendeley_5971.csv": (
+        "https://raw.githubusercontent.com/nmbenton/INFO-4360-Project/main/Dataset_5971.csv",
+        "649844f1c62a6b27e145eaf17a65f7010c56c390e11a794ea8329993a05ba71e",
+    ),
 }
 
 
