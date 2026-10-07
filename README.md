@@ -56,9 +56,10 @@ a leak we found in our own synthetic data and fixed, is in [data/README.md](data
 (reproduce with `python scripts/sms_experiment.py`).
 
 ## Train the model yourself
-See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)**: requirements,
-dataset links and hashes, every feature, step-by-step commands (Linux/macOS/Windows),
-expected results and troubleshooting. Every command in it was run on a fresh clone of this branch.
+See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,
+every dataset with links and hashes (plus other public Kaggle/Hugging Face sources you could add), every hand-made
+rule with its weight, every threshold, step-by-step commands (Linux/macOS/Windows), the SMS experiment, expected
+results and troubleshooting. Its Linux commands were run on a fresh clone and reproduced every number exactly.
 
 ## Safety
 PhishGuard performs static analysis only and never visits links. Use it only on

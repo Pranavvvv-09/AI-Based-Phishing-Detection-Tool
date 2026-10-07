@@ -67,8 +67,10 @@ real-world recall for a small false-positive cost.
 
 ## Provenance
 The email CSVs are the per-source files behind the Kaggle "Phishing Email Dataset"
-(Al-Subaiey et al., 2024). The original hosts (Kaggle, UCI, monkey.org, CMU) are
-blocked in some environments, so the script downloads public **GitHub mirrors**:
+(`kaggle.com/datasets/naserabdullahalam/phishing-email-dataset`, uploaded by Naser Abdullah
+Alam; its description asks users to cite Al-Subaiey et al., 2024). The original hosts
+(Kaggle, UCI, monkey.org, CMU) are blocked in some environments, so the script downloads
+public **GitHub mirrors**:
 
 - Email CSVs: `github.com/rokibulroni/Phishing-Email-Dataset` (unofficial mirror, no licence file)
 - SMS: `github.com/justmarkham/pycon-2016-tutorial` (`data/sms.tsv`) and
