@@ -16,7 +16,7 @@ The full download is about 1.7 GB, most of it honeypot attachments that are neve
 |--------|--------------------------|-----------|--------|-----------------|
 | `Nazario.csv` | 1,526 | phishing (2004–2020) | Jose Nazario phishing corpus | Free for research |
 | `Nigerian_Fraud.csv` | 3,200 | phishing (advance-fee/impersonation fraud) | CLAIR fraud email collection (Radev) | Research use |
-| **`phishing_pot/`** | **3,342 English** (of 12,269 parsed) | **modern phishing (2022–2026)** | Real honeypot `.eml` files, [rf-peixoto/phishing_pot](https://github.com/rf-peixoto/phishing_pot) | **CC BY-NC 4.0** (non-commercial) |
+| **`phishing_pot/`** | **3,349 English** (of 12,269 parsed) | **modern phishing (2022–2026)** | Real honeypot `.eml` files, [rf-peixoto/phishing_pot](https://github.com/rf-peixoto/phishing_pot) | **CC BY-NC 4.0** (non-commercial) |
 | `Enron.csv` | 14,444 (`label == 0` only) | legitimate (corporate, 2001) | Enron-Spam (Metsis et al.) | Public research corpus |
 | `SpamAssasin.csv` | 4,073 (`label == 0` only) | legitimate (personal/lists, 2002) | Apache SpamAssassin public corpus | Apache-hosted public corpus |
 | **`CEAS_08.csv`** | **16,968** (`label == 0` only) | legitimate (2008) | CEAS 2008 challenge corpus | Research use |

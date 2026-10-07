@@ -41,6 +41,11 @@ ruff check .
 bandit -c pyproject.toml -r src
 ```
 
+## Train the model yourself
+See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)**: requirements,
+dataset links and hashes, every feature, step-by-step commands (Linux/macOS/Windows),
+expected results and troubleshooting. Every command in it was run on a fresh clone of this branch.
+
 ## Safety
 PhishGuard performs static analysis only and never visits links. Use it only on
 mailboxes you own. See [docs/lab-setup.md](docs/lab-setup.md) and [SECURITY.md](SECURITY.md).
