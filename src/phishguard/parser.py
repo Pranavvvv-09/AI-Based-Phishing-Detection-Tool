@@ -118,10 +118,29 @@ class ParsedEmail:
         return "\n".join(part for part in (self.text_body, self.html_text) if part)
 
 
+def fix_surrogates(text: str) -> str:
+    """Return valid Unicode for text holding lone surrogates.
+
+    The stdlib email parser represents raw 8-bit header bytes as "surrogate
+    escapes". Those strings can't be encoded as UTF-8, so they would crash JSON,
+    SQLite, CSV or HTML output later. Escaped bytes are turned back into the
+    original (usually UTF-8) text; anything still invalid becomes U+FFFD.
+    """
+    try:
+        text.encode("utf-8")
+        return text
+    except UnicodeEncodeError:
+        pass
+    try:
+        return text.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
+    except UnicodeEncodeError:  # surrogates outside the escape range
+        return text.encode("utf-8", "replace").decode("utf-8")
+
+
 def clean_header(value: object, limit: int = MAX_HEADER_CHARS) -> str:
     """Turn control characters (including CR/LF) into spaces, collapse runs of
     whitespace (e.g. from folded headers) and truncate."""
-    text = _CONTROL_CHARS.sub(" ", str(value))
+    text = _CONTROL_CHARS.sub(" ", fix_surrogates(str(value)))
     return _WHITESPACE_RUN.sub(" ", text).strip()[:limit]
 
 
@@ -213,7 +232,7 @@ def _raw_headers(msg: EmailMessage, name: str) -> list[str]:
     """Unparsed header values, unfolded and truncated *before* any further parsing."""
     name = name.lower()
     values = [
-        str(value)[:MAX_RAW_HEADER_CHARS].replace("\r", "").replace("\n", "")
+        fix_surrogates(str(value)[:MAX_RAW_HEADER_CHARS]).replace("\r", "").replace("\n", "")
         for key, value in msg.raw_items()
         if key.lower() == name
     ]

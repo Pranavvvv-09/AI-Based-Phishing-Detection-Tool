@@ -284,3 +284,23 @@ def test_limits_can_be_raised_for_unusual_mail():
             + "--b\r\n\r\nx\r\n" * 2_500 + "--b--").encode()
     e = parse_email(many, max_boundary_lines=5_000)
     assert e.truncated  # parsed (part cap still applies), not rejected
+
+
+def test_raw_8bit_headers_never_leak_surrogates():
+    # Unencoded UTF-8 bytes in headers (common in real phishing) used to come back
+    # as lone surrogates, which crash JSON/CSV/SQLite/HTML output.
+    raw = (
+        "From: Segurança <a@example.com>\r\nSubject: Sua conta será bloqueada\r\n"
+        "To: b@example.org\r\n\r\nbody"
+    ).encode() + b"\r\nX-Bad: \xff\xfe\r\n"
+    e = parse_email(raw)
+    assert e.subject == "Sua conta será bloqueada"  # original text recovered
+    assert e.from_display == "Segurança"
+    for value in (e.subject, e.from_display, e.from_address, e.body):
+        value.encode("utf-8")  # must not raise
+
+
+def test_invalid_8bit_header_bytes_become_replacement_chars():
+    e = parse_email(b"From: a@example.com\r\nSubject: bad \xff\xfe bytes\r\n\r\nx")
+    e.subject.encode("utf-8")
+    assert "�" in e.subject

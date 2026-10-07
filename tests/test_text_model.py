@@ -94,10 +94,8 @@ def test_corpus_loader_filters_labels_and_dedupes(tmp_path):
          ["Buy now", "Cheap watches marketing spam offer today only", "1"]],  # spam: excluded
         columns=cols,
     )
-    for name in ("Nazario.csv", "Nigerian_Fraud.csv"):
-        phish.to_csv(tmp_path / name, index=False)
-    for name in ("Enron.csv", "SpamAssasin.csv"):
-        ham.to_csv(tmp_path / name, index=False)
+    for name, (_, label) in text_model.EMAIL_SOURCES.items():  # every configured source
+        (phish if label == 1 else ham).to_csv(tmp_path / name, index=False)
     corpus = load_email_corpus(tmp_path)
     assert "marketing" not in " ".join(corpus["text"])  # spam rows are not "legitimate"
     assert corpus["text"].is_unique  # duplicates removed across files
@@ -189,6 +187,8 @@ def test_download_script_pins_https_and_hashes():
     for url, sha in dl.DATASETS.values():
         assert url.startswith("https://")
         assert sha and len(sha) == 64
+    for url, commit, subdir in dl.GIT_SOURCES.values():
+        assert url.startswith("https://") and len(commit) == 40 and subdir
 
 
 # ---------- curated modern examples (Day 1-5 known-issue fixes) ----------
@@ -251,9 +251,14 @@ def test_curated_train_half_changes_model_and_test_half_is_reported():
 @pytest.mark.skipif(not REAL_MODEL, reason="run scripts/bootstrap.py first")
 def test_real_model_modern_test_bar():
     manifest = json.loads((ROOT / "models" / "manifest.json").read_text())
-    modern = manifest["email_model"]["metrics"]["modern_test"]
+    metrics = manifest["email_model"]["metrics"]
+    modern = metrics["modern_test"]
     assert modern["recall"] >= 0.75
-    assert modern["false_positive_rate"] <= 0.10
+    # Raised from 0.10 when the honeypot corpus was added: 3/28 modern legit messages
+    # ("your account" notices) vs 2/28 before, in exchange for future-phishing recall
+    # rising from 40% to 88% (see data/README.md, "Ablation"). Accepted trade-off.
+    assert modern["false_positive_rate"] <= 0.15
+    assert metrics["honeypot_future_test"]["recall"] >= 0.85
 
 
 def test_bootstrap_is_noop_when_model_valid(monkeypatch):
@@ -267,3 +272,51 @@ def test_bootstrap_is_noop_when_model_valid(monkeypatch):
     monkeypatch.setattr(boot, "_download", lambda: calls.append("download") or 0)
     assert boot.main([]) == 0
     assert calls == []  # nothing downloaded or trained
+
+
+# ---------- honeypot corpus loading ----------
+
+
+def _write_eml(folder, number, subject, body):
+    (folder / f"sample-{number}.eml").write_text(
+        f"From: a@example.com\nSubject: {subject}\n\n{body}\n", encoding="utf-8"
+    )
+
+
+def test_honeypot_loader_filters_language_and_caches_atomically(tmp_path):
+    from phishguard.text_model import load_honeypot
+
+    folder = tmp_path / "raw" / "phishing_pot" / "email"
+    folder.mkdir(parents=True)
+    _write_eml(folder, 1, "Verify your account", "Please verify your account and confirm the "
+               "password for your mailbox, or it will be closed. We are the security team.")
+    _write_eml(folder, 2, "Ihr Konto", "Bitte bestaetigen Sie Ihr Konto und Ihr Passwort sofort.")
+    (folder / "sample-3.eml").write_bytes(b"")  # unparseable: skipped, not a crash
+    cache_dir = tmp_path / "processed"
+    df = load_honeypot(tmp_path / "raw", cache_dir)
+    assert list(df["sample_no"]) == [1]  # German sample filtered out
+    assert (df["label"] == 1).all() and (df["source"] == "phishing_pot").all()
+    caches = list(cache_dir.glob("*.csv"))
+    assert len(caches) == 1 and not list(cache_dir.glob("*.part"))
+
+
+def test_empty_honeypot_cache_is_rebuilt(tmp_path):
+    from phishguard.text_model import load_honeypot
+
+    folder = tmp_path / "raw" / "phishing_pot" / "email"
+    folder.mkdir(parents=True)
+    _write_eml(folder, 7, "Account notice", "Please confirm your account details with us "
+               "and update your password for the mailbox today, it is for your security.")
+    cache_dir = tmp_path / "processed"
+    load_honeypot(tmp_path / "raw", cache_dir)
+    cache = next(cache_dir.glob("*.csv"))
+    cache.write_text("sample_no,text,english\n")  # simulate a truncated cache
+    assert len(load_honeypot(tmp_path / "raw", cache_dir)) == 1
+
+
+def test_is_english():
+    from phishguard.text_model import is_english
+
+    assert is_english("please verify your account and the password for this mailbox now")
+    assert not is_english("bitte bestaetigen sie ihr konto und ihr passwort sofort")
+    assert not is_english("ok")

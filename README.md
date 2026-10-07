@@ -22,7 +22,7 @@ phishing from your own mailbox.
 - [x] Day 2: Safe `.eml` parser (size, MIME-bomb, header-flood and charset defences)
 - [x] Day 3: Header checks (SPF/DKIM/DMARC trust model, spoofing, lookalike domains, BEC)
 - [x] Day 4: URL & attachment checks (punycode, @-trick, obfuscated IPs, link-text mismatch, risky files)
-- [x] Day 5: Email ML model (TF-IDF + LogReg, 99.0% F1 in-distribution, leakage & shortcut-learning fixes)
+- [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [ ] Day 6: SMS model + scorer
 - [ ] Day 7: IMAP poller + quarantine
 - [ ] Day 8: Web UI, API, admin dashboard

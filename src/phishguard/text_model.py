@@ -25,6 +25,12 @@ ML security measures:
   loaded after its SHA-256 matches the committed ``models/manifest.json``.
 * Training is deterministic (``random_state=42``, single-threaded) so CI is
   reproducible.
+* Modern phishing comes from the phishing_pot honeypot corpus (2022-2026, real
+  ``.eml`` files parsed with our own hardened parser). It is multilingual while
+  all legitimate data is English, so only English messages are used: otherwise
+  the model would learn "German/Portuguese = phishing" (a language shortcut).
+  It is split by *time* (oldest 70% train, newest 30% test) to measure how well
+  the model catches future campaigns.
 * The public corpora are mostly 2004-2020 English mail. A small hand-written set
   (``data/curated/modern_lures.csv``: AI-polished lures, gift-card/payroll BEC,
   Indian KYC/UPI/digital-arrest/courier/task scams, Hinglish, plus alarming-but-
@@ -61,7 +67,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-from .parser import ParsedEmail
+from .parser import EmailParseError, ParsedEmail, parse_email_file
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = ROOT / "data" / "raw"
@@ -83,6 +89,15 @@ CORPUS_ARTIFACTS = [
     "enron", "vince", "kaminski", "louise", "daren", "houston", "ect", "hou", "jeff",
     "monkey", "jose", "nazario", "utf", "iso", "charset", "http", "https", "www", "com",
     "net", "org", "html", "htm", "nbsp", "subject", "cc", "fw", "fwd", "url",
+    # honeypot anonymisation placeholder ("phishing@pot") residue. "phishing" itself
+    # never occurs in the (older) legitimate corpora, so the model could only learn it
+    # as a phishing signal and would flag genuine security-awareness notices.
+    "pot", "phishing",
+    # era markers: normal in modern legitimate mail, absent from 2000-2008 ham
+    "unsubscribe", "preferences", "copyright", "reserved", "app", "apps", "ai",
+    # non-English residue in otherwise-English honeypot mail (language shortcut)
+    "de", "para", "que", "da", "em", "la", "el", "und", "der", "die",
+    "enviado", "assunto", "remetente",  # Portuguese forwarded-message header labels
 ]
 
 # Phishing = credential/payment scams. Spam rows are excluded on purpose: spam is
@@ -93,8 +108,21 @@ EMAIL_SOURCES = {
     "Nigerian_Fraud.csv": ("1", 1),
     "Enron.csv": ("0", 0),
     "SpamAssasin.csv": ("0", 0),
+    "CEAS_08.csv": ("0", 0),
+    "Ling.csv": ("0", 0),
 }
-LEGIT_SOURCES = ("Enron.csv", "SpamAssasin.csv")
+LEGIT_SOURCES = ("Enron.csv", "SpamAssasin.csv", "CEAS_08.csv", "Ling.csv")
+HONEYPOT = "phishing_pot"
+HONEYPOT_CACHE_VERSION = 2  # bump when honeypot text extraction changes
+_HONEYPOT_PLACEHOLDER = re.compile(r"phishing@pot", re.IGNORECASE)
+HONEYPOT_TRAIN_FRACTION = 0.7  # oldest 70% by sample number train, newest 30% test
+PROCESSED_DIR = ROOT / "data" / "processed"
+
+# Common English function words: a cheap, transparent language check.
+_EN_WORDS = frozenset(
+    "the and to of you your is for in on this that with we be are it please have will "
+    "our from as at by or if not can has an all".split()
+)
 
 
 class ModelIntegrityError(RuntimeError):
@@ -165,13 +193,66 @@ def load_email_corpus(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
                 }
             )
         )
+    honeypot = load_honeypot(raw_dir)
+    if honeypot is not None:
+        frames.append(honeypot)
     corpus = pd.concat(frames, ignore_index=True)
     corpus = corpus[corpus["text"].str.len() >= 20]
     # Near-duplicate removal: after masking numbers/URLs, template variants collapse.
+    # The first copy wins (earliest honeypot sample, phishing sources before ham),
+    # so a text can never appear twice, with the same or with conflicting labels.
     key = corpus["text"].str.slice(0, 2000)
     corpus = corpus.loc[~key.duplicated()]
-    # Drop texts that appear with *both* labels (would be pure label noise).
     return corpus.reset_index(drop=True)
+
+
+def is_english(text: str) -> bool:
+    """Heuristic: at least 5 common English function words making up 8%+ of tokens."""
+    tokens = text.split()
+    hits = sum(token in _EN_WORDS for token in tokens)
+    return hits >= 5 and hits / max(len(tokens), 1) >= 0.08
+
+
+def load_honeypot(raw_dir: Path = RAW_DIR, cache_dir: Path = PROCESSED_DIR) -> pd.DataFrame | None:
+    """English phishing_pot emails as (text, label=1, source, sample_no).
+
+    Parsing ~12k hostile .eml files takes ~2 minutes, so normalised text is cached in
+    data/processed/ (gitignored), keyed by the number and total size of the files.
+    """
+    email_dir = raw_dir / HONEYPOT / "email"
+    if not email_dir.is_dir():
+        return None
+    files = sorted(email_dir.glob("sample-*.eml"))
+    signature = f"{len(files)}-{sum(f.stat().st_size for f in files)}"
+    cache = cache_dir / f"{HONEYPOT}_v{HONEYPOT_CACHE_VERSION}_{signature}.csv"
+    df = None
+    if cache.exists():
+        df = pd.read_csv(cache, dtype={"text": str}, keep_default_na=False)
+        if df.empty and files:  # never trust an empty cache for a non-empty folder
+            df = None
+    if df is None:
+        rows = []
+        for path in files:
+            number = path.stem.removeprefix("sample-")
+            if not number.isdigit():
+                continue
+            try:
+                raw_text = email_text(parse_email_file(path))
+                # The corpus replaces victims' addresses with "phishing@pot"; left in,
+                # the model learns the words "phishing"/"pot" (a dataset fingerprint).
+                text = normalize_text(_HONEYPOT_PLACEHOLDER.sub(" ", raw_text))
+            except EmailParseError:
+                continue  # over-limit or not an email: skipped, never crashes training
+            rows.append((int(number), text, is_english(text)))
+        df = pd.DataFrame(rows, columns=["sample_no", "text", "english"])
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        tmp = cache.with_suffix(".csv.part")
+        df.to_csv(tmp, index=False)
+        tmp.replace(cache)  # atomic: a crash can never leave a half-written cache
+    df = df[df["english"].astype(str) == "True"]
+    return pd.DataFrame(
+        {"text": df["text"], "label": 1, "source": HONEYPOT, "sample_no": df["sample_no"]}
+    )
 
 
 def load_curated(path: Path = CURATED) -> pd.DataFrame:
@@ -218,12 +299,18 @@ def train_email_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None)
     * ``leave_one_corpus_out``: for each legitimate corpus, a model trained
       *without* it is scored on it, showing false positives on unfamiliar mail.
     * ``modern_test``: the held-out half of the hand-written modern examples.
-    The returned model is the one trained on the full 80% split (+ curated train half).
+    * ``honeypot_future_test``: the newest 30% of honeypot phishing (time split).
+    The returned model is the one trained on the full 80% split (+ curated train half
+    + oldest 70% of the honeypot).
     """
     curated_train = curated[curated["split"] == "train"] if curated is not None else None
-    train, test = train_test_split(
-        corpus, test_size=0.2, stratify=corpus["label"], random_state=SEED
-    )
+    pot = corpus[corpus["source"] == HONEYPOT]
+    rest = corpus[corpus["source"] != HONEYPOT]
+    train, test = train_test_split(rest, test_size=0.2, stratify=rest["label"], random_state=SEED)
+    if len(pot):
+        cutoff = pot["sample_no"].quantile(HONEYPOT_TRAIN_FRACTION)
+        pot_train, pot_test = pot[pot["sample_no"] <= cutoff], pot[pot["sample_no"] > cutoff]
+        train = pd.concat([train, pot_train], ignore_index=True)
     model = _fit(train, curated_train)
     metrics: dict = {
         "test_in_distribution": _metrics(
@@ -232,6 +319,7 @@ def train_email_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None)
         "class_counts_train": {
             "phishing": int(train["label"].sum()),
             "legitimate": int((train["label"] == 0).sum()),
+            "by_source": {k: int(v) for k, v in train["source"].value_counts().items()},
         },
         "leave_one_corpus_out": {},
     }
@@ -252,6 +340,14 @@ def train_email_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None)
             "phishing_recall": round(
                 float((probe.predict_proba(phish_test["text"])[:, 1] >= 0.5).mean()), 4
             ),
+        }
+    if len(pot):
+        pot_scores = model.predict_proba(pot_test["text"])[:, 1]
+        metrics["honeypot_future_test"] = {
+            "n": int(len(pot_test)),
+            "first_sample_no": int(pot_test["sample_no"].min()),
+            "recall": round(float((pot_scores >= 0.5).mean()), 4),
+            "recall_at_quarantine_0.8": round(float((pot_scores >= 0.8).mean()), 4),
         }
     if curated is not None:
         modern = curated[curated["split"] == "test"]

@@ -3,61 +3,87 @@
     "file": "email_model.joblib",
     "metrics": {
       "class_counts_train": {
-        "legitimate": 14813,
-        "phishing": 3781
+        "by_source": {
+          "CEAS_08.csv": 13578,
+          "Enron.csv": 11517,
+          "Ling.csv": 1932,
+          "Nazario.csv": 1203,
+          "Nigerian_Fraud.csv": 2578,
+          "SpamAssasin.csv": 3277,
+          "phishing_pot": 2344
+        },
+        "legitimate": 30304,
+        "phishing": 6125
+      },
+      "honeypot_future_test": {
+        "first_sample_no": 6808,
+        "n": 1005,
+        "recall": 0.8786,
+        "recall_at_quarantine_0.8": 0.6736
       },
       "leave_one_corpus_out": {
-        "Enron.csv": {
-          "false_positive_rate": 0.1594,
-          "false_positive_rate_at_quarantine_0.8": 0.0156,
-          "n_unseen_legit": 14444,
+        "CEAS_08.csv": {
+          "false_positive_rate": 0.0483,
+          "false_positive_rate_at_quarantine_0.8": 0.0217,
+          "n_unseen_legit": 16968,
           "phishing_recall": 0.9894
         },
-        "SpamAssasin.csv": {
-          "false_positive_rate": 0.014,
-          "false_positive_rate_at_quarantine_0.8": 0.0005,
-          "n_unseen_legit": 4073,
+        "Enron.csv": {
+          "false_positive_rate": 0.0864,
+          "false_positive_rate_at_quarantine_0.8": 0.0113,
+          "n_unseen_legit": 14444,
+          "phishing_recall": 0.9905
+        },
+        "Ling.csv": {
+          "false_positive_rate": 0.0079,
+          "false_positive_rate_at_quarantine_0.8": 0.0017,
+          "n_unseen_legit": 2396,
           "phishing_recall": 0.9852
+        },
+        "SpamAssasin.csv": {
+          "false_positive_rate": 0.0083,
+          "false_positive_rate_at_quarantine_0.8": 0.001,
+          "n_unseen_legit": 4073,
+          "phishing_recall": 0.9862
         }
       },
       "modern_test": {
         "errors_by_category": {
-          "ai_invoice": 1,
           "bec_giftcard": 1,
-          "hinglish": 1,
-          "in_digital_arrest": 1,
-          "in_job": 1,
+          "hinglish": 2,
           "in_upi": 1,
-          "security_notice": 1
+          "security_notice": 1,
+          "utility": 1,
+          "vendor_legit": 1
         },
-        "f1": 0.8627,
-        "false_positive_rate": 0.0357,
-        "fn": 6,
-        "fp": 1,
+        "f1": 0.8727,
+        "false_positive_rate": 0.1071,
+        "fn": 4,
+        "fp": 3,
         "n": 56,
-        "pr_auc": 0.9232,
-        "precision": 0.9565,
-        "recall": 0.7857,
-        "roc_auc": 0.9337,
-        "tn": 27,
-        "tp": 22
+        "pr_auc": 0.9099,
+        "precision": 0.8889,
+        "recall": 0.8571,
+        "roc_auc": 0.8954,
+        "tn": 25,
+        "tp": 24
       },
       "test_in_distribution": {
-        "f1": 0.9888,
-        "false_positive_rate": 0.0011,
-        "fn": 17,
-        "fp": 4,
-        "n": 4649,
-        "pr_auc": 0.9988,
-        "precision": 0.9957,
-        "recall": 0.982,
-        "roc_auc": 0.9995,
-        "tn": 3700,
-        "tp": 928
+        "f1": 0.9764,
+        "false_positive_rate": 0.004,
+        "fn": 15,
+        "fp": 30,
+        "n": 8522,
+        "pr_auc": 0.9981,
+        "precision": 0.9688,
+        "recall": 0.9841,
+        "roc_auc": 0.9997,
+        "tn": 7547,
+        "tp": 930
       }
     },
-    "sha256": "bf73e191aaab6b4467a26288d41abe0db207b4d7c8ad3dd09cb5ce345b0d063c",
+    "sha256": "c27789bba68910c5e2fe895abb90433e5c8f2af2ba50683ce9b86990a0b79476",
     "sklearn_version": "1.9.1",
-    "trained_at": "2026-10-07T18:33:54Z"
+    "trained_at": "2026-10-07T19:25:40Z"
   }
 }

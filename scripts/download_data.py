@@ -18,7 +18,11 @@ Run:  python scripts/download_data.py
 from __future__ import annotations
 
 import hashlib
+import shutil
 import ssl
+
+# Only fixed git commands are run, with an argument list and no shell.
+import subprocess  # nosec B404
 import sys
 import urllib.request
 from pathlib import Path
@@ -48,9 +52,29 @@ DATASETS: dict[str, tuple[str, str | None]] = {
         f"{_EMAIL_MIRROR}/SpamAssasin.csv",
         "3bfe8f8abff89f69a98456be50413c2fcb20a476141116dd84ee1507b980c00e",
     ),
+    "CEAS_08.csv": (
+        f"{_EMAIL_MIRROR}/CEAS_08.csv",
+        "22375e7d5f5a8229dbe987914ee9b3705656c590038662a7df6054629b376074",
+    ),
+    "Ling.csv": (
+        f"{_EMAIL_MIRROR}/Ling.csv",
+        "c133792260f18b251e9377b9cb31bef226322af6dc0d79841f61c67489929eca",
+    ),
     "sms.tsv": (
         "https://raw.githubusercontent.com/justmarkham/pycon-2016-tutorial/master/data/sms.tsv",
         "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
+    ),
+}
+
+
+# Git sources are pinned to a full commit hash: git verifies every object against it,
+# so the checked-out files are exactly that snapshot.
+GIT_SOURCES: dict[str, tuple[str, str, str]] = {
+    # name: (https repo url, commit, sub-directory to check out)
+    "phishing_pot": (
+        "https://github.com/rf-peixoto/phishing_pot.git",
+        "89e2bc05d159555389782f2fbe8d916588cd49cd",
+        "email/",
     ),
 }
 
@@ -112,6 +136,40 @@ def download(name: str, url: str, expected: str | None) -> Path:
     return target
 
 
+def _git(*args: str, cwd: Path | None = None) -> str:
+    git = shutil.which("git")
+    if git is None:
+        raise RuntimeError("git is required for git-hosted datasets")
+    # Fixed argv, no shell; transport restricted to https via protocol.allow.
+    result = subprocess.run(  # noqa: S603  # nosec B603
+        [git, "-c", "protocol.allow=never", "-c", "protocol.https.allow=always", *args],
+        cwd=cwd, check=True, capture_output=True, text=True, timeout=1800,
+    )
+    return result.stdout.strip()
+
+
+def fetch_git(name: str, url: str, commit: str, subdir: str) -> Path:
+    """Sparse, blob-less checkout of one folder at an exact commit (HTTPS only)."""
+    if not url.startswith("https://") or len(commit) != 40:
+        raise ValueError(f"{name}: need an https URL and a full 40-char commit hash")
+    target = RAW_DIR / name
+    if target.exists():
+        if _git("rev-parse", "HEAD", cwd=target) == commit:
+            print(f"[ok]   {name} already present at pinned commit {commit[:12]}")
+            return target
+        shutil.rmtree(target)
+    _git("init", "-q", str(target))
+    _git("remote", "add", "origin", url, cwd=target)
+    _git("sparse-checkout", "set", "--no-cone", subdir, cwd=target)
+    _git("fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", commit, cwd=target)
+    _git("checkout", "-q", commit, cwd=target)
+    if _git("rev-parse", "HEAD", cwd=target) != commit:
+        shutil.rmtree(target)
+        raise ValueError(f"{name}: checked-out commit does not match the pin")
+    print(f"[done] {name} at pinned commit {commit[:12]}")
+    return target
+
+
 def main() -> int:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     failed = 0
@@ -119,6 +177,12 @@ def main() -> int:
         try:
             download(name, url, expected)
         except Exception as exc:  # noqa: BLE001 - report and continue with the others
+            failed += 1
+            print(f"[fail] {name}: {exc}", file=sys.stderr)
+    for name, (url, commit, subdir) in GIT_SOURCES.items():
+        try:
+            fetch_git(name, url, commit, subdir)
+        except Exception as exc:  # noqa: BLE001
             failed += 1
             print(f"[fail] {name}: {exc}", file=sys.stderr)
     return 1 if failed else 0
