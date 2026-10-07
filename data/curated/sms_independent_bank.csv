@@ -1,0 +1,13 @@
+id,label,source_repo,source_commit,text
+1,0,Pavel401/transaction_sms_parser,a4f99c3,Your VPA 9876543210@ybl linked to Indian Bank a/c no. XXXXXX1234 is debited for Rs.499.00 and credited to amazon@apl  (UPI Ref no  105201221633).
+2,0,Pavel401/transaction_sms_parser,a4f99c3,Rs 150.00 debited from account ending 1234 to 9876543210@ybl on 04-11-25. UPI Ref: 432198765
+3,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.299.00 paid to merchant@okicici via UPI. Avbl bal Rs.5000
+4,0,Pavel401/transaction_sms_parser,a4f99c3,You have paid Rs 75.50 to store123@paytm on 04-Nov-25
+5,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.2000 spent on Credit Card 4321. Avbl credit limit Rs.50000. Outstanding Rs.10000
+6,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.250 debited from Paytm wallet. Available bal Rs.750
+7,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.500 sent to merchant@upi via UPI. UPI Ref No 123456789. Avbl bal Rs.5000
+8,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.1500.50 debited from AC 9876. Available balance Rs.25000
+9,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.500.00 debited from card 1234 on 01-Jan-23. Avbl bal Rs.10000.00
+10,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.1000.00 credited to AC 5678 on 01-Jan-23. Available balance Rs.20000.00
+11,0,Pavel401/transaction_sms_parser,a4f99c3,Rs.2000 spent on HDFC Visa Credit Card 4321. Avbl credit limit Rs.50000. Outstanding Rs.10000
+12,0,saurabhgupta050890/transaction-sms-parser,9626d16,INR 2000 debited from A/c no. XX3423 on 05-02-19 07:27:11 IST at ECS PAY. Avl Bal- INR 2343.23.

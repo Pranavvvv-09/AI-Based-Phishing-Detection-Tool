@@ -451,3 +451,42 @@ def test_real_sms_model_quality_bar():
     assert entry["metrics"]["test_in_distribution"]["recall"] >= 0.9
     assert entry["metrics"]["test_in_distribution"]["false_positive_rate"] <= 0.01
     assert entry["metrics"]["modern_test"]["recall"] >= 0.75
+
+
+# ---------- frozen SMS evaluation sets (committed before the false-positive fix) ----------
+
+SMS_EVAL = ROOT / "data" / "curated" / "sms_transactional_eval.csv"
+SMS_INDEPENDENT = ROOT / "data" / "curated" / "sms_independent_bank.csv"
+
+
+def test_frozen_sms_eval_is_balanced_and_split():
+    df = pd.read_csv(SMS_EVAL)
+    assert df["id"].is_unique and df["text"].is_unique
+    assert df.groupby(["label", "split"]).size().to_dict() == {
+        (0, "test"): 24, (0, "validation"): 12, (1, "test"): 24, (1, "validation"): 12
+    }
+    for _, group in df.groupby("category"):
+        assert set(group["split"]) == {"validation", "test"}
+
+
+def test_frozen_sms_eval_has_no_real_phone_numbers_or_domains():
+    import re
+
+    text = " ".join(pd.read_csv(SMS_EVAL)["text"])
+    assert not re.search(r"(?<!\d)[6-9]\d{9}(?!\d)", text)  # Indian mobile-number shape
+    for host in re.findall(r"\b((?:[a-z0-9-]+\.)+[a-z]{2,})(?=/|\b)", text.lower()):
+        assert host.endswith(".test"), host  # reserved TLD: can never be a real site
+
+
+def test_independent_set_is_attributed():
+    df = pd.read_csv(SMS_INDEPENDENT)
+    assert len(df) == 12 and (df["label"] == 0).all()
+    assert set(df["source_repo"]) == {
+        "Pavel401/transaction_sms_parser", "saurabhgupta050890/transaction-sms-parser"
+    }
+    assert (ROOT / "THIRD_PARTY_NOTICES.md").read_text().count("MIT License") == 2
+
+
+def test_frozen_sets_are_never_used_for_training():
+    source = (ROOT / "src" / "phishguard" / "text_model.py").read_text()
+    assert "sms_transactional_eval" not in source and "sms_independent_bank" not in source

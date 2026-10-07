@@ -1,0 +1,73 @@
+id,split,label,category,text
+1,validation,0,bank_debit,"A/c XX4410 debited by Rs 3,200.00 on 06-Oct for NEFT to RAMESH K. Bal Rs 18,904.55. Not you? Call 1800-XXX-XXXX. -SBI"
+2,test,0,bank_debit,"Dear Customer, INR 1,150.00 withdrawn at ATM on 05-10-26 from a/c **7781. Avl bal INR 9,210.00. Bank never asks for PIN/OTP."
+3,test,0,bank_debit,Your a/c no. XXXXXX2290 is debited with Rs.645.00 towards Standing Instruction for LIC premium on 03/10/2026. -Canara Bank
+4,validation,0,bank_credit,"Rs 25,000.00 credited to your A/c XX9012 on 01-10-2026 by NEFT from INFOSYS LTD (salary). Total bal: Rs 41,230.17 -HDFC Bank"
+5,test,0,bank_credit,Interest of Rs 412.00 credited to your Savings A/c XX3318 for the quarter. Thank you for banking with us. -Kotak
+6,test,0,bank_credit,"Refund of Rs 1,299.00 from MYNTRA credited to your card ending 8812 on 04-Oct. Reflects in your next statement."
+7,validation,0,card_spend,"Transaction alert: Rs 2,450.00 spent on your ICICI Bank Credit Card XX5521 at RELIANCE FRESH on 05-Oct-26. Avl limit Rs 61,240."
+8,test,0,card_spend,"You've spent INR 799 at NETFLIX using Axis Bank card ending 0034. If not done by you, block the card from the mobile app."
+9,test,0,card_spend,"Card XX6678 used for Rs 3,999.00 at CROMA ONLINE. Total due Rs 12,400 by 18-Oct. Pay via net banking or the app."
+10,validation,0,upi_payment,Paid Rs 120.00 to Sharma Tea Stall via UPI from HDFC Bank A/c 3311. Txn ID 427812991230. -HDFC Bank
+11,test,0,upi_payment,Received Rs 600.00 from PRIYA S via UPI in your SBI a/c XX0021 on 06Oct26. Ref 627188213301.
+12,test,0,upi_payment,"You sent Rs 1,000 to Rahul Verma. Money debited from your Kotak account. Check details in your payments app history."
+13,validation,0,otp,"482913 is your OTP to log in to your Axis Bank account. Valid for 5 mins. Do not share it with anyone, including bank staff."
+14,test,0,otp,Use 739204 as the one-time password for your Flipkart order delivery. Share it only with the delivery agent at your door.
+15,test,0,otp,Your verification code for IRCTC is 552018. It expires in 10 minutes. IRCTC never calls asking for this code.
+16,validation,0,delivery,Out for delivery: your Amazon package with 2 items will be delivered today by 8 PM. Track in the Amazon app.
+17,test,0,delivery,Delhivery: shipment 1432876511 delivered at your doorstep at 14:32 and received by Security. Rate us in the app.
+18,test,0,delivery,Blue Dart: your parcel AWB 77215543 is in transit and expected on 9 Oct. No action needed.
+19,validation,0,order,Order placed! Your Swiggy order from Paradise Biryani will arrive in 35 mins. Enjoy your meal.
+20,test,0,order,"Your Myntra order of 1 item has been shipped. Expected delivery Thu, 9 Oct. Track it in the Myntra app."
+21,test,0,order,"Your BigBasket slot for Saturday 7-9 AM is confirmed. Order total Rs 1,845 to be paid on delivery."
+22,validation,0,bill_utility,"Your BESCOM electricity bill of Rs 1,642 for Sep is generated. Due date 21-Oct-2026. Pay via BBPS in your banking app."
+23,test,0,bill_utility,Payment of Rs 899.00 received for your ACT Fibernet account. Thank you. Receipt no. 55120911.
+24,test,0,bill_utility,Reminder: Mahanagar Gas bill Rs 612 due on 15 Oct. Ignore if already paid.
+25,validation,0,recharge_telecom,"Recharge of Rs 299 successful for 98XXXXXX10. Plan: 2GB/day for 28 days, valid till 03-Nov-26. -Jio"
+26,test,0,recharge_telecom,"Dear customer, 80% of your daily data is used. Speed will reduce after 100%. Data renews at midnight. -Airtel"
+27,test,0,recharge_telecom,Your Vi postpaid bill of Rs 499 for Sep is ready. Due date 20 Oct. View and pay in the Vi app.
+28,validation,0,travel_booking,"PNR 4521873390: Train 12951 confirmed, Coach B3 Berth 41 on 12-Oct. Chart prepared. Happy journey. -IRCTC"
+29,test,0,travel_booking,Your IndiGo flight 6E-2134 BLR to DEL on 14 Oct at 06:10 is confirmed. Web check-in opens 48 hrs before departure.
+30,test,0,travel_booking,Your Uber ride with Suresh (KA05 AB 1234) is arriving in 3 mins. Share your trip status with family from the app.
+31,validation,0,appointment,"Your appointment with Dr. Mehta at Apollo Clinic is confirmed for 10 Oct, 11:30 AM. Reply C to cancel."
+32,test,0,appointment,"Passport Seva: your appointment at PSK Bengaluru is on 15 Oct 2026, 10:00 AM. Carry original documents."
+33,test,0,appointment,Reminder: your vehicle service at Maruti Arena is booked for tomorrow 9 AM. Call the workshop to reschedule.
+34,validation,0,security_notice,"A new device logged in to your SBI YONO account on 06-Oct 21:14. If this was not you, call 1800-XX-XXXX immediately."
+35,test,0,security_notice,"Your UPI PIN was changed successfully on 05-Oct-26. If you did not do this, contact your bank's official helpline."
+36,test,0,security_notice,"Never share your card number, CVV, PIN or OTP with anyone. Bank officials will never ask for them. -RBI awareness"
+37,validation,1,fake_bank_debit,"Rs 49,999 debited from your a/c XX1290. If not done by you, cancel the transaction now at sbi-cancel-txn.test/rev"
+38,test,1,fake_bank_debit,"ALERT: Unusual withdrawal of INR 25,000 detected. Verify your identity within 30 min to stop it: hdfc-secure-check.test"
+39,test,1,fake_bank_debit,"Your account will be debited Rs 9,800 for an auto-renewal. To stop it, reply with your card number and expiry."
+40,validation,1,fake_credit_refund,"Congrats! Rs 4,999 cashback is ready. Approve the UPI request and enter your PIN to receive it in your account."
+41,test,1,fake_credit_refund,"Income Tax refund of Rs 18,450 approved. Update your bank details here to receive it today: itr-refund-gov.test"
+42,test,1,fake_credit_refund,"You have received Rs 2,000 from PhonePe rewards. Scan the QR code sent to you and enter your PIN to claim."
+43,validation,1,fake_card_block,Your credit card XX8812 is blocked due to KYC expiry. Click to reactivate immediately: icici-card-kyc.test
+44,test,1,fake_card_block,"Dear customer, your debit card will be deactivated tonight. Share the OTP sent to you with our executive to keep it active."
+45,test,1,fake_card_block,"Card reward points worth Rs 7,450 expire today. Redeem now by entering your card details at rewardz-points.test"
+46,validation,1,fake_upi_collect,"I sent Rs 5,000 to your number by mistake. Please approve the collect request I sent so it goes back. Urgent please."
+47,test,1,fake_upi_collect,"PhonePe: complete your UPI verification by entering your PIN on the payment request, or your UPI ID will be suspended."
+48,test,1,fake_upi_collect,Your Google Pay wallet is locked. Pay Rs 10 to the verification ID to unlock and get Rs 500 bonus.
+49,validation,1,otp_theft,This is Amazon support. Your order is stuck. Please tell us the OTP you just received so we can release it.
+50,test,1,otp_theft,Your SIM will be upgraded to 5G today. Reply with the 6-digit code sent to your number to continue service.
+51,test,1,otp_theft,"We are processing your loan approval. Share the OTP received to confirm, otherwise the loan will be cancelled."
+52,validation,1,courier_fee,India Post: your parcel is on hold due to an incomplete address. Pay Rs 25 redelivery fee at indiapost-redeliver.test
+53,test,1,courier_fee,"FedEx: a customs duty of Rs 1,450 is pending on your shipment. Pay now to avoid return: fedex-dutypay.test/in"
+54,test,1,courier_fee,Your DHL package could not be delivered. Confirm your details and pay the storage charge here: dhl-hold.test/pay
+55,validation,1,order_problem,Your Flipkart order is cancelled due to a payment failure. Re-enter your card details at flipkart-payfix.test to retry.
+56,test,1,order_problem,"Amazon: a suspicious order of an iPhone was placed on your account. If not you, call our fraud desk on 98XXXXXX10 now."
+57,test,1,order_problem,Your Myntra refund failed. Download the AnyDesk app and share the code with our agent to process it.
+58,validation,1,bill_disconnection,"Dear consumer, your electricity will be disconnected tonight at 9:30 PM as last month's bill is not updated. Call officer 91XXXXXX89."
+59,test,1,bill_disconnection,Your gas connection will be cut today due to pending KYC. Update immediately to avoid disconnection: gas-kyc-update.test
+60,test,1,bill_disconnection,Water bill overdue. Your connection will be suspended in 2 hours. Pay now through this link: wb-pay.test/now
+61,validation,1,sim_kyc,Your SIM card will be blocked within 24 hours as your KYC is incomplete. Call 70XXXXXX78 to verify your Aadhaar.
+62,test,1,sim_kyc,TRAI notice: your mobile number is linked to illegal activity and will be disconnected. Press 9 to talk to the officer.
+63,test,1,sim_kyc,"Dear Jio user, your number has won 5G upgrade cashback. Download the app from jio-5g-offer.test and log in to claim."
+64,validation,1,travel_refund,"IRCTC: your ticket refund of Rs 2,340 is pending. Fill your bank details at irctc-refund-claim.test to receive it."
+65,test,1,travel_refund,"Your flight is cancelled. To get a full refund, call our airline helpline 80XXXXXX67 and share your card details."
+66,test,1,travel_refund,"Congratulations, you won a free Goa holiday package! Pay a refundable booking fee of Rs 999 to confirm your trip."
+67,validation,1,govt_prize,"PM Kisan: you are eligible for Rs 6,000 benefit. Register with your Aadhaar and bank PIN at pmkisan-register.test"
+68,test,1,govt_prize,You are selected for a government laptop scheme. Pay Rs 499 processing fee to receive the laptop at home.
+69,test,1,govt_prize,Lucky draw winner! Your number won Rs 25 lakh in the KBC lottery. Contact Mr. Rana on WhatsApp to claim.
+70,validation,1,account_block,Your SBI YONO account is suspended. Update your PAN today to reactivate: sbi-yono-pan.test/update
+71,test,1,account_block,Your HDFC NetBanking access will be blocked today. Verify your details now to avoid permanent closure: hdfc-verify.test
+72,test,1,account_block,Your Paytm wallet is frozen as per RBI guidelines. Complete KYC by sharing your Aadhaar photo with our agent on WhatsApp.
