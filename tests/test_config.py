@@ -15,10 +15,13 @@ def test_defaults_are_safe():
 
 
 def test_secrets_not_in_repr():
-    s = load_settings({"API_KEY": "super-secret-key", "IMAP_APP_PASSWORD": "pw-1234"})
+    import secrets
+
+    api_key, app_password = secrets.token_urlsafe(16), secrets.token_urlsafe(12)  # random fakes
+    s = load_settings({"API_KEY": api_key, "IMAP_APP_PASSWORD": app_password})
     text = repr(s)
-    assert "super-secret-key" not in text
-    assert "pw-1234" not in text
+    assert api_key not in text
+    assert app_password not in text
 
 
 def test_placeholder_secrets_reported_missing():

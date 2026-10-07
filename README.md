@@ -33,6 +33,7 @@ phishing from your own mailbox.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[web,dev]"
+python scripts/bootstrap.py   # download datasets + train the email model (~1 min)
 cp .env.example .env          # then fill in secrets (see docs/lab-setup.md)
 pre-commit install
 pytest

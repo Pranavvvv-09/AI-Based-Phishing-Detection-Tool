@@ -48,6 +48,7 @@ MAX_URL_CHARS = 2_048
 MAX_ADDRESSES = 500
 
 _CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f]+")
+_WHITESPACE_RUN = re.compile(r"\s{2,}")
 # Linear-time URL pattern: one bounded character class, no nested quantifiers (no ReDoS).
 _URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)[^\s<>\"'()\[\]{}]{1,2048}")
 _TRAILING_PUNCT = ".,;:!?"
@@ -59,7 +60,15 @@ class EmailParseError(ValueError):
     """The input could not be parsed as an email."""
 
 
-class EmailTooLargeError(EmailParseError):
+class EmailLimitError(EmailParseError):
+    """The input exceeds a safety limit (size, header section or MIME part count).
+
+    This is *not* proof the message is harmless or malicious. Callers should route
+    it to manual review (fail safe) rather than silently dropping or delivering it.
+    """
+
+
+class EmailTooLargeError(EmailLimitError):
     """The input exceeds the configured size limit."""
 
 
@@ -110,9 +119,10 @@ class ParsedEmail:
 
 
 def clean_header(value: object, limit: int = MAX_HEADER_CHARS) -> str:
-    """Collapse control characters (including CR/LF) to spaces and truncate."""
-    text = _CONTROL_CHARS.sub(" ", str(value)).strip()
-    return text[:limit]
+    """Turn control characters (including CR/LF) into spaces, collapse runs of
+    whitespace (e.g. from folded headers) and truncate."""
+    text = _CONTROL_CHARS.sub(" ", str(value))
+    return _WHITESPACE_RUN.sub(" ", text).strip()[:limit]
 
 
 class _HTMLExtractor(HTMLParser):
@@ -242,18 +252,29 @@ def extract_urls(text: str) -> list[str]:
     return urls
 
 
-def _precheck(raw: bytes) -> None:
+def _precheck(raw: bytes, max_header_bytes: int, max_boundary_lines: int) -> None:
     """Cheap structural limits applied before handing bytes to the stdlib parser."""
     ends = [i for i in (raw.find(b"\r\n\r\n"), raw.find(b"\n\n")) if i != -1]
     header_end = min(ends) if ends else len(raw)
-    if header_end > MAX_HEADER_SECTION_BYTES:
-        raise EmailParseError("header section too large")
-    if raw.count(b"\n--") > MAX_BOUNDARY_LINES:
-        raise EmailParseError("too many MIME parts")
+    if header_end > max_header_bytes:
+        raise EmailLimitError("header section too large")
+    if raw.count(b"\n--") > max_boundary_lines:
+        raise EmailLimitError("too many MIME parts")
 
 
-def parse_email(raw: bytes, max_bytes: int = DEFAULT_MAX_BYTES) -> ParsedEmail:
-    """Parse raw RFC 5322 bytes. Raises ``EmailParseError`` / ``EmailTooLargeError``."""
+def parse_email(
+    raw: bytes,
+    max_bytes: int = DEFAULT_MAX_BYTES,
+    *,
+    max_header_bytes: int = MAX_HEADER_SECTION_BYTES,
+    max_boundary_lines: int = MAX_BOUNDARY_LINES,
+) -> ParsedEmail:
+    """Parse raw RFC 5322 bytes.
+
+    Raises ``EmailLimitError`` (route to manual review) when a safety limit is hit,
+    or ``EmailParseError`` when the input is not an email at all. The limits are
+    generous for real mail; they can be raised per call for unusual mailboxes.
+    """
     if not isinstance(raw, bytes | bytearray):
         raise TypeError("raw email must be bytes")
     if len(raw) > max_bytes:
@@ -261,7 +282,7 @@ def parse_email(raw: bytes, max_bytes: int = DEFAULT_MAX_BYTES) -> ParsedEmail:
     if not raw.strip():
         raise EmailParseError("email is empty")
     raw = bytes(raw)
-    _precheck(raw)
+    _precheck(raw, max_header_bytes, max_boundary_lines)
 
     try:
         msg = BytesParser(policy=policy.default).parsebytes(raw)

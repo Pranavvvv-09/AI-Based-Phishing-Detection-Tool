@@ -189,3 +189,81 @@ def test_download_script_pins_https_and_hashes():
     for url, sha in dl.DATASETS.values():
         assert url.startswith("https://")
         assert sha and len(sha) == 64
+
+
+# ---------- curated modern examples (Day 1-5 known-issue fixes) ----------
+
+CURATED = ROOT / "data" / "curated" / "modern_lures.csv"
+
+
+def test_curated_file_is_balanced_and_split_per_category():
+    df = pd.read_csv(CURATED)
+    assert set(df["split"]) == {"train", "test"} and set(df["label"]) == {0, 1}
+    assert df["id"].is_unique and df["text"].is_unique
+    counts = df.groupby(["label", "split"]).size()
+    assert counts.min() >= 25 and counts.max() - counts.min() <= 2
+    for _, group in df.groupby("category"):
+        assert set(group["split"]) == {"train", "test"}  # every category is tested
+
+
+def test_curated_file_has_no_real_links_or_addresses():
+    import re
+
+    text = " ".join(pd.read_csv(CURATED)["text"])
+    assert not re.search(r"https?://|www\.|@[a-z0-9-]+\.[a-z]", text, re.IGNORECASE)
+
+
+def test_load_curated_validates(tmp_path):
+    from phishguard.text_model import load_curated
+
+    bad = tmp_path / "bad.csv"
+    bad.write_text("id,split,label,category,text\n1,validation,1,x,hello there\n")
+    with pytest.raises(ValueError):
+        load_curated(bad)
+    good = load_curated(CURATED)
+    assert (good["source"] == "curated").all()
+
+
+def test_curated_train_half_changes_model_and_test_half_is_reported():
+    corpus = tiny_corpus()
+    curated = pd.DataFrame(
+        {
+            "text": [normalize_text(t) for t in (
+                "buy gift cards and send me the codes urgently",
+                "enter your upi pin to receive the refund",
+                "your otp is numtoken do not share it with anyone",
+                "your parcel was delivered today",
+            )],
+            "label": [1, 1, 0, 0],
+            "split": ["train", "test", "train", "test"],
+            "category": ["bec", "upi", "otp", "delivery"],
+            "source": "curated",
+        }
+    )
+    plain = train_email_model(corpus)
+    boosted = train_email_model(corpus, curated)
+    assert "modern_test" in boosted.metrics and "modern_test" not in plain.metrics
+    assert boosted.metrics["modern_test"]["n"] == 2  # only the test half is scored
+    gift = normalize_text("buy gift cards and send me the codes urgently")
+    assert boosted.model.predict_proba([gift])[0, 1] > plain.model.predict_proba([gift])[0, 1]
+
+
+@pytest.mark.skipif(not REAL_MODEL, reason="run scripts/bootstrap.py first")
+def test_real_model_modern_test_bar():
+    manifest = json.loads((ROOT / "models" / "manifest.json").read_text())
+    modern = manifest["email_model"]["metrics"]["modern_test"]
+    assert modern["recall"] >= 0.75
+    assert modern["false_positive_rate"] <= 0.10
+
+
+def test_bootstrap_is_noop_when_model_valid(monkeypatch):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("boot", ROOT / "scripts" / "bootstrap.py")
+    boot = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(boot)
+    calls = []
+    monkeypatch.setattr(boot, "model_is_valid", lambda name="email_model": True)
+    monkeypatch.setattr(boot, "_download", lambda: calls.append("download") or 0)
+    assert boot.main([]) == 0
+    assert calls == []  # nothing downloaded or trained

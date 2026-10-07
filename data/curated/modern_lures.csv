@@ -1,0 +1,113 @@
+id,split,label,category,text
+1,train,1,ai_credential,"Hi Priya, as part of our scheduled security review, all Microsoft 365 accounts must re-validate their sign-in credentials by end of day. Please confirm your password using the secure portal below to avoid interruption to Teams and Outlook access."
+2,test,1,ai_credential,Your organisation's password policy requires you to update your credentials within 24 hours. Kindly sign in through the link below to keep your mailbox active. This is an automated message from IT Support.
+3,train,1,ai_credential,A document has been shared with you via DocuSign: Q3 Salary Adjustment.pdf. Review and sign before 5 PM today. You will need to sign in with your work email to view the document.
+4,test,1,ai_credential,"Hello, we were unable to deliver 4 incoming messages because your mailbox storage is full. Verify your account now to release the pending messages and increase your quota at no cost."
+5,train,1,ai_credential,"Unusual sign-in activity was detected on your account from a new device in Moscow. If this wasn't you, secure your account immediately by verifying your identity using the button below."
+6,test,1,ai_credential,"Your Apple ID has been locked for security reasons. To unlock it, confirm your payment details and billing address within 12 hours, otherwise your account will be permanently disabled."
+7,train,1,ai_credential,Netflix: your membership is on hold because we could not process your last payment. Update your card details now to continue watching without interruption.
+8,test,1,ai_credential,Action required: your Google Workspace account will be deactivated today due to a verification failure. Re-enter your login details to keep access to Drive and Gmail.
+9,train,1,bec_giftcard,Are you at your desk? I need a quick favour. I'm stuck in a meeting and can't talk. Please purchase 5 Google Play gift cards of Rs 5000 each for a client and send me the codes. I'll reimburse you today.
+10,test,1,bec_giftcard,"Hi, this is urgent and confidential. I need you to buy Amazon gift cards for staff appreciation. Scratch the back, take photos of the codes and reply here. Don't mention this to anyone yet, it's a surprise."
+11,train,1,bec_giftcard,Do you have a moment? I need you to handle a small task for me discreetly. Get 10 Apple gift cards worth $100 each and email me the redemption codes within the hour.
+12,test,1,bec_giftcard,I'm boarding a flight shortly. Please arrange gift cards for the client visit and send the codes over WhatsApp. Keep this between us until I'm back.
+13,train,1,bec_payroll,"Hello HR, I have changed my bank account. Please update my salary account details to the new account below before this month's payroll is processed. I cannot take calls right now."
+14,test,1,bec_payroll,Please note our company bank account has changed due to an ongoing audit. Kindly make the pending invoice payment to the new account details attached and confirm once the transfer is done.
+15,train,1,bec_payroll,"Following our call, please process an urgent wire transfer of 18,40,000 to the vendor account below. This is time sensitive and confidential, the acquisition must not be discussed internally."
+16,test,1,bec_payroll,"Dear Accounts, our remittance details have been updated. All future payments for outstanding invoices should be sent to the new beneficiary account. Please treat this as priority."
+17,train,1,in_kyc,"Dear SBI customer, your YONO account will be blocked today as your KYC is not updated. Update your PAN card details immediately using the link below to avoid suspension."
+18,test,1,in_kyc,HDFC Bank: Your account has been temporarily suspended due to incomplete KYC. Click the link and complete Aadhaar verification within 24 hours to reactivate net banking.
+19,train,1,in_kyc,Your bank account will be frozen as per RBI guidelines because your KYC documents have expired. Share your Aadhaar number and the OTP received to complete re-KYC.
+20,test,1,in_kyc,Dear customer your Paytm wallet KYC is pending. Your wallet will be closed tonight. Call our KYC executive on the number below and install the support app to complete verification.
+21,train,1,in_upi,"You have received a refund of Rs 4,999 from Flipkart. To accept the amount into your bank account, approve the UPI collect request and enter your UPI PIN."
+22,test,1,in_upi,"Congratulations! You have won a cashback of Rs 2,500 on Google Pay. Scratch the card and enter your UPI PIN to receive the money instantly."
+23,train,1,in_upi,"Your electricity refund of Rs 1,200 is ready. Scan the QR code attached and enter your PIN to credit the amount to your account."
+24,test,1,in_upi,"I accidentally sent Rs 10,000 to your number by mistake. Please return it by approving the request I just sent. My child is in hospital, please help urgently."
+25,train,1,in_digital_arrest,This is an officer from the CBI cyber cell. A parcel in your name containing illegal drugs and fake passports was seized by customs. You are under digital arrest. Do not disconnect the video call and do not inform anyone.
+26,test,1,in_digital_arrest,Mumbai Police Crime Branch notice: your Aadhaar is linked to a money laundering case. To avoid arrest you must transfer your funds to an RBI verification account for checking. This matter is strictly confidential.
+27,train,1,in_digital_arrest,Your mobile number will be disconnected within 2 hours by TRAI because it was used for illegal activities. Press 9 to speak to the investigating officer.
+28,test,1,in_digital_arrest,Income Tax Department: legal proceedings have been initiated against you for tax evasion. Pay the penalty immediately through the link to avoid arrest and seizure of property.
+29,train,1,in_courier,"India Post: your parcel could not be delivered due to an incomplete address. Update your address within 24 hours and pay a redelivery fee of Rs 25, otherwise the package will be returned."
+30,test,1,in_courier,"Your FedEx shipment is held at customs. Pay the customs clearance charge of Rs 1,450 using the link below to release your package today."
+31,train,1,in_courier,DTDC: Delivery attempt failed. Your package is waiting at our warehouse. Confirm your details and pay the small storage fee to reschedule delivery.
+32,test,1,in_courier,Speed Post alert: we are holding a package for you. Please verify your identity and pay Rs 30 handling charges to avoid return to sender.
+33,train,1,in_job,Part time job offer: earn Rs 3000 to 8000 per day by liking YouTube videos and rating hotels from home. No experience needed. Contact our HR on WhatsApp to start today.
+34,test,1,in_job,"Congratulations, you are selected for a work-from-home data entry role at Amazon. Pay the refundable registration fee of Rs 1,999 to receive your joining kit."
+35,train,1,in_job,Earn daily commission by completing simple online tasks. Deposit a small amount to unlock premium tasks with higher returns. Withdraw anytime to your bank account.
+36,test,1,in_job,"Dear candidate, your profile is shortlisted for a government job. Pay the exam processing fee within today to confirm your seat. Limited vacancies."
+37,train,1,in_bill,"Dear consumer, your electricity power will be disconnected tonight at 9.30 pm because your previous month bill was not updated. Please immediately contact our electricity officer on the number below."
+38,test,1,in_bill,Your FASTag has been blacklisted due to pending KYC. Recharge and update KYC through the link to avoid double toll charges.
+39,train,1,in_bill,Your gas connection subsidy is pending. Update your bank details through the link to receive the subsidy amount directly.
+40,test,1,in_bill,Dear customer your SIM card KYC is incomplete and your number will be blocked in 24 hours. Download the app and complete e-KYC now.
+41,train,1,in_refund,"Income Tax Refund: you are eligible for a refund of Rs 15,490. Please submit your account number and verify your card details to process the refund."
+42,test,1,in_refund,"Your EPFO claim has been approved. To withdraw the amount, update your bank details and provide the OTP sent to your mobile."
+43,train,1,in_refund,"Dear user, your LIC policy bonus of Rs 48,000 is ready for transfer. Click to verify your policy number and bank account."
+44,test,1,in_refund,You are eligible for a GST refund. Log in with your credentials on the portal below to claim it before the deadline.
+45,train,1,hinglish,"Aapka bank account aaj band ho jayega. Turant KYC update karein, neeche diye link par click karke apna PAN aur OTP share karein."
+46,test,1,hinglish,Sir aapke number par Rs 25 lakh ki lottery lagi hai. Processing fee Rs 5000 jama karein aur apna account number bhejein.
+47,train,1,hinglish,Aapka parcel customs mein ruka hua hai. Release karne ke liye abhi payment karein warna case darj hoga.
+48,test,1,hinglish,"Bhai urgent hai, mera phone kharab ho gaya. Is naye number par Rs 8000 bhej do, kal wapas kar dunga. Kisi ko mat batana."
+49,train,1,crypto,Exclusive invitation: our AI trading bot guarantees 30 percent monthly returns. Deposit a minimum of 500 USDT today to secure your spot in the VIP investment group.
+50,test,1,crypto,Your MetaMask wallet will be suspended due to a security upgrade. Enter your 12-word recovery phrase to verify ownership and keep your funds safe.
+51,train,1,crypto,Binance compliance notice: withdrawals from your account are frozen. Complete verification and pay the unlock fee to release your funds.
+52,test,1,crypto,You have received 0.5 BTC from an airdrop. Connect your wallet and sign the transaction to claim the reward before it expires.
+53,train,1,ai_invoice,"Hi, please find attached the revised invoice for last month's services. Our payment portal has moved; kindly use the secure link to view the invoice and complete payment today to avoid late fees."
+54,test,1,ai_invoice,"Your Adobe subscription renewal of Rs 14,999 was processed. If you did not authorise this charge, call our billing support immediately to cancel and receive a refund."
+55,train,1,ai_invoice,"We noticed a duplicate charge on your Amazon order. To receive the refund, confirm your card number and expiry date through our support page."
+56,test,1,ai_invoice,"Your antivirus subscription has auto-renewed for $399. To dispute this charge, reply with your phone number and our refund team will call you."
+57,train,0,otp,Your OTP for login is 482913. It is valid for 10 minutes. Do not share this OTP with anyone. The bank will never ask for your OTP or PIN.
+58,test,0,otp,"123456 is your verification code for Swiggy. For your security, do not share this code with anyone."
+59,train,0,otp,"Use 739201 to sign in to your account. If you didn't request this code, you can safely ignore this message. Never share this code."
+60,test,0,otp,"Your one-time password for the transaction of Rs 1,250 at Big Bazaar is 664510. Do not share it with anyone, including bank staff."
+61,train,0,bank_alert,"Rs 2,500.00 has been debited from your account XX1234 on 05-10-26 by UPI transfer to a merchant. Available balance Rs 18,340.12. If not done by you, call the number on the back of your card."
+62,test,0,bank_alert,"Your credit card statement for September is now available. Total amount due Rs 12,410, minimum due Rs 620, payment due date 20 October. You can pay using net banking or the mobile app."
+63,train,0,bank_alert,"Salary credited: Rs 64,500.00 has been credited to your account XX7781 on 01-10-26. Thank you for banking with us."
+64,test,0,bank_alert,"We have received your fixed deposit renewal request. The deposit of Rs 1,00,000 has been renewed for 12 months at 7.1 percent. No action is needed."
+65,train,0,order,Your order #403-1182 has shipped and will arrive on Thursday. You can track the package in Your Orders. Thanks for shopping with us.
+66,test,0,order,Thanks for your order! We're getting it ready. We'll send you another email when your items have been dispatched.
+67,train,0,order,Your food is on the way! Your delivery partner Ramesh will reach you in about 25 minutes. Enjoy your meal.
+68,test,0,order,"Your return has been received and the refund of Rs 1,299 has been initiated to your original payment method. It will reflect in 5 to 7 working days."
+69,train,0,delivery,Your parcel was delivered today at 2:14 pm and handed to the security guard. Rate your delivery experience in the app.
+70,test,0,delivery,Out for delivery: your package is scheduled to arrive today between 10 am and 6 pm. No signature is required.
+71,train,0,delivery,We missed you today. We'll try to deliver your package again tomorrow. You can also pick it up from the nearest post office with your ID.
+72,test,0,delivery,Your shipment has been dispatched from the Bhiwandi hub and is expected to arrive by Saturday.
+73,train,0,security_notice,"Your password was changed successfully. If you made this change, no further action is needed. If you didn't, please contact your administrator through the usual helpdesk."
+74,test,0,security_notice,"A new sign-in to your account was detected on Chrome on Windows. If this was you, you can ignore this email. You can review your devices anytime in your account settings."
+75,train,0,security_notice,Two-step verification is now turned on for your account. You'll be asked for a code when you sign in on a new device.
+76,test,0,security_notice,Reminder: the IT team will never ask for your password over email or phone. Report suspicious emails using the Report Phishing button in Outlook.
+77,train,0,work,"Hi team, the sprint review is moved to Thursday 3 pm. Please update your tickets before the meeting. Thanks, Anjali"
+78,test,0,work,Attaching the minutes from yesterday's client call. Action items are highlighted. Let me know if I missed anything.
+79,train,0,work,Reminder: timesheets for September are due by Friday. Please submit them in the HR portal as usual.
+80,test,0,work,Can we push our 1:1 to next week? I'm travelling to Pune on Monday. Happy to sync over chat if anything is urgent.
+81,train,0,hr,Payslips for September are now available on the employee portal. Please reach out to payroll if you have any questions about deductions.
+82,test,0,hr,The office will remain closed on 2 October for Gandhi Jayanti. Wishing you and your family a peaceful holiday.
+83,train,0,hr,Welcome to the team! Your laptop will be ready for pickup at the IT desk on Monday at 10 am. Please bring your ID card.
+84,test,0,hr,Annual health check-up camp will be held in the cafeteria on Wednesday. Registration is optional and free for all employees.
+85,train,0,college,"Dear students, the mid-semester exam timetable has been published on the notice board and the college website. Hall tickets will be issued next week."
+86,test,0,college,Reminder: the assignment for Data Structures is due on Monday 11:59 pm. Submit it on the course portal. Late submissions lose 10 percent.
+87,train,0,college,The placement cell is organising a resume workshop on Friday in Seminar Hall 2. All final-year students are encouraged to attend.
+88,test,0,college,Library books issued before 15 September must be returned or renewed by this Friday to avoid fines.
+89,train,0,newsletter,"This week in security: we look at passkeys, a new browser update, and five tips for spotting fake delivery messages. Happy reading!"
+90,test,0,newsletter,"Your monthly reading list: ten long-form articles on climate, cricket and cooking, hand-picked by our editors."
+91,train,0,newsletter,New on the blog: how we cut our cloud bill by 30 percent. Plus upcoming meetups in Bengaluru and Hyderabad.
+92,test,0,newsletter,Thanks for subscribing! You'll get one email every Sunday with the week's top stories. You can unsubscribe anytime.
+93,train,0,utility,"Your electricity bill for September is Rs 1,842, due on 25 October. You can pay through the official app, website or at any collection centre."
+94,test,0,utility,Your mobile plan renews on 12 October. Your current plan includes 2 GB per day and unlimited calls. No action is needed if you have auto-pay enabled.
+95,train,0,utility,Thank you for your payment of Rs 799 towards your broadband bill. Your receipt number is 88213.
+96,test,0,utility,Scheduled maintenance: water supply in your area will be interrupted on Sunday from 10 am to 2 pm.
+97,train,0,personal,Hey! Are we still on for dinner on Saturday? I booked a table for 8 at the usual place.
+98,test,0,personal,Happy birthday! Hope you have an amazing day. Let's celebrate when you're back in town.
+99,train,0,personal,"Mom says the train tickets are confirmed for Diwali. Coach B2, seats 33 and 34."
+100,test,0,personal,Sending you the photos from the trip. Some of them are blurry but the sunset ones turned out great.
+101,train,0,hinglish_legit,"Kal ki meeting 11 baje hai, sab log time pe aa jana. Presentation main bhej dunga."
+102,test,0,hinglish_legit,Bhai match dekhne aa raha hai na Sunday ko? Snacks main le aaunga.
+103,train,0,hinglish_legit,"Aapka order dispatch ho gaya hai, delivery kal tak ho jayegi. Dhanyavaad."
+104,test,0,hinglish_legit,"Maa ne bola hai shaam ko jaldi ghar aana, mehmaan aa rahe hain."
+105,train,0,vendor_legit,Please find attached our invoice for September services as per the agreed contract. Payment terms remain 30 days to the usual account on file.
+106,test,0,vendor_legit,Thanks for the purchase order. We confirm delivery of the 20 monitors by next Wednesday to your Chennai office.
+107,train,0,vendor_legit,"Following our call, I've shared the revised quotation. Let us know if procurement needs any additional documents."
+108,test,0,vendor_legit,Your annual maintenance contract is due for renewal next month. Our account manager will reach out to schedule a review.
+109,train,0,finance_legit,"Your mutual fund SIP of Rs 5,000 has been processed successfully. Units will be allotted at today's NAV."
+110,test,0,finance_legit,Your income tax return for AY 2026-27 has been successfully verified. No further action is required.
+111,train,0,finance_legit,"Your insurance policy renewal premium of Rs 12,300 was received. The policy document has been updated in your account."
+112,test,0,finance_legit,"Monthly statement: your portfolio value is Rs 3,42,000 as on 30 September. Log in to the app to see detailed performance."

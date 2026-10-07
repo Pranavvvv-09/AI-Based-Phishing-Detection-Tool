@@ -32,7 +32,6 @@ from .domains import (
 )
 from .parser import ParsedEmail
 
-DEFAULT_TRUSTED_AUTHSERV_ID = "mx.google.com"
 BULK_RECIPIENTS = 10
 
 _COMMENT = re.compile(r"\([^()]*\)")
@@ -254,10 +253,15 @@ def _check_recipients(email: ParsedEmail, report: HeaderReport) -> None:
         report.add("missing_message_id", "Message-ID header missing")
 
 
-def check_headers(
-    email: ParsedEmail, trusted_authserv_id: str = DEFAULT_TRUSTED_AUTHSERV_ID
-) -> HeaderReport:
-    """Run all header checks on a parsed email."""
+def check_headers(email: ParsedEmail, trusted_authserv_id: str | None = None) -> HeaderReport:
+    """Run all header checks on a parsed email.
+
+    ``trusted_authserv_id`` defaults to the ``TRUSTED_AUTHSERV_ID`` setting.
+    """
+    if trusted_authserv_id is None:
+        from .config import load_settings
+
+        trusted_authserv_id = load_settings().trusted_authserv_id
     report = HeaderReport()
     _check_authentication(email, report, trusted_authserv_id.lower())
     _check_sender(email, report)

@@ -34,6 +34,7 @@ class Settings:
     admin_username: str
     intel_enabled: bool
     trusted_authserv_id: str
+    extra_brands_file: str
     # Secrets: hidden from repr() so printing settings never leaks them.
     imap_app_password: str = field(repr=False)
     api_key: str = field(repr=False)
@@ -122,6 +123,7 @@ def load_settings(
         admin_username=env.get("ADMIN_USERNAME", "admin").strip(),
         intel_enabled=_bool(env, "INTEL_ENABLED", False),
         trusted_authserv_id=authserv,
+        extra_brands_file=env.get("EXTRA_BRANDS_FILE", "").strip(),
         imap_app_password=env.get("IMAP_APP_PASSWORD", ""),
         api_key=env.get("API_KEY", ""),
         flask_secret_key=env.get("FLASK_SECRET_KEY", ""),

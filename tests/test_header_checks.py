@@ -155,3 +155,12 @@ def test_regexes_fast_on_hostile_header_values():
     start = time.perf_counter()
     check_headers(parse_email(raw))
     assert time.perf_counter() - start < 0.5
+
+
+def test_trusted_authserv_defaults_to_setting(monkeypatch):
+    monkeypatch.setenv("TRUSTED_AUTHSERV_ID", "relay.attacker.test")
+    r = check_headers(parse_email_file(FIXTURES / "phish_untrusted_pass.eml"))
+    assert r.auth_source == "trusted"  # proves the setting is used when no argument given
+    monkeypatch.delenv("TRUSTED_AUTHSERV_ID")
+    r = check_headers(parse_email_file(FIXTURES / "phish_untrusted_pass.eml"))
+    assert r.auth_source == "untrusted"

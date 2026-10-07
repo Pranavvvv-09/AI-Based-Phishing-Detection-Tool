@@ -19,6 +19,7 @@ from .domains import (
     BRANDS,
     brands_in_text,
     decode_punycode,
+    domain_of,
     is_ip,
     lookalike_brand,
     normalise_host,
@@ -62,6 +63,16 @@ ESP_TRACKING = frozenset(
         "sparkpostmail.com", "mlsend.com", "brevo.com", "sendibt3.com",
     }
 )
+# User-uploaded content on big clouds: the *domain* is trustworthy (so lookalike and
+# brand checks stay quiet), but anyone can host a phishing page there.
+CLOUD_USER_CONTENT = (
+    "storage.googleapis.com", "firebasestorage.googleapis.com", "googleusercontent.com",
+    "appspot.com", "sites.google.com", "forms.gle", "blob.core.windows.net",
+    "web.core.windows.net", "azurewebsites.net", "azureedge.net", "ipfs.io", "dweb.link",
+    "cloudflare-ipfs.com", "digitaloceanspaces.com", "backblazeb2.com",
+)
+_S3_HOST = re.compile(r"(?:^|\.)s3[.-](?:[a-z0-9-]+\.)*amazonaws\.com$")
+
 DANGEROUS_SCHEMES = frozenset({"javascript", "data", "vbscript", "file"})
 IGNORED_SCHEMES = frozenset({"mailto", "tel", "sms", "cid", "about"})
 CREDENTIAL_WORDS = frozenset(
@@ -95,6 +106,7 @@ WEIGHTS = {
     "url_brand_outside_domain": 0.30,
     "url_shortener": 0.10,
     "url_free_hosting": 0.15,
+    "url_cloud_user_content": 0.10,
     "url_risky_tld": 0.10,
     "url_http_only": 0.05,
     "url_many_subdomains": 0.10,
@@ -236,6 +248,12 @@ def check_url(url: str) -> UrlResult:
             codes.append("url_shortener")
         if domain in FREE_HOSTING:
             codes.append("url_free_hosting")
+        if (
+            _S3_HOST.search(host)
+            or any(host == c or host.endswith("." + c) for c in CLOUD_USER_CONTENT)
+            or (host == "docs.google.com" and parts.path.startswith("/forms"))
+        ):
+            codes.append("url_cloud_user_content")
         if host.rsplit(".", 1)[-1] in RISKY_TLDS:
             codes.append("url_risky_tld")
         if host.count(".") - domain.count(".") >= 4:
@@ -250,7 +268,9 @@ def check_url(url: str) -> UrlResult:
     if port not in (None, 80, 443):
         codes.append("url_nonstandard_port")
     words = set(_PATH_TOKENS.split(unquote(f"{parts.path} {parts.query}").lower()))
-    if words & CREDENTIAL_WORDS and not official_brand(domain):
+    # A brand's own login page is fine; user-uploaded content on its cloud is not.
+    brand_owned = official_brand(domain) and "url_cloud_user_content" not in codes
+    if words & CREDENTIAL_WORDS and not brand_owned:
         codes.append("url_credential_words")
     if len(url) > 100:
         codes.append("url_long")
@@ -264,17 +284,25 @@ def _shown_domain(text: str) -> str:
     return registered_domain(decode_punycode(match.group(1))) if match else ""
 
 
-def _check_link_text(link: Link, result: UrlResult, report: LinkReport) -> None:
+def _check_link_text(
+    link: Link, result: UrlResult, report: LinkReport, sender_domain: str
+) -> None:
     if link.source != "html" or not result.domain:
         return
+    # Click-tracking redirectors are excused only for the sender's *own* links
+    # (example.com's newsletter showing www.example.com). Phishing relayed through
+    # SendGrid that *shows* paypal.com from another sender is still a mismatch.
+    via_esp = result.domain in ESP_TRACKING
     shown = _shown_domain(link.text)
-    if shown and shown != result.domain and result.domain not in ESP_TRACKING:
+    if shown and shown != result.domain and not (via_esp and shown == sender_domain):
         report.add(
             "link_text_mismatch",
             f"Link text shows {shown} but actually goes to {result.domain}",
         )
         return
     for brand in brands_in_text(link.text):
+        if via_esp and sender_domain in BRANDS[brand]:
+            continue  # e.g. Amazon's own newsletter routed through its tracking domain
         if result.domain not in BRANDS[brand]:
             report.add(
                 "link_text_brand_mismatch",
@@ -322,12 +350,13 @@ def check_urls(urls: list[str]) -> LinkReport:
 def check_links(email: ParsedEmail) -> LinkReport:
     """Check every link and attachment in a parsed email."""
     report = LinkReport()
+    sender_domain = domain_of(email.from_address)
     for link in email.links[:MAX_URLS_CHECKED]:
         result = check_url(link.href)
         report.urls.append(result)
         for code in result.codes:
             report.add(code, _detail(code, result.host or link.href[:80]))
-        _check_link_text(link, result, report)
+        _check_link_text(link, result, report, sender_domain)
         if link.source == "form":
             target = result.host or link.href[:80]
             report.add("form_in_email", f"Email contains a form that submits to {target}")

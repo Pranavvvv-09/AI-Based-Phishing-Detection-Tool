@@ -241,7 +241,7 @@ def test_encoded_display_name_and_folded_headers():
     e = parse_email(raw)
     assert e.from_display == "PayPal Sécurité"
     assert e.to == ["one@example.com", "two@example.com"]
-    assert e.subject == "folded  subject line"
+    assert e.subject == "folded subject line"  # folding whitespace collapsed
 
 
 def test_huge_html_is_bounded():
@@ -262,3 +262,25 @@ def test_non_text_charsets_never_crash(charset):
     e = parse_email(raw)
     assert "hello" in e.text_body
     assert "unknown_charset" in e.defects
+
+
+def test_limit_errors_are_distinguishable_for_manual_review():
+    from phishguard.parser import EmailLimitError
+
+    flood = ("From: a@x.test\r\nContent-Type: multipart/mixed; boundary=b\r\n\r\n"
+             + "--b\r\n\r\nx\r\n" * 3_000).encode()
+    with pytest.raises(EmailLimitError):
+        parse_email(flood)
+    with pytest.raises(EmailLimitError):  # size limit is also a limit error
+        parse_email(b"A" * 2_000, max_bytes=1_000)
+    # Not an email at all is a plain parse error, not a limit error.
+    with pytest.raises(EmailParseError) as info:
+        parse_email(b"")
+    assert not isinstance(info.value, EmailLimitError)
+
+
+def test_limits_can_be_raised_for_unusual_mail():
+    many = ("From: a@x.test\r\nContent-Type: multipart/mixed; boundary=b\r\n\r\n"
+            + "--b\r\n\r\nx\r\n" * 2_500 + "--b--").encode()
+    e = parse_email(many, max_boundary_lines=5_000)
+    assert e.truncated  # parsed (part cap still applies), not rejected

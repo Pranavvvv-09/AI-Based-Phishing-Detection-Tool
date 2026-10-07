@@ -1,4 +1,3 @@
-import importlib
 import socket
 
 import pytest
@@ -25,10 +24,14 @@ def no_network(monkeypatch):
     monkeypatch.setattr(socket, "create_connection", blocked)
 
 
-def test_domain_lookup_never_touches_network(no_network):
-    fresh = importlib.reload(domains)  # forces a brand-new TLDExtract
-    assert fresh.registered_domain("login.secure.paypal.co.uk") == "paypal.co.uk"
-    assert fresh.lookalike_brand("paypa1-verify.com") == "paypal"
+def test_domain_lookup_never_touches_network(no_network, monkeypatch):
+    import tldextract
+
+    # A brand-new extractor configured exactly like the module's: must work offline.
+    fresh = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None, extra_suffixes=("bank.in",))
+    monkeypatch.setattr(domains, "_EXTRACT", fresh)
+    assert registered_domain("login.secure.paypal.co.uk") == "paypal.co.uk"
+    assert lookalike_brand("paypa1-verify.com") == "paypal"
 
 
 @pytest.mark.parametrize(
@@ -77,7 +80,9 @@ def test_lookalikes_detected(domain, brand):
 @pytest.mark.parametrize(
     "domain",
     ["paypal.com", "amazon.in", "example.com", "applebees.com", "scrabble.com",
-     "gmail.com", "googleusercontent.com", "sbi.co.in", "192.0.2.1"],
+     "gmail.com", "googleusercontent.com", "sbi.co.in", "192.0.2.1",
+     # ordinary words one letter away from short brand names
+     "apply.com", "paytv.com", "apples.com", "stream.com", "irctv.com", "fedel.com"],
 )
 def test_no_false_lookalikes(domain):
     assert lookalike_brand(domain) is None
@@ -88,3 +93,68 @@ def test_brands_in_text_whole_words():
     assert brands_in_text("India Post Delivery") == ["indiapost"]
     assert "sbi" in brands_in_text("State Bank of India")
     assert brands_in_text("Sbinder Newsletter") == []
+
+
+@pytest.mark.parametrize(
+    ("domain", "brand"),
+    [
+        ("app1e.com", "apple"),
+        ("flipkart-sale.shop", "flipkart"),
+        ("airte1.in", "airtel"),
+        ("docusign-review.net", "docusign"),
+        ("wellsfargo-alert.com", "wellsfargo"),
+        ("kotak-kyc.in", "kotak"),
+        ("uidai-aadhaar-update.in", "uidai"),
+    ],
+)
+def test_expanded_brand_lookalikes(domain, brand):
+    assert lookalike_brand(domain) == brand
+
+
+def test_common_words_and_surnames_are_not_brand_claims():
+    assert brands_in_text("Weekly Market Outlook") == []
+    assert brands_in_text("Chase Miller") == []
+    assert brands_in_text("Chase Bank Alerts") == ["chase"]
+    assert "uidai" in brands_in_text("Aadhaar Update Team")
+
+
+@pytest.fixture
+def restore_brands():
+    brands, phrases = dict(domains.BRANDS), dict(domains.BRAND_PHRASES)
+    yield
+    domains.BRANDS.clear()
+    domains.BRANDS.update(brands)
+    domains.BRAND_PHRASES.clear()
+    domains.BRAND_PHRASES.update(phrases)
+
+
+def test_load_extra_brands(tmp_path, restore_brands):
+    from phishguard.domains import load_extra_brands
+
+    path = tmp_path / "brands.json"
+    path.write_text('{"acmecorp": ["acmecorp.com", "mail.acmecorp.in"]}')
+    assert load_extra_brands(path) == 1
+    assert official_brand("hr.acmecorp.com") == "acmecorp"
+    assert lookalike_brand("acmecorp-payroll.com") == "acmecorp"
+    assert brands_in_text("AcmeCorp HR") == ["acmecorp"]
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "[]",
+        '{"Bad Name!": ["x.com"]}',
+        '{"acme": "acme.com"}',
+        '{"acme": []}',
+        '{"acme": ["not a domain"]}',
+        '{"acme": ["acme.com", 5]}',
+        "not json",
+    ],
+)
+def test_extra_brands_file_is_validated(tmp_path, restore_brands, content):
+    from phishguard.domains import load_extra_brands
+
+    path = tmp_path / "brands.json"
+    path.write_text(content)
+    with pytest.raises(ValueError):
+        load_extra_brands(path)

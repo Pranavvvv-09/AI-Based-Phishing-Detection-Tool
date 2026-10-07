@@ -4,7 +4,8 @@ Raw and processed data are **never committed** (`data/raw/` and `data/processed/
 gitignored). Fetch them with:
 
 ```bash
-python scripts/download_data.py   # HTTPS-only, size-capped, SHA-256-pinned
+python scripts/bootstrap.py        # download (if needed) + train (if model missing/invalid)
+python scripts/download_data.py    # just the data: HTTPS-only, size-capped, SHA-256-pinned
 ```
 
 ## What is used
@@ -16,6 +17,15 @@ python scripts/download_data.py   # HTTPS-only, size-capped, SHA-256-pinned
 | `Enron.csv` | `label == 0` only (15,791 ham) | legitimate | Enron-Spam (Metsis et al.) / Enron corpus | Public research corpus |
 | `SpamAssasin.csv` | `label == 0` only (4,091 ham) | legitimate | Apache SpamAssassin public corpus | Apache-hosted public corpus |
 | `sms.tsv` | all (5,572) | SMS (Day 6) | UCI SMS Spam Collection (Almeida & Hidalgo) | CC BY 4.0 |
+
+Plus one file that **is** committed: `data/curated/modern_lures.csv`, 112 hand-written
+messages (56 phishing / 56 legitimate, 27 categories). Phishing categories cover
+AI-polished credential lures, gift-card and payroll BEC, and Indian KYC, UPI,
+digital-arrest, courier, task-job, bill and refund scams, plus Hinglish. Legitimate
+categories cover alarming-but-genuine OTPs, bank alerts, security notices and
+deliveries, and everyday work, college and Hinglish mail. It contains no real
+people, links or addresses. Each category is split into a `train` half (added with
+a fixed weight of 20) and a `test` half used **only** for the `modern_test` metric.
 
 **Spam rows are deliberately excluded.** Spam (unwanted marketing) isn't phishing
 (credential or payment fraud), and labelling it "phishing" would blur what the model
@@ -43,9 +53,12 @@ redistribute the data.
 - Corpus-identifying words (`enron`, `jose`/`monkey` from the Nazario mailbox,
   encoding residue) are stop words, so the model can't identify the *dataset*
   instead of the *behaviour*.
-- The phishing data is mostly 2004–2020 English-language mail. Modern AI-written
-  and Indian-language lures are under-represented, which is why header and URL
-  checks stay in the final score.
+- The phishing data is mostly 2004–2020 English-language mail. On the held-out
+  modern examples the model originally reached only 68% recall with 14% false
+  positives. Adding the curated train half raised this to **79% recall with 3.6%
+  false positives** (and cut unseen-corporate-mail false positives at the 0.8
+  threshold from 2.35% to 1.56%). With only 56 test messages these figures are
+  indicative, not precise, which is why header and URL checks stay in the final score.
 
 ## Handling rules
 - These files contain **real phishing**, with live malicious links and possibly personal data.

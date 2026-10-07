@@ -8,34 +8,56 @@
       },
       "leave_one_corpus_out": {
         "Enron.csv": {
-          "false_positive_rate": 0.2312,
-          "false_positive_rate_at_quarantine_0.8": 0.0235,
+          "false_positive_rate": 0.1594,
+          "false_positive_rate_at_quarantine_0.8": 0.0156,
           "n_unseen_legit": 14444,
-          "phishing_recall": 0.9905
+          "phishing_recall": 0.9894
         },
         "SpamAssasin.csv": {
-          "false_positive_rate": 0.0152,
-          "false_positive_rate_at_quarantine_0.8": 0.001,
+          "false_positive_rate": 0.014,
+          "false_positive_rate_at_quarantine_0.8": 0.0005,
           "n_unseen_legit": 4073,
-          "phishing_recall": 0.9862
+          "phishing_recall": 0.9852
         }
       },
+      "modern_test": {
+        "errors_by_category": {
+          "ai_invoice": 1,
+          "bec_giftcard": 1,
+          "hinglish": 1,
+          "in_digital_arrest": 1,
+          "in_job": 1,
+          "in_upi": 1,
+          "security_notice": 1
+        },
+        "f1": 0.8627,
+        "false_positive_rate": 0.0357,
+        "fn": 6,
+        "fp": 1,
+        "n": 56,
+        "pr_auc": 0.9232,
+        "precision": 0.9565,
+        "recall": 0.7857,
+        "roc_auc": 0.9337,
+        "tn": 27,
+        "tp": 22
+      },
       "test_in_distribution": {
-        "f1": 0.9904,
+        "f1": 0.9888,
         "false_positive_rate": 0.0011,
-        "fn": 14,
+        "fn": 17,
         "fp": 4,
         "n": 4649,
-        "pr_auc": 0.9987,
+        "pr_auc": 0.9988,
         "precision": 0.9957,
-        "recall": 0.9852,
+        "recall": 0.982,
         "roc_auc": 0.9995,
         "tn": 3700,
-        "tp": 931
+        "tp": 928
       }
     },
-    "sha256": "f1b4ff8db23962b64b28b45a9ffa62a656bfd09b7b2a39f0504d5e695e74d4b8",
+    "sha256": "bf73e191aaab6b4467a26288d41abe0db207b4d7c8ad3dd09cb5ce345b0d063c",
     "sklearn_version": "1.9.1",
-    "trained_at": "2026-10-07T18:22:09Z"
+    "trained_at": "2026-10-07T18:33:54Z"
   }
 }

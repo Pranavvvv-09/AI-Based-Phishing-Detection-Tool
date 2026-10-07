@@ -25,6 +25,12 @@ ML security measures:
   loaded after its SHA-256 matches the committed ``models/manifest.json``.
 * Training is deterministic (``random_state=42``, single-threaded) so CI is
   reproducible.
+* The public corpora are mostly 2004-2020 English mail. A small hand-written set
+  (``data/curated/modern_lures.csv``: AI-polished lures, gift-card/payroll BEC,
+  Indian KYC/UPI/digital-arrest/courier/task scams, Hinglish, plus alarming-but-
+  genuine OTP and bank alerts) is split per category: the *train* half is added
+  with a fixed weight chosen in advance, and the *test* half is only ever used
+  for the ``modern_test`` metric.
 """
 
 from __future__ import annotations
@@ -63,6 +69,8 @@ MODELS_DIR = ROOT / "models"
 MANIFEST = MODELS_DIR / "manifest.json"
 SEED = 42
 MAX_TEXT_CHARS = 20_000
+CURATED = ROOT / "data" / "curated" / "modern_lures.csv"
+CURATED_WEIGHT = 20.0  # fixed a priori (not tuned on the test half)
 
 _URL = re.compile(r"(?:https?://|www\.)[^\s<>\"']{1,2048}", re.IGNORECASE)
 _EMAIL = re.compile(r"[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}")
@@ -166,6 +174,22 @@ def load_email_corpus(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
     return corpus.reset_index(drop=True)
 
 
+def load_curated(path: Path = CURATED) -> pd.DataFrame:
+    """Hand-written modern examples with an explicit train/test split column."""
+    df = pd.read_csv(path, dtype={"text": str, "split": str, "category": str})
+    if not set(df["split"]) <= {"train", "test"} or not set(df["label"]) <= {0, 1}:
+        raise ValueError("curated file must use split in {train,test} and label in {0,1}")
+    return df.assign(text=df["text"].map(normalize_text), source="curated")
+
+
+def _fit(frame: pd.DataFrame, curated_train: pd.DataFrame | None) -> Pipeline:
+    weights = np.ones(len(frame))
+    if curated_train is not None and len(curated_train):
+        frame = pd.concat([frame, curated_train], ignore_index=True)
+        weights = np.concatenate([weights, np.full(len(curated_train), CURATED_WEIGHT)])
+    return build_pipeline().fit(frame["text"], frame["label"], clf__sample_weight=weights)
+
+
 def _metrics(y_true, scores, threshold: float = 0.5) -> dict[str, float]:
     pred = (scores >= threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(y_true, pred, labels=[0, 1]).ravel()
@@ -187,18 +211,20 @@ class TrainResult:
     metrics: dict
 
 
-def train_email_model(corpus: pd.DataFrame) -> TrainResult:
+def train_email_model(corpus: pd.DataFrame, curated: pd.DataFrame | None = None) -> TrainResult:
     """Train on a stratified 80% split and report three kinds of evidence.
 
     * ``test_in_distribution``: the held-out 20% (same sources as training).
     * ``leave_one_corpus_out``: for each legitimate corpus, a model trained
       *without* it is scored on it, showing false positives on unfamiliar mail.
-    The returned model is the one trained on the full 80% split.
+    * ``modern_test``: the held-out half of the hand-written modern examples.
+    The returned model is the one trained on the full 80% split (+ curated train half).
     """
+    curated_train = curated[curated["split"] == "train"] if curated is not None else None
     train, test = train_test_split(
         corpus, test_size=0.2, stratify=corpus["label"], random_state=SEED
     )
-    model = build_pipeline().fit(train["text"], train["label"])
+    model = _fit(train, curated_train)
     metrics: dict = {
         "test_in_distribution": _metrics(
             test["label"].to_numpy(), model.predict_proba(test["text"])[:, 1]
@@ -214,7 +240,7 @@ def train_email_model(corpus: pd.DataFrame) -> TrainResult:
         subset = train[train["source"] != held]
         if unseen.empty or subset["label"].nunique() < 2:
             continue
-        probe = build_pipeline().fit(subset["text"], subset["label"])
+        probe = _fit(subset, curated_train)
         phish_test = test[test["label"] == 1]
         unseen_scores = probe.predict_proba(unseen["text"])[:, 1]
         metrics["leave_one_corpus_out"][held] = {
@@ -227,6 +253,14 @@ def train_email_model(corpus: pd.DataFrame) -> TrainResult:
                 float((probe.predict_proba(phish_test["text"])[:, 1] >= 0.5).mean()), 4
             ),
         }
+    if curated is not None:
+        modern = curated[curated["split"] == "test"]
+        scores = model.predict_proba(modern["text"])[:, 1]
+        metrics["modern_test"] = _metrics(modern["label"].to_numpy(), scores)
+        wrong = (scores >= 0.5).astype(int) != modern["label"].to_numpy()
+        metrics["modern_test"]["errors_by_category"] = (
+            modern.loc[wrong, "category"].value_counts().sort_index().to_dict()
+        )
     return TrainResult(model=model, metrics=metrics)
 
 
@@ -306,7 +340,8 @@ def main(argv: list[str] | None = None) -> int:
     corpus = load_email_corpus()
     counts = corpus.groupby(["source", "label"]).size().to_dict()
     print("corpus after de-duplication:", {f"{s}:{lbl}": n for (s, lbl), n in counts.items()})
-    result = train_email_model(corpus)
+    curated = load_curated() if CURATED.exists() else None
+    result = train_email_model(corpus, curated)
     path = save_model(result.model, "email_model", result.metrics)
     print(json.dumps(result.metrics, indent=2))
     print(f"saved {path.relative_to(ROOT)} (sha256 recorded in models/manifest.json)")

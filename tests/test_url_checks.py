@@ -204,3 +204,71 @@ def test_url_count_capped():
 def test_bidi_control_characters_flagged():
     assert "url_obfuscated_host" in codes("https://example.com/\u202egnp.exe")
     assert "url_obfuscated_host" in codes("https://exa\u200bmple.com/")
+
+
+# ---------- regressions for Day 1-5 known issues ----------
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://my-bucket.s3.amazonaws.com/login.html",
+        "https://s3-eu-west-1.amazonaws.com/bucket/x.html",
+        "https://bucket.s3.ap-south-1.amazonaws.com/x",
+        "https://storage.googleapis.com/b/index.html",
+        "https://firebasestorage.googleapis.com/v0/b/x",
+        "https://evil.web.core.windows.net/",
+        "https://x.blob.core.windows.net/c/page.html",
+        "https://docs.google.com/forms/d/e/abc/viewform",
+        "https://ipfs.io/ipfs/bafy123",
+    ],
+)
+def test_cloud_user_content_flagged(url):
+    assert "url_cloud_user_content" in codes(url)
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["https://aws.amazon.com/", "https://docs.google.com/document/d/x", "https://www.google.com/"],
+)
+def test_cloud_brand_pages_not_flagged(url):
+    assert "url_cloud_user_content" not in codes(url)
+
+
+def test_credential_words_apply_to_user_content_on_official_clouds():
+    assert "url_credential_words" in codes("https://my-bucket.s3.amazonaws.com/login.html")
+    assert "url_credential_words" not in codes("https://www.amazon.in/ap/signin")
+
+
+def _from(sender: str, body: str):
+    return parse_email(
+        (f"From: {sender}\r\nContent-Type: text/html\r\n\r\n" + body).encode()
+    )
+
+
+def test_esp_relayed_phishing_showing_other_domain_is_flagged():
+    # Attacker sends through SendGrid, shows paypal.com, but isn't PayPal.
+    r = check_links(
+        _from("alerts@random-sender.test",
+              '<a href="https://u1.ct.sendgrid.net/ls/click?x">www.paypal.com</a>')
+    )
+    assert "link_text_mismatch" in r.codes
+
+
+def test_esp_newsletter_showing_own_domain_is_fine():
+    r = check_links(
+        _from("news@example.com",
+              '<a href="https://u1.ct.sendgrid.net/ls/click?x">www.example.com</a>')
+    )
+    assert "link_text_mismatch" not in r.codes
+
+
+def test_brand_text_via_esp_only_excused_for_that_brand():
+    legit = check_links(
+        _from("store-news@amazon.in", '<a href="https://x.awstrack.me/a">Shop Amazon deals</a>')
+    )
+    assert "link_text_brand_mismatch" not in legit.codes
+    fake = check_links(
+        _from("deals@offers.test", '<a href="https://x.awstrack.me/a">Shop Amazon deals</a>')
+    )
+    assert "link_text_brand_mismatch" in fake.codes
