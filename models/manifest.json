@@ -1,0 +1,41 @@
+{
+  "email_model": {
+    "file": "email_model.joblib",
+    "metrics": {
+      "class_counts_train": {
+        "legitimate": 14813,
+        "phishing": 3781
+      },
+      "leave_one_corpus_out": {
+        "Enron.csv": {
+          "false_positive_rate": 0.2312,
+          "false_positive_rate_at_quarantine_0.8": 0.0235,
+          "n_unseen_legit": 14444,
+          "phishing_recall": 0.9905
+        },
+        "SpamAssasin.csv": {
+          "false_positive_rate": 0.0152,
+          "false_positive_rate_at_quarantine_0.8": 0.001,
+          "n_unseen_legit": 4073,
+          "phishing_recall": 0.9862
+        }
+      },
+      "test_in_distribution": {
+        "f1": 0.9904,
+        "false_positive_rate": 0.0011,
+        "fn": 14,
+        "fp": 4,
+        "n": 4649,
+        "pr_auc": 0.9987,
+        "precision": 0.9957,
+        "recall": 0.9852,
+        "roc_auc": 0.9995,
+        "tn": 3700,
+        "tp": 931
+      }
+    },
+    "sha256": "f1b4ff8db23962b64b28b45a9ffa62a656bfd09b7b2a39f0504d5e695e74d4b8",
+    "sklearn_version": "1.9.1",
+    "trained_at": "2026-10-07T18:22:09Z"
+  }
+}
