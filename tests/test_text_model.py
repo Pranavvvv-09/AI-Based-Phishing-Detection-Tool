@@ -320,3 +320,50 @@ def test_is_english():
     assert is_english("please verify your account and the password for this mailbox now")
     assert not is_english("bitte bestaetigen sie ihr konto und ihr passwort sofort")
     assert not is_english("ok")
+
+
+def _load_downloader():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("dl2", ROOT / "scripts" / "download_data.py")
+    dl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dl)
+    return dl
+
+
+def test_download_retries_transient_corruption_then_verifies(tmp_path, monkeypatch):
+    import hashlib
+    import http.client
+
+    dl = _load_downloader()
+    monkeypatch.setattr(dl, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(dl.time, "sleep", lambda s: None)
+    good = b"good,data\n"
+    outcomes = [b"corrupt", http.client.IncompleteRead(b"par"), good]
+
+    def fake_fetch(name, url, tmp):
+        result = outcomes.pop(0)
+        if isinstance(result, Exception):
+            raise result
+        tmp.write_bytes(result)
+        return len(result)
+
+    monkeypatch.setattr(dl, "_fetch_once", fake_fetch)
+    path = dl.download("x.csv", "https://example.com/x.csv", hashlib.sha256(good).hexdigest())
+    assert path.read_bytes() == good and outcomes == []
+    assert not list(tmp_path.glob("*.part"))
+
+
+def test_download_gives_up_and_keeps_nothing_on_persistent_mismatch(tmp_path, monkeypatch):
+    dl = _load_downloader()
+    monkeypatch.setattr(dl, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(dl.time, "sleep", lambda s: None)
+
+    def always_bad(name, url, tmp):
+        tmp.write_bytes(b"tampered")
+        return 8
+
+    monkeypatch.setattr(dl, "_fetch_once", always_bad)
+    with pytest.raises(dl.DownloadError, match="gave up after 3 attempts"):
+        dl.download("x.csv", "https://example.com/x.csv", "0" * 64)
+    assert list(tmp_path.iterdir()) == []  # no partial or unverified file left behind

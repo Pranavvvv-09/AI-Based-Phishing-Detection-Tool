@@ -18,12 +18,14 @@ Run:  python scripts/download_data.py
 from __future__ import annotations
 
 import hashlib
+import http.client
 import shutil
 import ssl
 
 # Only fixed git commands are run, with an argument list and no shell.
 import subprocess  # nosec B404
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -102,7 +104,30 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def download(name: str, url: str, expected: str | None) -> Path:
+class DownloadError(ValueError):
+    """A download was refused (size, hash or transfer problem)."""
+
+
+def _fetch_once(name: str, url: str, tmp: Path) -> int:
+    request = urllib.request.Request(  # noqa: S310 - pinned https URL, https-only opener
+        url, headers={"User-Agent": "phishguard-dataset-fetch", "Accept-Encoding": "identity"}
+    )
+    total = 0
+    with https_only_opener().open(request, timeout=TIMEOUT) as response, tmp.open("wb") as out:
+        declared = response.headers.get("Content-Length")
+        while chunk := response.read(1 << 20):
+            total += len(chunk)
+            if total > MAX_BYTES:
+                raise DownloadError(f"{name}: exceeds {MAX_BYTES} bytes, aborting")
+            out.write(chunk)
+    if declared is not None and declared.isdigit() and int(declared) != total:
+        raise DownloadError(f"{name}: truncated transfer ({total} of {declared} bytes)")
+    return total
+
+
+def download(name: str, url: str, expected: str | None, attempts: int = 3) -> Path:
+    """Download one pinned file. Transient corruption is retried; a file is only
+    accepted if its SHA-256 matches the pin (never on "best effort")."""
     if not url.startswith("https://"):
         raise ValueError(f"{name}: refusing non-HTTPS URL")
     target = RAW_DIR / name
@@ -111,29 +136,26 @@ def download(name: str, url: str, expected: str | None) -> Path:
         return target
 
     tmp = target.with_suffix(target.suffix + ".part")
-    request = urllib.request.Request(  # noqa: S310 - pinned https URL, https-only opener
-        url, headers={"User-Agent": "phishguard-dataset-fetch"}
-    )
-    total = 0
-    opener = https_only_opener()
-    with opener.open(request, timeout=TIMEOUT) as response, tmp.open("wb") as out:
-        while chunk := response.read(1 << 20):
-            total += len(chunk)
-            if total > MAX_BYTES:
-                out.close()
-                tmp.unlink(missing_ok=True)
-                raise ValueError(f"{name}: exceeds {MAX_BYTES} bytes, aborting")
-            out.write(chunk)
-
-    actual = sha256_file(tmp)
-    if expected is None:
-        print(f"[pin]  {name}: sha256={actual} (pin this value in DATASETS)")
-    elif actual != expected:
-        tmp.unlink(missing_ok=True)
-        raise ValueError(f"{name}: SHA-256 mismatch (expected {expected}, got {actual})")
-    tmp.replace(target)
-    print(f"[done] {name}: {total / 1e6:.1f} MB")
-    return target
+    last_error = ""
+    for attempt in range(1, attempts + 1):
+        try:
+            total = _fetch_once(name, url, tmp)
+            actual = sha256_file(tmp)
+            if expected is None:
+                print(f"[pin]  {name}: sha256={actual} (pin this value in DATASETS)")
+            elif actual != expected:
+                raise DownloadError(f"{name}: SHA-256 mismatch (expected {expected}, got {actual})")
+            tmp.replace(target)
+            print(f"[done] {name}: {total / 1e6:.1f} MB")
+            return target
+        # URLError/timeouts are OSErrors; IncompleteRead is an http.client.HTTPException.
+        except (DownloadError, OSError, http.client.HTTPException) as exc:
+            tmp.unlink(missing_ok=True)
+            last_error = str(exc)
+            if attempt < attempts:
+                print(f"[retry] {name}: attempt {attempt} failed ({exc}); retrying")
+                time.sleep(2 * attempt)
+    raise DownloadError(f"{last_error} - gave up after {attempts} attempts")
 
 
 def _git(*args: str, cwd: Path | None = None) -> str:
