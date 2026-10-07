@@ -23,7 +23,7 @@ phishing from your own mailbox.
 - [x] Day 3: Header checks (SPF/DKIM/DMARC trust model, spoofing, lookalike domains, BEC)
 - [x] Day 4: URL & attachment checks (punycode, @-trick, obfuscated IPs, link-text mismatch, risky files)
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
-- [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail)
+- [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%
 - [ ] Day 7: IMAP poller + quarantine
 - [ ] Day 8: Web UI, API, admin dashboard
 - [ ] Day 9: Tests + CI hardening
@@ -48,9 +48,12 @@ python -m phishguard.scorer sms "Your SBI account is blocked. Update KYC at sbi-
 ```
 Prints a JSON verdict: `score` (0–1), `label` (phishing / suspicious / legitimate),
 `action` (quarantine / review / deliver) and the `reasons`, each with a signed weight
-showing how much it moved the score. Errors and partly-analysed messages always
+showing how much it moved the score. For SMS, `components` also shows both model probabilities
+(`sms_model_probability`, `email_model_probability`), which are averaged in log-odds. Errors and partly-analysed messages always
 return `review`, never `deliver`. Full-system results are in `models/scorer_metrics.json`
-(reproduce with `python scripts/evaluate_scorer.py`).
+(reproduce with `python scripts/evaluate_scorer.py`). How the SMS scoring was chosen, including
+a leak we found in our own synthetic data and fixed, is in [data/README.md](data/README.md)
+(reproduce with `python scripts/sms_experiment.py`).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)**: requirements,

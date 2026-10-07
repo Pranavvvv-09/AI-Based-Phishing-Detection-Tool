@@ -9,6 +9,7 @@ from phishguard.config import load_settings
 from phishguard.scorer import (
     RULE_SCALE,
     TEXT_CLIP,
+    BlendedText,
     Scorer,
     check_text_links,
     extract_bare_domains,
@@ -60,22 +61,49 @@ def raw_email(headers: str, body: str = "Hello, see the attached notes for this 
 
 
 def test_text_only_score_equals_model_probability():
-    v = scorer(p_sms=0.9).scan_sms("hello there my friend how are you")
+    v = scorer(p_sms=0.9, p_email=0.9).scan_sms("hello there my friend how are you")
     assert v.score == pytest.approx(0.9)
     assert v.label == "phishing" and v.action == "quarantine"
+    v = scorer(p_email=0.9).scan_text("hello there my friend how are you", kind="email")
+    assert v.score == pytest.approx(0.9)
+
+
+def test_sms_wording_averages_sms_and_email_models_in_log_odds():
+    v = scorer(p_sms=0.9, p_email=0.1).scan_sms("hello there my friend how are you")
+    assert v.score == pytest.approx(0.5)  # logits +2.197 and -2.197 cancel out
+    assert v.components["sms_model_probability"] == 0.9
+    assert v.components["email_model_probability"] == 0.1
+    v = scorer(p_sms=0.95, p_email=0.6).scan_sms("hello there my friend how are you")
+    assert v.score == pytest.approx(sigmoid((logit(0.95) + logit(0.6)) / 2))
+    assert "sms_model_probability" not in scorer().scan_text("a b c d", kind="email").components
+
+
+def test_blended_explanation_halves_each_models_word_weights():
+    class Terms(StubModel):
+        def __init__(self, terms):
+            super().__init__(0.5)
+            self.terms = terms
+
+        def top_terms(self, text, k=5):
+            return self.terms[:k]
+
+    blend = BlendedText(Terms([("kyc", 2.0), ("account", 1.0)]),
+                        Terms([("account", 3.0), ("verify", 0.5)]))
+    assert blend.top_terms("x", 2) == [("account", 2.0), ("kyc", 1.0)]
+    assert blend.predict_proba("x") == pytest.approx(0.5)
 
 
 def test_text_evidence_is_clipped():
-    v = scorer(p_sms=0.999999).scan_sms("some ordinary words here")
+    v = scorer(p_sms=0.999999, p_email=0.999999).scan_sms("some ordinary words here")
     assert v.score == pytest.approx(sigmoid(TEXT_CLIP))
-    v = scorer(p_sms=1e-9).scan_sms("some ordinary words here")
+    v = scorer(p_sms=1e-9, p_email=1e-9).scan_sms("some ordinary words here")
     assert v.score == pytest.approx(sigmoid(-TEXT_CLIP))
 
 
 def test_thresholds_map_to_actions():
-    assert scorer(p_sms=0.79).scan_sms("a b c d").action == "review"
-    assert scorer(p_sms=0.49).scan_sms("a b c d").action == "deliver"
-    assert scorer(p_sms=0.81).scan_sms("a b c d").action == "quarantine"
+    assert scorer(p_sms=0.79, p_email=0.79).scan_sms("a b c d").action == "review"
+    assert scorer(p_sms=0.49, p_email=0.49).scan_sms("a b c d").action == "deliver"
+    assert scorer(p_sms=0.81, p_email=0.81).scan_sms("a b c d").action == "quarantine"
 
 
 def test_rule_layer_is_capped_at_rule_scale():

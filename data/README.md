@@ -24,6 +24,9 @@ The full download is about 1.7 GB, most of it honeypot attachments that are neve
 | `sms.tsv` | 194 ham (UCI-only; the rest overlaps Mendeley) of 5,574 | legitimate SMS | UCI SMS Spam Collection (2011) | CC BY 4.0 |
 | **`sms_mendeley_5971.csv`** | **4,832 ham + 434 smishing** (of 5,971) | legitimate SMS / smishing | Mishra & Soni (2022), Mendeley Data | CC BY 4.0 (as listed on the Mendeley record) |
 | `data/curated/modern_lures.csv` | 112 (committed) | modern phishing + legitimate | Hand-written for this project | Same as this repository |
+| `data/curated/sms_transactional_eval.csv` | 72 (committed, frozen) | **evaluation only**: genuine transactional SMS + smishing | Hand-written for this project | Same as this repository |
+| `data/curated/sms_independent_bank.csv` | 12 (committed, frozen) | **evaluation only**: genuine bank SMS | Example SMS from two MIT-licensed open-source parsers | MIT (see `THIRD_PARTY_NOTICES.md`) |
+| `data/curated/sms_templates.csv` | 663 (committed, generated) | experiment data for SMS variants V1/V2 (**not** used by the shipped model) | `scripts/generate_sms_templates.py` | Same as this repository |
 
 **Total training rows: 6,125 phishing and 30,304 legitimate,** plus the curated train half.
 
@@ -114,11 +117,46 @@ genuine notices come from authenticated, official domains.
   credit/OTP/delivery messages as spam and has only personal chat as ham. Adding it
   would have made the problem below worse.
 - **Residual bias (honest limitation):** every legitimate training SMS is casual
-  personal chat, so the model learned "formal = scam". It flags **21.4%** of modern
-  legitimate messages (bank alerts, deliveries, OTP-style notices) in the hand-written
-  test as suspicious, though only 3.6% reach the quarantine threshold. No public
-  corpus of legitimate transactional SMS exists (it is personal data). The fix is
-  consented, anonymised examples from your *own* phone.
+  personal chat, so the SMS model learned "formal = scam". On its own it flags
+  **37.5%** of the genuine transactional SMS in the frozen test set (bank, UPI, OTP,
+  delivery and bill alerts). No public corpus of legitimate transactional SMS exists
+  (it is personal data).
+
+### The SMS false-positive fix: a pre-registered experiment
+1. **Evaluation sets frozen first**, in a commit before any fix existed:
+   `sms_transactional_eval.csv` (36 genuine transactional SMS and 36 smishing in the
+   same formats; per category 1 validation and 2 test messages) and
+   `sms_independent_bank.csv` (12 real-format bank SMS written by other developers).
+   Phone numbers are masked and every domain uses the reserved `.test` TLD.
+2. **Variants and the choice rule fixed before training** (`scripts/sms_experiment.py`):
+   V0 = SMS model alone; V1 = retrained with 663 synthetic transactional SMS
+   (`sms_templates.csv`: every format appears as both legitimate and smishing);
+   V2 = V1 averaged with the email model; V3 = V0 averaged with the email model
+   (in log-odds). Guard: FPR <= 1% and recall >= 90% on the public SMS test split.
+   Rule: best validation F1, then fewer false positives at 0.8, then the simpler variant.
+3. **A leak was found and fixed.** Run 1 chose V1, but an overlap audit showed that some
+   synthetic messages paraphrased evaluation messages (up to 8 shared consecutive
+   words), which flattered V1 (test FPR 8.3%). They were rewritten using overlap
+   measures only, and tests now enforce word overlap below 0.4 and no shared run of 5+
+   words. Run 2 (the committed script) chose **V3**, which the scorer now uses.
+
+| Text score on held-out data | V0: SMS model alone | **V3: SMS + email blend (shipped)** | V1: + synthetic SMS |
+|---|---|---|---|
+| Frozen test: genuine SMS flagged (>= 0.5) | 37.5% (9/24) | **20.8% (5/24)** | 25.0% (6/24) |
+| Frozen test: genuine SMS at quarantine level (>= 0.8) | 4.2% (1/24) | **4.2% (1/24)** | 4.2% (1/24) |
+| Frozen test: smishing caught (>= 0.5 / >= 0.8) | 91.7% / 66.7% | **100% / 79.2%** | 95.8% / 87.5% |
+| Independent bank SMS flagged (>= 0.5 / >= 0.8) | 2 / 2 of 12 | **2 / 0 of 12** | 3 / 0 of 12 |
+| Modern hand-written test: FPR / recall (>= 0.5) | 21.4% / 82.1% | **21.4% / 85.7%** | 7.1% / 89.3% |
+| Public SMS test split: FPR / recall (>= 0.5) | 0.3% / 96.6% | **0.4% / 90.8%** | 0.3% / 95.4% |
+
+V2 had the best validation score but failed the guard (public-split recall 84.9%).
+**Honest reading:** V3 beat V1 on validation by one message (F1 0.750 vs 0.741), and V1
+did better on the modern hand-written test. The pre-registered choice was kept anyway:
+switching to whichever variant looks best on test data would make the reported numbers
+optimistic. The blend costs recall on the public 2011-2022 smishing at the 0.8 level
+(85.1% to 54.0%), although 90.8% is still flagged for review. Genuine transactional SMS
+are still flagged too often (about 1 in 5). The real fix is consented, anonymised
+transactional SMS from your *own* phone, evaluated on a fresh frozen set.
 
 ## Handling rules
 - These files contain **real phishing**, with live malicious links and, in the honeypot,

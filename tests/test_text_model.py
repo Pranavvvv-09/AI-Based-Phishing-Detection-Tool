@@ -490,3 +490,84 @@ def test_independent_set_is_attributed():
 def test_frozen_sets_are_never_used_for_training():
     source = (ROOT / "src" / "phishguard" / "text_model.py").read_text()
     assert "sms_transactional_eval" not in source and "sms_independent_bank" not in source
+    generator = (ROOT / "scripts" / "generate_sms_templates.py").read_text()
+    assert "sms_transactional_eval" not in generator and "sms_independent_bank" not in generator
+
+
+# ---------- synthetic SMS templates + the experiment that chose the SMS scoring ----------
+
+SMS_TEMPLATES = ROOT / "data" / "curated" / "sms_templates.csv"
+
+
+def _script(name):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_sms_templates_are_safe_and_mirror_every_format():
+    import re
+
+    df = pd.read_csv(SMS_TEMPLATES, dtype={"text": str, "template_id": str})
+    assert list(df.columns) == ["id", "label", "category", "template_id", "text"]
+    assert df["id"].is_unique and df["text"].is_unique
+    # every format exists as legitimate AND smishing, so format alone can't separate them
+    assert (df.groupby("category")["label"].nunique() == 2).all()
+    text = " ".join(df["text"])
+    assert not re.search(r"(?<!\d)[6-9]\d{9}(?!\d)", text)  # no real-looking mobile numbers
+    for host in re.findall(r"\b((?:[a-z0-9-]+\.)+[a-z]{2,})(?=/|\b)", text.lower()):
+        assert host.endswith(".test"), host
+    for url in re.findall(r"\S*\.test\S*", text):
+        assert url.startswith("https://"), url  # full URLs: removed by the normaliser
+
+
+def test_sms_templates_do_not_reuse_evaluation_wording():
+    import re
+
+    normalize = _script("sms_experiment").normalize_sms_masked
+    words = lambda t: re.findall(text_model.WORD_PATTERN, normalize(t))  # noqa: E731
+    frozen = [
+        *pd.read_csv(SMS_EVAL)["text"],
+        *pd.read_csv(SMS_INDEPENDENT)["text"],
+        *pd.read_csv(text_model.CURATED).query("split == 'test'")["text"],
+    ]
+    frozen_words = [set(words(t)) for t in frozen]
+    frozen_runs = {tuple(w[i:i + 5]) for t in frozen for w in [words(t)] for i in range(len(w))
+                   if len(w[i:i + 5]) == 5}
+    for template in pd.read_csv(SMS_TEMPLATES, dtype={"text": str})["text"]:
+        seq = words(template)
+        mine = set(seq)
+        assert max(len(mine & f) / len(mine | f) for f in frozen_words) < 0.4, template
+        assert not {tuple(seq[i:i + 5]) for i in range(len(seq) - 4)} & frozen_runs, template
+
+
+def test_template_generator_reproduces_committed_file():
+    rows = _script("generate_sms_templates").generate()
+    committed = pd.read_csv(SMS_TEMPLATES, dtype={"text": str, "template_id": str})
+    assert [tuple(r) for r in committed.itertuples(index=False)] == rows
+
+
+def test_experiment_normaliser_drops_masked_numbers_only():
+    normalize = _script("sms_experiment").normalize_sms_masked
+    assert normalize("A/c XX4410 and **7781 debited. Call 1800-XXX-XXXX or 98XXXXXX10") == (
+        "a/c and debited. call or"
+    )
+    assert normalize("Xmas x-ray love you xxx") == "xmas x-ray love you xxx"
+
+
+@pytest.mark.skipif(
+    not (ROOT / "models" / "sms_experiment.json").exists(), reason="run scripts/sms_experiment.py"
+)
+def test_recorded_sms_experiment_follows_its_rule():
+    report = json.loads((ROOT / "models" / "sms_experiment.json").read_text())
+    variants = report["variants"]
+    for name, result in variants.items():
+        ok = (result["in_distribution"]["FPR_05"] <= report["guard"]["max_fpr"]
+              and result["in_distribution"]["recall_05"] >= report["guard"]["min_recall"])
+        assert ok == (name in report["eligible"])
+    best = max(variants[v]["validation"]["F1_05"] for v in report["eligible"])
+    assert variants[report["choice"]]["validation"]["F1_05"] == best
+    assert report["choice"] == "V3"  # the scorer implements V3: SMS + email models blended

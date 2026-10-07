@@ -13,11 +13,14 @@ Test sets (all held out from training):
   Ling. The CSVs contain no headers, so these run in content mode (text + links).
 * Modern hand-written test half, scored as email text and as SMS.
 * SMS test split (Mendeley + UCI) through the full SMS scorer (text + links).
+* Frozen SMS sets (data/curated/sms_transactional_eval.csv, validation and test halves,
+  and sms_independent_bank.csv): committed before the SMS false-positive fix and never
+  used for training. The validation half chose the fix; the test half is only reported.
 
 "Flagged" = review or quarantine (score >= 0.5); "quarantined" = score >= threshold.
 Unanalysed (fail-safe) verdicts count as flagged, because they go to review.
 
-Run:  python scripts/evaluate_scorer.py      (needs the datasets and both models; ~3 min)
+Run:  python scripts/evaluate_scorer.py      (needs the datasets and both models; ~5 min)
 Writes models/scorer_metrics.json.
 """
 
@@ -160,6 +163,24 @@ def main() -> int:
     results["sms_test_full_scorer"] = {
         "smishing": _summarise(sms_verdicts[1], True, threshold),
         "legitimate": _summarise(sms_verdicts[0], False, threshold),
+    }
+
+    # ---------------- frozen SMS evaluation sets (never trained on)
+    frozen = pd.read_csv(ROOT / "data" / "curated" / "sms_transactional_eval.csv",
+                         dtype={"text": str})
+    for split in ("validation", "test"):
+        part = frozen[frozen["split"] == split]
+        verdicts = {lab: [scorer.scan_sms(t) for t in part.loc[part["label"] == lab, "text"]]
+                    for lab in (0, 1)}
+        results[f"sms_frozen_{split}"] = {
+            "smishing": _summarise(verdicts[1], True, threshold),
+            "legitimate": _summarise(verdicts[0], False, threshold),
+        }
+    independent = pd.read_csv(ROOT / "data" / "curated" / "sms_independent_bank.csv",
+                              dtype={"text": str})
+    results["sms_independent_bank"] = {
+        "legitimate": _summarise([scorer.scan_sms(t) for t in independent["text"]], False,
+                                 threshold),
     }
 
     # ---------------- fixtures

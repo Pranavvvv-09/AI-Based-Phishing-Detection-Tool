@@ -1,0 +1,264 @@
+{
+ "guard": {
+  "max_fpr": 0.01,
+  "min_recall": 0.9
+ },
+ "eligible": [
+  "V0",
+  "V1",
+  "V3"
+ ],
+ "choice": "V3",
+ "variants": {
+  "V0": {
+   "validation": {
+    "n_legit": 12,
+    "n_smish": 12,
+    "FP_05": 6,
+    "FP_08": 2,
+    "FPR_05": 0.5,
+    "FPR_08": 0.1667,
+    "recall_05": 0.75,
+    "recall_08": 0.5,
+    "F1_05": 0.6667
+   },
+   "in_distribution": {
+    "n_legit": 1005,
+    "n_smish": 87,
+    "FP_05": 3,
+    "FP_08": 0,
+    "FPR_05": 0.003,
+    "FPR_08": 0.0,
+    "recall_05": 0.9655,
+    "recall_08": 0.8506,
+    "F1_05": 0.9655
+   },
+   "modern_test": {
+    "n_legit": 28,
+    "n_smish": 28,
+    "FP_05": 6,
+    "FP_08": 1,
+    "FPR_05": 0.2143,
+    "FPR_08": 0.0357,
+    "recall_05": 0.8214,
+    "recall_08": 0.7143,
+    "F1_05": 0.807
+   },
+   "test": {
+    "n_legit": 24,
+    "n_smish": 24,
+    "FP_05": 9,
+    "FP_08": 1,
+    "FPR_05": 0.375,
+    "FPR_08": 0.0417,
+    "recall_05": 0.9167,
+    "recall_08": 0.6667,
+    "F1_05": 0.8
+   },
+   "independent": {
+    "n_legit": 12,
+    "n_smish": 0,
+    "FP_05": 2,
+    "FP_08": 2,
+    "FPR_05": 0.1667,
+    "FPR_08": 0.1667
+   },
+   "test_errors_by_category": {
+    "appointment": 1,
+    "bank_credit": 1,
+    "bill_disconnection": 1,
+    "card_spend": 2,
+    "otp_theft": 1,
+    "recharge_telecom": 1,
+    "security_notice": 1,
+    "travel_booking": 1,
+    "upi_payment": 2
+   }
+  },
+  "V1": {
+   "validation": {
+    "n_legit": 12,
+    "n_smish": 12,
+    "FP_05": 5,
+    "FP_08": 1,
+    "FPR_05": 0.4167,
+    "FPR_08": 0.0833,
+    "recall_05": 0.8333,
+    "recall_08": 0.6667,
+    "F1_05": 0.7407
+   },
+   "in_distribution": {
+    "n_legit": 1006,
+    "n_smish": 86,
+    "FP_05": 3,
+    "FP_08": 0,
+    "FPR_05": 0.003,
+    "FPR_08": 0.0,
+    "recall_05": 0.9535,
+    "recall_08": 0.7326,
+    "F1_05": 0.9591
+   },
+   "modern_test": {
+    "n_legit": 28,
+    "n_smish": 28,
+    "FP_05": 2,
+    "FP_08": 0,
+    "FPR_05": 0.0714,
+    "FPR_08": 0.0,
+    "recall_05": 0.8929,
+    "recall_08": 0.7857,
+    "F1_05": 0.9091
+   },
+   "test": {
+    "n_legit": 24,
+    "n_smish": 24,
+    "FP_05": 6,
+    "FP_08": 1,
+    "FPR_05": 0.25,
+    "FPR_08": 0.0417,
+    "recall_05": 0.9583,
+    "recall_08": 0.875,
+    "F1_05": 0.8679
+   },
+   "independent": {
+    "n_legit": 12,
+    "n_smish": 0,
+    "FP_05": 3,
+    "FP_08": 0,
+    "FPR_05": 0.25,
+    "FPR_08": 0.0
+   },
+   "test_errors_by_category": {
+    "appointment": 1,
+    "bank_credit": 1,
+    "card_spend": 1,
+    "otp": 1,
+    "otp_theft": 1,
+    "recharge_telecom": 1,
+    "security_notice": 1
+   }
+  },
+  "V2": {
+   "validation": {
+    "n_legit": 12,
+    "n_smish": 12,
+    "FP_05": 2,
+    "FP_08": 0,
+    "FPR_05": 0.1667,
+    "FPR_08": 0.0,
+    "recall_05": 0.8333,
+    "recall_08": 0.6667,
+    "F1_05": 0.8333
+   },
+   "in_distribution": {
+    "n_legit": 1006,
+    "n_smish": 86,
+    "FP_05": 2,
+    "FP_08": 1,
+    "FPR_05": 0.002,
+    "FPR_08": 0.001,
+    "recall_05": 0.8488,
+    "recall_08": 0.5116,
+    "F1_05": 0.9068
+   },
+   "modern_test": {
+    "n_legit": 28,
+    "n_smish": 28,
+    "FP_05": 3,
+    "FP_08": 1,
+    "FPR_05": 0.1071,
+    "FPR_08": 0.0357,
+    "recall_05": 0.8929,
+    "recall_08": 0.75,
+    "F1_05": 0.8929
+   },
+   "test": {
+    "n_legit": 24,
+    "n_smish": 24,
+    "FP_05": 5,
+    "FP_08": 0,
+    "FPR_05": 0.2083,
+    "FPR_08": 0.0,
+    "recall_05": 1.0,
+    "recall_08": 0.875,
+    "F1_05": 0.9057
+   },
+   "independent": {
+    "n_legit": 12,
+    "n_smish": 0,
+    "FP_05": 0,
+    "FP_08": 0,
+    "FPR_05": 0.0,
+    "FPR_08": 0.0
+   },
+   "test_errors_by_category": {
+    "bank_credit": 1,
+    "bill_utility": 1,
+    "security_notice": 1,
+    "travel_booking": 1,
+    "upi_payment": 1
+   }
+  },
+  "V3": {
+   "validation": {
+    "n_legit": 12,
+    "n_smish": 12,
+    "FP_05": 3,
+    "FP_08": 1,
+    "FPR_05": 0.25,
+    "FPR_08": 0.0833,
+    "recall_05": 0.75,
+    "recall_08": 0.5833,
+    "F1_05": 0.75
+   },
+   "in_distribution": {
+    "n_legit": 1005,
+    "n_smish": 87,
+    "FP_05": 4,
+    "FP_08": 1,
+    "FPR_05": 0.004,
+    "FPR_08": 0.001,
+    "recall_05": 0.908,
+    "recall_08": 0.5402,
+    "F1_05": 0.9294
+   },
+   "modern_test": {
+    "n_legit": 28,
+    "n_smish": 28,
+    "FP_05": 6,
+    "FP_08": 1,
+    "FPR_05": 0.2143,
+    "FPR_08": 0.0357,
+    "recall_05": 0.8571,
+    "recall_08": 0.7857,
+    "F1_05": 0.8276
+   },
+   "test": {
+    "n_legit": 24,
+    "n_smish": 24,
+    "FP_05": 5,
+    "FP_08": 1,
+    "FPR_05": 0.2083,
+    "FPR_08": 0.0417,
+    "recall_05": 1.0,
+    "recall_08": 0.7917,
+    "F1_05": 0.9057
+   },
+   "independent": {
+    "n_legit": 12,
+    "n_smish": 0,
+    "FP_05": 2,
+    "FP_08": 0,
+    "FPR_05": 0.1667,
+    "FPR_08": 0.0
+   },
+   "test_errors_by_category": {
+    "bank_credit": 1,
+    "bill_utility": 1,
+    "security_notice": 1,
+    "travel_booking": 1,
+    "upi_payment": 1
+   }
+  }
+ }
+}

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T20:38:19Z",
+  "generated_at": "2026-10-07T21:32:33Z",
   "parameters": {
     "rule_scale": 4.0,
     "text_clip": 4.0,
@@ -88,10 +88,10 @@
     "phishing": {
       "n": 28,
       "unanalysed_review": 0,
-      "scorer_recall_flagged": 0.8214,
-      "scorer_recall_quarantined": 0.7143,
-      "text_only_recall_flagged": 0.8214,
-      "text_only_recall_quarantined": 0.7143
+      "scorer_recall_flagged": 0.8571,
+      "scorer_recall_quarantined": 0.7857,
+      "text_only_recall_flagged": 0.8571,
+      "text_only_recall_quarantined": 0.7857
     },
     "legitimate": {
       "n": 28,
@@ -106,17 +106,63 @@
     "smishing": {
       "n": 87,
       "unanalysed_review": 0,
-      "scorer_recall_flagged": 0.9655,
-      "scorer_recall_quarantined": 0.8506,
-      "text_only_recall_flagged": 0.9655,
-      "text_only_recall_quarantined": 0.8506
+      "scorer_recall_flagged": 0.908,
+      "scorer_recall_quarantined": 0.5402,
+      "text_only_recall_flagged": 0.908,
+      "text_only_recall_quarantined": 0.5402
     },
     "legitimate": {
       "n": 1005,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.003,
+      "scorer_false_positive_rate_flagged": 0.004,
+      "scorer_false_positive_rate_quarantined": 0.001,
+      "text_only_false_positive_rate_flagged": 0.004,
+      "text_only_false_positive_rate_quarantined": 0.001
+    }
+  },
+  "sms_frozen_validation": {
+    "smishing": {
+      "n": 12,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.75,
+      "scorer_recall_quarantined": 0.5833,
+      "text_only_recall_flagged": 0.75,
+      "text_only_recall_quarantined": 0.5833
+    },
+    "legitimate": {
+      "n": 12,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.25,
+      "scorer_false_positive_rate_quarantined": 0.0833,
+      "text_only_false_positive_rate_flagged": 0.25,
+      "text_only_false_positive_rate_quarantined": 0.0833
+    }
+  },
+  "sms_frozen_test": {
+    "smishing": {
+      "n": 24,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 1.0,
+      "scorer_recall_quarantined": 0.7917,
+      "text_only_recall_flagged": 1.0,
+      "text_only_recall_quarantined": 0.7917
+    },
+    "legitimate": {
+      "n": 24,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.2083,
+      "scorer_false_positive_rate_quarantined": 0.0417,
+      "text_only_false_positive_rate_flagged": 0.2083,
+      "text_only_false_positive_rate_quarantined": 0.0417
+    }
+  },
+  "sms_independent_bank": {
+    "legitimate": {
+      "n": 12,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.1667,
       "scorer_false_positive_rate_quarantined": 0.0,
-      "text_only_false_positive_rate_flagged": 0.003,
+      "text_only_false_positive_rate_flagged": 0.1667,
       "text_only_false_positive_rate_quarantined": 0.0
     }
   },
@@ -150,5 +196,5 @@
       "score": 0.985
     }
   },
-  "runtime_seconds": 297
+  "runtime_seconds": 290
 }

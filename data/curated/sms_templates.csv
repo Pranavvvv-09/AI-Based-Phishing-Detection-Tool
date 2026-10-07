@@ -1,0 +1,664 @@
+id,label,category,template_id,text
+1,0,bank_debit,bank_debit-0-0,"HDFC Bank: Rs 75,057 has been debited from your account XX9042 on 18-12-26 towards Myntra. Current balance shown in the app."
+2,0,bank_debit,bank_debit-0-0,"HDFC Bank: Rs 32,976 has been debited from your account XX7166 on 12-06-26 towards Apollo Pharmacy. Current balance shown in the app."
+3,0,bank_debit,bank_debit-0-0,"Kotak Bank: Rs 3,252 has been debited from your account XX7043 on 28-12-26 towards BigBasket. Current balance shown in the app."
+4,0,bank_debit,bank_debit-0-0,"Canara Bank: Rs 73,934 has been debited from your account XX9486 on 16-09-26 towards Flipkart. Current balance shown in the app."
+5,0,bank_debit,bank_debit-0-0,"Union Bank: Rs 16,002 has been debited from your account XX8484 on 21-12-26 towards Nykaa. Current balance shown in the app."
+6,0,bank_debit,bank_debit-0-0,"Kotak Bank: Rs 35,273 has been debited from your account XX3455 on 01-01-26 towards BookMyShow. Current balance shown in the app."
+7,0,bank_debit,bank_debit-0-0,"Yes Bank: Rs 41,514 has been debited from your account XX8183 on 15-02-26 towards Apollo Pharmacy. Current balance shown in the app."
+8,0,bank_debit,bank_debit-0-0,"IndusInd Bank: Rs 58,913 has been debited from your account XX1003 on 01-02-26 towards BigBasket. Current balance shown in the app."
+9,0,bank_debit,bank_debit-0-1,"IMPS of Rs 90,417 to Neha done from SBI account XX9942 on 24-03-26. Not initiated by you? Ring the helpline listed on your passbook."
+10,0,bank_debit,bank_debit-0-1,"IMPS of Rs 51,181 to Sana done from Bank of Baroda account XX9520 on 26-03-26. Not initiated by you? Ring the helpline listed on your passbook."
+11,0,bank_debit,bank_debit-0-1,"IMPS of Rs 42,970 to Sana done from SBI account XX8375 on 22-05-26. Not initiated by you? Ring the helpline listed on your passbook."
+12,0,bank_debit,bank_debit-0-1,"IMPS of Rs 71,752 to Kavya done from Union Bank account XX4202 on 13-01-26. Not initiated by you? Ring the helpline listed on your passbook."
+13,0,bank_debit,bank_debit-0-1,"IMPS of Rs 67,754 to Sana done from Canara Bank account XX4047 on 05-03-26. Not initiated by you? Ring the helpline listed on your passbook."
+14,0,bank_debit,bank_debit-0-1,"IMPS of Rs 61,312 to Pooja done from ICICI Bank account XX9508 on 06-06-26. Not initiated by you? Ring the helpline listed on your passbook."
+15,0,bank_debit,bank_debit-0-1,"IMPS of Rs 46,140 to Imran done from SBI account XX6762 on 28-03-26. Not initiated by you? Ring the helpline listed on your passbook."
+16,0,bank_debit,bank_debit-0-1,"IMPS of Rs 34,575 to Imran done from Axis Bank account XX3806 on 04-07-26. Not initiated by you? Ring the helpline listed on your passbook."
+17,0,bank_debit,bank_debit-0-2,"Cheque no. 21,163 for Rs 21,163 presented on your HDFC Bank account XX2030 has been cleared on 09-05-26."
+18,0,bank_debit,bank_debit-0-2,"Cheque no. 41,294 for Rs 41,294 presented on your Axis Bank account XX1622 has been cleared on 25-08-26."
+19,0,bank_debit,bank_debit-0-2,"Cheque no. 96,398 for Rs 96,398 presented on your HDFC Bank account XX1387 has been cleared on 23-07-26."
+20,0,bank_debit,bank_debit-0-2,"Cheque no. 21,259 for Rs 21,259 presented on your IDFC FIRST Bank account XX2937 has been cleared on 20-02-26."
+21,0,bank_debit,bank_debit-0-2,"Cheque no. 86,857 for Rs 86,857 presented on your IDFC FIRST Bank account XX4005 has been cleared on 08-03-26."
+22,0,bank_debit,bank_debit-0-2,"Cheque no. 82,163 for Rs 82,163 presented on your SBI account XX3937 has been cleared on 19-02-26."
+23,0,bank_debit,bank_debit-0-2,"Cheque no. 29,086 for Rs 29,086 presented on your Yes Bank account XX3471 has been cleared on 22-09-26."
+24,0,bank_debit,bank_debit-0-2,"Cheque no. 88,274 for Rs 88,274 presented on your PNB account XX4078 has been cleared on 19-05-26."
+25,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 48,872 for your Hotstar subscription was processed from Yes Bank account XX5342. Manage mandates in your banking app."
+26,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 96,030 for your Netflix subscription was processed from Bank of Baroda account XX9970. Manage mandates in your banking app."
+27,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 55,407 for your Hotstar subscription was processed from Union Bank account XX3799. Manage mandates in your banking app."
+28,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 28,346 for your Netflix subscription was processed from SBI account XX5065. Manage mandates in your banking app."
+29,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 72,832 for your YouTube Premium subscription was processed from Kotak Bank account XX6876. Manage mandates in your banking app."
+30,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 42,306 for your Spotify subscription was processed from Canara Bank account XX9080. Manage mandates in your banking app."
+31,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 56,540 for your Hotstar subscription was processed from PNB account XX2930. Manage mandates in your banking app."
+32,0,bank_debit,bank_debit-0-3,"Auto-debit of Rs 75,296 for your Netflix subscription was processed from Kotak Bank account XX7573. Manage mandates in your banking app."
+33,0,bank_credit,bank_credit-0-0,"IndusInd Bank: NEFT inward of Rs 52,407 from Neha reflected in a/c XX1172 on 24-03-26. Available balance can be checked in the app."
+34,0,bank_credit,bank_credit-0-0,"PNB: NEFT inward of Rs 2,341 from Manoj reflected in a/c XX8489 on 25-04-26. Available balance can be checked in the app."
+35,0,bank_credit,bank_credit-0-0,"Axis Bank: NEFT inward of Rs 60,757 from Neha reflected in a/c XX3798 on 07-10-26. Available balance can be checked in the app."
+36,0,bank_credit,bank_credit-0-0,"Union Bank: NEFT inward of Rs 72,130 from Anil reflected in a/c XX4790 on 24-09-26. Available balance can be checked in the app."
+37,0,bank_credit,bank_credit-0-0,"Kotak Bank: NEFT inward of Rs 2,863 from Rohit reflected in a/c XX5159 on 16-06-26. Available balance can be checked in the app."
+38,0,bank_credit,bank_credit-0-0,"Bank of Baroda: NEFT inward of Rs 63,264 from Sana reflected in a/c XX9349 on 20-02-26. Available balance can be checked in the app."
+39,0,bank_credit,bank_credit-0-0,"HDFC Bank: NEFT inward of Rs 82,656 from Sana reflected in a/c XX4519 on 04-10-26. Available balance can be checked in the app."
+40,0,bank_credit,bank_credit-0-0,"ICICI Bank: NEFT inward of Rs 47,686 from Imran reflected in a/c XX9727 on 21-07-26. Available balance can be checked in the app."
+41,0,bank_credit,bank_credit-0-1,"Payroll transfer received: IDFC FIRST Bank has added Rs 35,079 to account XX6843. Pay slip details are with your employer."
+42,0,bank_credit,bank_credit-0-1,"Payroll transfer received: ICICI Bank has added Rs 67,456 to account XX2507. Pay slip details are with your employer."
+43,0,bank_credit,bank_credit-0-1,"Payroll transfer received: Canara Bank has added Rs 99,199 to account XX9245. Pay slip details are with your employer."
+44,0,bank_credit,bank_credit-0-1,"Payroll transfer received: Axis Bank has added Rs 94,527 to account XX6950. Pay slip details are with your employer."
+45,0,bank_credit,bank_credit-0-1,"Payroll transfer received: HDFC Bank has added Rs 15,102 to account XX8103. Pay slip details are with your employer."
+46,0,bank_credit,bank_credit-0-1,"Payroll transfer received: PNB has added Rs 63,995 to account XX3359. Pay slip details are with your employer."
+47,0,bank_credit,bank_credit-0-1,"Payroll transfer received: IDFC FIRST Bank has added Rs 61,425 to account XX9608. Pay slip details are with your employer."
+48,0,bank_credit,bank_credit-0-1,"Payroll transfer received: SBI has added Rs 80,402 to account XX1359. Pay slip details are with your employer."
+49,0,bank_credit,bank_credit-0-2,"Cashback of Rs 96,012 from BookMyShow has been credited to your ICICI Bank card XX3510. No action is required."
+50,0,bank_credit,bank_credit-0-2,"Cashback of Rs 78,088 from Zomato has been credited to your Bank of Baroda card XX4090. No action is required."
+51,0,bank_credit,bank_credit-0-2,"Cashback of Rs 18,397 from Apollo Pharmacy has been credited to your SBI card XX9541. No action is required."
+52,0,bank_credit,bank_credit-0-2,"Cashback of Rs 72,710 from Swiggy has been credited to your Union Bank card XX7642. No action is required."
+53,0,bank_credit,bank_credit-0-2,"Cashback of Rs 33,479 from Amazon has been credited to your Axis Bank card XX4580. No action is required."
+54,0,bank_credit,bank_credit-0-2,"Cashback of Rs 38,193 from Nykaa has been credited to your Union Bank card XX2073. No action is required."
+55,0,bank_credit,bank_credit-0-2,"Cashback of Rs 64,925 from Croma has been credited to your HDFC Bank card XX9874. No action is required."
+56,0,bank_credit,bank_credit-0-2,"Cashback of Rs 22,498 from Amazon has been credited to your SBI card XX4266. No action is required."
+57,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 90,900 with SBI has matured and the amount is credited to account XX6282."
+58,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 10,917 with HDFC Bank has matured and the amount is credited to account XX1344."
+59,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 3,752 with IDFC FIRST Bank has matured and the amount is credited to account XX3875."
+60,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 80,356 with ICICI Bank has matured and the amount is credited to account XX3418."
+61,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 42,577 with IndusInd Bank has matured and the amount is credited to account XX7311."
+62,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 80,279 with Yes Bank has matured and the amount is credited to account XX4351."
+63,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 84,491 with PNB has matured and the amount is credited to account XX4402."
+64,0,bank_credit,bank_credit-0-3,"Your fixed deposit of Rs 39,370 with Axis Bank has matured and the amount is credited to account XX3048."
+65,0,card,card-0-0,"Amazon purchase of Rs 90,602 approved on Yes Bank card XX9370. Questions about this charge? Use the help section of the Yes Bank app."
+66,0,card,card-0-0,"BookMyShow purchase of Rs 46,701 approved on Bank of Baroda card XX1477. Questions about this charge? Use the help section of the Bank of Baroda app."
+67,0,card,card-0-0,"Swiggy purchase of Rs 13,313 approved on Canara Bank card XX7513. Questions about this charge? Use the help section of the Canara Bank app."
+68,0,card,card-0-0,"Zomato purchase of Rs 86,370 approved on Bank of Baroda card XX7780. Questions about this charge? Use the help section of the Bank of Baroda app."
+69,0,card,card-0-0,"Flipkart purchase of Rs 72,197 approved on HDFC Bank card XX3145. Questions about this charge? Use the help section of the HDFC Bank app."
+70,0,card,card-0-0,"Amazon purchase of Rs 53,441 approved on Canara Bank card XX2125. Questions about this charge? Use the help section of the Canara Bank app."
+71,0,card,card-0-0,"Reliance Digital purchase of Rs 47,837 approved on ICICI Bank card XX7725. Questions about this charge? Use the help section of the ICICI Bank app."
+72,0,card,card-0-0,"BigBasket purchase of Rs 72,822 approved on IDFC FIRST Bank card XX9639. Questions about this charge? Use the help section of the IDFC FIRST Bank app."
+73,0,card,card-0-1,ICICI Bank card XX6531: your bill payment of Rs 263 has been posted. The updated limit is visible in the app.
+74,0,card,card-0-1,"Bank of Baroda card XX6315: your bill payment of Rs 99,057 has been posted. The updated limit is visible in the app."
+75,0,card,card-0-1,"PNB card XX5816: your bill payment of Rs 5,779 has been posted. The updated limit is visible in the app."
+76,0,card,card-0-1,"Kotak Bank card XX7014: your bill payment of Rs 30,009 has been posted. The updated limit is visible in the app."
+77,0,card,card-0-1,"Bank of Baroda card XX1392: your bill payment of Rs 4,832 has been posted. The updated limit is visible in the app."
+78,0,card,card-0-1,"Axis Bank card XX1799: your bill payment of Rs 79,516 has been posted. The updated limit is visible in the app."
+79,0,card,card-0-1,"IndusInd Bank card XX8569: your bill payment of Rs 25,135 has been posted. The updated limit is visible in the app."
+80,0,card,card-0-1,"SBI card XX7013: your bill payment of Rs 9,800 has been posted. The updated limit is visible in the app."
+81,0,card,card-0-2,"HDFC Bank card e-statement generated: outstanding Rs 73,178, least payable Rs 73,178, pay by 12-03-26."
+82,0,card,card-0-2,"IDFC FIRST Bank card e-statement generated: outstanding Rs 62,099, least payable Rs 62,099, pay by 03-11-26."
+83,0,card,card-0-2,"Yes Bank card e-statement generated: outstanding Rs 51,468, least payable Rs 51,468, pay by 26-12-26."
+84,0,card,card-0-2,"PNB card e-statement generated: outstanding Rs 99,147, least payable Rs 99,147, pay by 14-02-26."
+85,0,card,card-0-2,"SBI card e-statement generated: outstanding Rs 89,533, least payable Rs 89,533, pay by 11-09-26."
+86,0,card,card-0-2,"SBI card e-statement generated: outstanding Rs 72,733, least payable Rs 72,733, pay by 21-09-26."
+87,0,card,card-0-2,"IndusInd Bank card e-statement generated: outstanding Rs 15,776, least payable Rs 15,776, pay by 23-11-26."
+88,0,card,card-0-2,"Axis Bank card e-statement generated: outstanding Rs 97,003, least payable Rs 97,003, pay by 17-08-26."
+89,0,card,card-0-3,International usage is disabled on your Kotak Bank card XX7158. You can enable it anytime from the app settings.
+90,0,card,card-0-3,International usage is disabled on your Axis Bank card XX3880. You can enable it anytime from the app settings.
+91,0,card,card-0-3,International usage is disabled on your Kotak Bank card XX2102. You can enable it anytime from the app settings.
+92,0,card,card-0-3,International usage is disabled on your HDFC Bank card XX6203. You can enable it anytime from the app settings.
+93,0,card,card-0-3,International usage is disabled on your ICICI Bank card XX5364. You can enable it anytime from the app settings.
+94,0,card,card-0-3,International usage is disabled on your Bank of Baroda card XX1703. You can enable it anytime from the app settings.
+95,0,card,card-0-3,International usage is disabled on your SBI card XX1635. You can enable it anytime from the app settings.
+96,0,card,card-0-3,International usage is disabled on your Union Bank card XX4904. You can enable it anytime from the app settings.
+97,0,upi,upi-0-0,You paid Rs 923 to Zomato using UPI from your Union Bank account XX7390. Transaction ID 923.
+98,0,upi,upi-0-0,"You paid Rs 57,733 to Swiggy using UPI from your PNB account XX2533. Transaction ID 57,733."
+99,0,upi,upi-0-0,"You paid Rs 26,719 to Reliance Digital using UPI from your Canara Bank account XX2106. Transaction ID 26,719."
+100,0,upi,upi-0-0,"You paid Rs 17,749 to Flipkart using UPI from your IndusInd Bank account XX2739. Transaction ID 17,749."
+101,0,upi,upi-0-0,"You paid Rs 12,645 to BookMyShow using UPI from your Kotak Bank account XX7797. Transaction ID 12,645."
+102,0,upi,upi-0-0,"You paid Rs 34,819 to Flipkart using UPI from your Yes Bank account XX7663. Transaction ID 34,819."
+103,0,upi,upi-0-0,"You paid Rs 82,760 to Amazon using UPI from your ICICI Bank account XX5818. Transaction ID 82,760."
+104,0,upi,upi-0-0,"You paid Rs 71,107 to Reliance Digital using UPI from your IndusInd Bank account XX8368. Transaction ID 71,107."
+105,0,upi,upi-0-1,"Money received! Imran sent you Rs 23,344 via UPI. It is now in your SBI account XX6971."
+106,0,upi,upi-0-1,"Money received! Imran sent you Rs 90,226 via UPI. It is now in your Canara Bank account XX7599."
+107,0,upi,upi-0-1,"Money received! Imran sent you Rs 71,273 via UPI. It is now in your Bank of Baroda account XX7432."
+108,0,upi,upi-0-1,"Money received! Divya sent you Rs 97,811 via UPI. It is now in your Kotak Bank account XX1856."
+109,0,upi,upi-0-1,"Money received! Kavya sent you Rs 82,570 via UPI. It is now in your Yes Bank account XX7844."
+110,0,upi,upi-0-1,"Money received! Anil sent you Rs 82,252 via UPI. It is now in your PNB account XX3899."
+111,0,upi,upi-0-1,"Money received! Imran sent you Rs 15,320 via UPI. It is now in your PNB account XX4461."
+112,0,upi,upi-0-1,"Money received! Imran sent you Rs 94,370 via UPI. It is now in your Union Bank account XX3866."
+113,0,upi,upi-0-2,"Your UPI autopay for Spotify of Rs 50,794 will be debited on 17-12-26. Pause or cancel it in your UPI app."
+114,0,upi,upi-0-2,"Your UPI autopay for SonyLIV of Rs 33,448 will be debited on 24-11-26. Pause or cancel it in your UPI app."
+115,0,upi,upi-0-2,"Your UPI autopay for Spotify of Rs 37,319 will be debited on 19-07-26. Pause or cancel it in your UPI app."
+116,0,upi,upi-0-2,"Your UPI autopay for Zee5 of Rs 50,957 will be debited on 18-08-26. Pause or cancel it in your UPI app."
+117,0,upi,upi-0-2,"Your UPI autopay for YouTube Premium of Rs 41,085 will be debited on 14-09-26. Pause or cancel it in your UPI app."
+118,0,upi,upi-0-2,"Your UPI autopay for Netflix of Rs 71,606 will be debited on 02-08-26. Pause or cancel it in your UPI app."
+119,0,upi,upi-0-2,"Your UPI autopay for Zee5 of Rs 95,169 will be debited on 23-10-26. Pause or cancel it in your UPI app."
+120,0,upi,upi-0-2,"Your UPI autopay for Zee5 of Rs 1,643 will be debited on 28-08-26. Pause or cancel it in your UPI app."
+121,0,otp,otp-0-0,165744 is your ICICI Bank net banking OTP. Keep it private. ICICI Bank will never call you for it.
+122,0,otp,otp-0-0,400443 is your Axis Bank net banking OTP. Keep it private. Axis Bank will never call you for it.
+123,0,otp,otp-0-0,936379 is your Canara Bank net banking OTP. Keep it private. Canara Bank will never call you for it.
+124,0,otp,otp-0-0,907110 is your Bank of Baroda net banking OTP. Keep it private. Bank of Baroda will never call you for it.
+125,0,otp,otp-0-0,614772 is your IndusInd Bank net banking OTP. Keep it private. IndusInd Bank will never call you for it.
+126,0,otp,otp-0-0,935462 is your IDFC FIRST Bank net banking OTP. Keep it private. IDFC FIRST Bank will never call you for it.
+127,0,otp,otp-0-0,398128 is your HDFC Bank net banking OTP. Keep it private. HDFC Bank will never call you for it.
+128,0,otp,otp-0-0,167088 is your Kotak Bank net banking OTP. Keep it private. Kotak Bank will never call you for it.
+129,0,otp,otp-0-1,"Use OTP 167607 to complete your payment of Rs 84,280 at Croma. Valid for 10 minutes. Do not share this OTP."
+130,0,otp,otp-0-1,"Use OTP 878462 to complete your payment of Rs 13,374 at Croma. Valid for 10 minutes. Do not share this OTP."
+131,0,otp,otp-0-1,"Use OTP 397210 to complete your payment of Rs 72,110 at Myntra. Valid for 10 minutes. Do not share this OTP."
+132,0,otp,otp-0-1,"Use OTP 650024 to complete your payment of Rs 74,223 at Nykaa. Valid for 10 minutes. Do not share this OTP."
+133,0,otp,otp-0-1,"Use OTP 647285 to complete your payment of Rs 96,046 at Croma. Valid for 10 minutes. Do not share this OTP."
+134,0,otp,otp-0-1,"Use OTP 518320 to complete your payment of Rs 34,311 at Myntra. Valid for 10 minutes. Do not share this OTP."
+135,0,otp,otp-0-1,"Use OTP 358106 to complete your payment of Rs 84,754 at Reliance Digital. Valid for 10 minutes. Do not share this OTP."
+136,0,otp,otp-0-1,"Use OTP 774808 to complete your payment of Rs 88,299 at Apollo Pharmacy. Valid for 10 minutes. Do not share this OTP."
+137,0,otp,otp-0-2,"972790 is your login code for Croma. If you did not request it, simply ignore this message."
+138,0,otp,otp-0-2,"900151 is your login code for Zomato. If you did not request it, simply ignore this message."
+139,0,otp,otp-0-2,"976120 is your login code for Croma. If you did not request it, simply ignore this message."
+140,0,otp,otp-0-2,"641976 is your login code for Amazon. If you did not request it, simply ignore this message."
+141,0,otp,otp-0-2,"476899 is your login code for Reliance Digital. If you did not request it, simply ignore this message."
+142,0,otp,otp-0-2,"643853 is your login code for BookMyShow. If you did not request it, simply ignore this message."
+143,0,otp,otp-0-2,"279152 is your login code for DMart. If you did not request it, simply ignore this message."
+144,0,otp,otp-0-2,"715305 is your login code for Amazon. If you did not request it, simply ignore this message."
+145,0,otp,otp-0-3,"Your Airtel SIM change OTP is 321879. If you have not requested a SIM change, visit a store with your ID."
+146,0,otp,otp-0-3,"Your BSNL SIM change OTP is 421763. If you have not requested a SIM change, visit a store with your ID."
+147,0,otp,otp-0-3,"Your BSNL SIM change OTP is 932673. If you have not requested a SIM change, visit a store with your ID."
+148,0,otp,otp-0-3,"Your Airtel SIM change OTP is 929127. If you have not requested a SIM change, visit a store with your ID."
+149,0,otp,otp-0-3,"Your Vi SIM change OTP is 178236. If you have not requested a SIM change, visit a store with your ID."
+150,0,otp,otp-0-3,"Your Jio SIM change OTP is 667454. If you have not requested a SIM change, visit a store with your ID."
+151,0,otp,otp-0-3,"Your Airtel SIM change OTP is 197853. If you have not requested a SIM change, visit a store with your ID."
+152,0,otp,otp-0-3,"Your Vi SIM change OTP is 662327. If you have not requested a SIM change, visit a store with your ID."
+153,0,delivery,delivery-0-0,XpressBees: your shipment from BigBasket has been dispatched and will reach Jaipur by 08-09-26. No action needed.
+154,0,delivery,delivery-0-0,Ecom Express: your shipment from Swiggy has been dispatched and will reach Indore by 18-04-26. No action needed.
+155,0,delivery,delivery-0-0,Ecom Express: your shipment from Myntra has been dispatched and will reach Jaipur by 18-02-26. No action needed.
+156,0,delivery,delivery-0-0,Ekart: your shipment from BookMyShow has been dispatched and will reach Surat by 05-07-26. No action needed.
+157,0,delivery,delivery-0-0,Ecom Express: your shipment from Nykaa has been dispatched and will reach Nagpur by 05-06-26. No action needed.
+158,0,delivery,delivery-0-0,Shadowfax: your shipment from Amazon has been dispatched and will reach Pune by 02-09-26. No action needed.
+159,0,delivery,delivery-0-0,Blue Dart: your shipment from Myntra has been dispatched and will reach Pune by 07-02-26. No action needed.
+160,0,delivery,delivery-0-0,Blue Dart: your shipment from Nykaa has been dispatched and will reach Jaipur by 13-11-26. No action needed.
+161,0,delivery,delivery-0-1,Your BookMyShow order has been delivered at 8:00 hrs. Thank you for shopping with us.
+162,0,delivery,delivery-0-1,Your Apollo Pharmacy order has been delivered at 9:00 hrs. Thank you for shopping with us.
+163,0,delivery,delivery-0-1,Your Nykaa order has been delivered at 7:00 hrs. Thank you for shopping with us.
+164,0,delivery,delivery-0-1,Your Swiggy order has been delivered at 4:00 hrs. Thank you for shopping with us.
+165,0,delivery,delivery-0-1,Your BigBasket order has been delivered at 4:00 hrs. Thank you for shopping with us.
+166,0,delivery,delivery-0-1,Your Flipkart order has been delivered at 7:00 hrs. Thank you for shopping with us.
+167,0,delivery,delivery-0-1,Your BookMyShow order has been delivered at 3:00 hrs. Thank you for shopping with us.
+168,0,delivery,delivery-0-1,Your Nykaa order has been delivered at 2:00 hrs. Thank you for shopping with us.
+169,0,delivery,delivery-0-2,Shadowfax: we tried to deliver your parcel today but could not reach you. We will try again tomorrow.
+170,0,delivery,delivery-0-2,Ekart: we tried to deliver your parcel today but could not reach you. We will try again tomorrow.
+171,0,delivery,delivery-0-2,Blue Dart: we tried to deliver your parcel today but could not reach you. We will try again tomorrow.
+172,0,delivery,delivery-0-2,DTDC: we tried to deliver your parcel today but could not reach you. We will try again tomorrow.
+173,0,delivery,delivery-0-2,Ecom Express: we tried to deliver your parcel today but could not reach you. We will try again tomorrow.
+174,0,delivery,delivery-0-3,Your BookMyShow package is out for delivery today. Keep the delivery OTP ready for the agent.
+175,0,delivery,delivery-0-3,Your Flipkart package is out for delivery today. Keep the delivery OTP ready for the agent.
+176,0,delivery,delivery-0-3,Your DMart package is out for delivery today. Keep the delivery OTP ready for the agent.
+177,0,order,order-0-0,Your Swiggy order is confirmed. You will receive an update when it ships.
+178,0,order,order-0-0,Your Myntra order is confirmed. You will receive an update when it ships.
+179,0,order,order-0-0,Your Amazon order is confirmed. You will receive an update when it ships.
+180,0,order,order-0-0,Your Zomato order is confirmed. You will receive an update when it ships.
+181,0,order,order-0-1,"Your refund of Rs 72,524 for the returned item from DMart has been initiated. It reaches your account in 5-7 days."
+182,0,order,order-0-1,"Your refund of Rs 59,311 for the returned item from Croma has been initiated. It reaches your account in 5-7 days."
+183,0,order,order-0-1,"Your refund of Rs 85,588 for the returned item from BigBasket has been initiated. It reaches your account in 5-7 days."
+184,0,order,order-0-1,"Your refund of Rs 82,922 for the returned item from Amazon has been initiated. It reaches your account in 5-7 days."
+185,0,order,order-0-1,"Your refund of Rs 75,201 for the returned item from Croma has been initiated. It reaches your account in 5-7 days."
+186,0,order,order-0-1,"Your refund of Rs 42,440 for the returned item from Amazon has been initiated. It reaches your account in 5-7 days."
+187,0,order,order-0-1,"Your refund of Rs 45,023 for the returned item from BigBasket has been initiated. It reaches your account in 5-7 days."
+188,0,order,order-0-1,"Your refund of Rs 35,647 for the returned item from BigBasket has been initiated. It reaches your account in 5-7 days."
+189,0,order,order-0-2,You cancelled your Swiggy order. Any amount paid will be refunded to the original payment method.
+190,0,order,order-0-2,You cancelled your Nykaa order. Any amount paid will be refunded to the original payment method.
+191,0,order,order-0-2,You cancelled your Amazon order. Any amount paid will be refunded to the original payment method.
+192,0,order,order-0-2,You cancelled your Croma order. Any amount paid will be refunded to the original payment method.
+193,0,order,order-0-2,You cancelled your BigBasket order. Any amount paid will be refunded to the original payment method.
+194,0,order,order-0-2,You cancelled your BookMyShow order. Any amount paid will be refunded to the original payment method.
+195,0,bill,bill-0-0,"CESC: the statement for your connection is available. Amount payable Rs 33,576 by 25-11-26. Online and counter payments are both accepted."
+196,0,bill,bill-0-0,"CESC: the statement for your connection is available. Amount payable Rs 83,156 by 24-09-26. Online and counter payments are both accepted."
+197,0,bill,bill-0-0,"CESC: the statement for your connection is available. Amount payable Rs 59,789 by 25-02-26. Online and counter payments are both accepted."
+198,0,bill,bill-0-0,"CESC: the statement for your connection is available. Amount payable Rs 55,660 by 10-02-26. Online and counter payments are both accepted."
+199,0,bill,bill-0-0,"CESC: the statement for your connection is available. Amount payable Rs 18,016 by 01-07-26. Online and counter payments are both accepted."
+200,0,bill,bill-0-0,"Adani Electricity: the statement for your connection is available. Amount payable Rs 42,727 by 25-02-26. Online and counter payments are both accepted."
+201,0,bill,bill-0-0,"Adani Electricity: the statement for your connection is available. Amount payable Rs 42,590 by 16-05-26. Online and counter payments are both accepted."
+202,0,bill,bill-0-0,"BESCOM: the statement for your connection is available. Amount payable Rs 32,408 by 24-12-26. Online and counter payments are both accepted."
+203,0,bill,bill-0-1,"BESCOM: we have credited Rs 1,586 against your electricity account. Your next meter reading is scheduled around 12-06-26."
+204,0,bill,bill-0-1,"Adani Electricity: we have credited Rs 97,815 against your electricity account. Your next meter reading is scheduled around 04-03-26."
+205,0,bill,bill-0-1,"Tata Power: we have credited Rs 72,661 against your electricity account. Your next meter reading is scheduled around 09-02-26."
+206,0,bill,bill-0-1,"Adani Electricity: we have credited Rs 12,082 against your electricity account. Your next meter reading is scheduled around 02-01-26."
+207,0,bill,bill-0-1,"Adani Electricity: we have credited Rs 32,793 against your electricity account. Your next meter reading is scheduled around 17-02-26."
+208,0,bill,bill-0-1,"TNEB: we have credited Rs 2,666 against your electricity account. Your next meter reading is scheduled around 09-01-26."
+209,0,bill,bill-0-1,"TNEB: we have credited Rs 27,876 against your electricity account. Your next meter reading is scheduled around 06-08-26."
+210,0,bill,bill-0-1,"Tata Power: we have credited Rs 86,468 against your electricity account. Your next meter reading is scheduled around 06-10-26."
+211,0,bill,bill-0-2,"Airtel postpaid: Rs 64,169 outstanding for this month, payable by 28-06-26. Already settled? Please disregard this message."
+212,0,bill,bill-0-2,"Airtel postpaid: Rs 15,191 outstanding for this month, payable by 07-02-26. Already settled? Please disregard this message."
+213,0,bill,bill-0-2,"Jio postpaid: Rs 15,532 outstanding for this month, payable by 09-10-26. Already settled? Please disregard this message."
+214,0,bill,bill-0-2,"Jio postpaid: Rs 81,814 outstanding for this month, payable by 06-09-26. Already settled? Please disregard this message."
+215,0,bill,bill-0-2,"Airtel postpaid: Rs 12,167 outstanding for this month, payable by 03-08-26. Already settled? Please disregard this message."
+216,0,bill,bill-0-2,"Airtel postpaid: Rs 68,933 outstanding for this month, payable by 03-08-26. Already settled? Please disregard this message."
+217,0,bill,bill-0-2,"BSNL postpaid: Rs 85,010 outstanding for this month, payable by 27-11-26. Already settled? Please disregard this message."
+218,0,bill,bill-0-2,"Vi postpaid: Rs 96,507 outstanding for this month, payable by 09-05-26. Already settled? Please disregard this message."
+219,0,telecom,telecom-0-0,"Airtel: Rs 90,207 top-up applied to your number. Unlimited calls and data now run until 03-05-26."
+220,0,telecom,telecom-0-0,"Airtel: Rs 39,363 top-up applied to your number. Unlimited calls and data now run until 26-09-26."
+221,0,telecom,telecom-0-0,"Jio: Rs 33,381 top-up applied to your number. Unlimited calls and data now run until 14-11-26."
+222,0,telecom,telecom-0-0,"Vi: Rs 71,549 top-up applied to your number. Unlimited calls and data now run until 10-06-26."
+223,0,telecom,telecom-0-0,"Vi: Rs 1,667 top-up applied to your number. Unlimited calls and data now run until 15-07-26."
+224,0,telecom,telecom-0-0,"BSNL: Rs 5,014 top-up applied to your number. Unlimited calls and data now run until 26-05-26."
+225,0,telecom,telecom-0-0,"Jio: Rs 31,532 top-up applied to your number. Unlimited calls and data now run until 04-07-26."
+226,0,telecom,telecom-0-0,"Airtel: Rs 8,401 top-up applied to your number. Unlimited calls and data now run until 04-05-26."
+227,0,telecom,telecom-0-1,BSNL: high-speed quota for today is over. Browsing continues at a lower speed until the quota resets tomorrow.
+228,0,telecom,telecom-0-1,Vi: high-speed quota for today is over. Browsing continues at a lower speed until the quota resets tomorrow.
+229,0,telecom,telecom-0-1,Airtel: high-speed quota for today is over. Browsing continues at a lower speed until the quota resets tomorrow.
+230,0,telecom,telecom-0-2,BSNL: your plan expires on 12-04-26. Recharge from the official app to continue services.
+231,0,telecom,telecom-0-2,BSNL: your plan expires on 16-12-26. Recharge from the official app to continue services.
+232,0,telecom,telecom-0-2,Airtel: your plan expires on 18-09-26. Recharge from the official app to continue services.
+233,0,telecom,telecom-0-2,Airtel: your plan expires on 14-11-26. Recharge from the official app to continue services.
+234,0,telecom,telecom-0-2,Vi: your plan expires on 09-10-26. Recharge from the official app to continue services.
+235,0,telecom,telecom-0-2,BSNL: your plan expires on 23-11-26. Recharge from the official app to continue services.
+236,0,telecom,telecom-0-2,BSNL: your plan expires on 15-05-26. Recharge from the official app to continue services.
+237,0,telecom,telecom-0-2,Airtel: your plan expires on 09-09-26. Recharge from the official app to continue services.
+238,0,travel,travel-0-0,"Your bus ticket from Lucknow to Lucknow on 18-04-26 is confirmed. Seat 32,491. Show this SMS while boarding."
+239,0,travel,travel-0-0,"Your bus ticket from Surat to Surat on 03-06-26 is confirmed. Seat 73,167. Show this SMS while boarding."
+240,0,travel,travel-0-0,"Your bus ticket from Jaipur to Jaipur on 28-08-26 is confirmed. Seat 96,954. Show this SMS while boarding."
+241,0,travel,travel-0-0,"Your bus ticket from Indore to Indore on 28-01-26 is confirmed. Seat 86,634. Show this SMS while boarding."
+242,0,travel,travel-0-0,"Your bus ticket from Lucknow to Lucknow on 10-12-26 is confirmed. Seat 64,639. Show this SMS while boarding."
+243,0,travel,travel-0-0,"Your bus ticket from Lucknow to Lucknow on 07-07-26 is confirmed. Seat 8,490. Show this SMS while boarding."
+244,0,travel,travel-0-0,"Your bus ticket from Lucknow to Lucknow on 12-06-26 is confirmed. Seat 61,428. Show this SMS while boarding."
+245,0,travel,travel-0-0,"Your bus ticket from Lucknow to Lucknow on 02-11-26 is confirmed. Seat 39,382. Show this SMS while boarding."
+246,0,travel,travel-0-1,E-ticket issued for your Indore flight on 10-01-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+247,0,travel,travel-0-1,E-ticket issued for your Pune flight on 21-08-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+248,0,travel,travel-0-1,E-ticket issued for your Kochi flight on 24-08-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+249,0,travel,travel-0-1,E-ticket issued for your Kochi flight on 14-09-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+250,0,travel,travel-0-1,E-ticket issued for your Jaipur flight on 20-10-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+251,0,travel,travel-0-1,E-ticket issued for your Indore flight on 16-07-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+252,0,travel,travel-0-1,E-ticket issued for your Kochi flight on 06-08-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+253,0,travel,travel-0-1,E-ticket issued for your Lucknow flight on 01-09-26. Baggage allowance is 15 kg plus 7 kg cabin. Have a pleasant trip.
+254,0,travel,travel-0-2,Your cab driver Manoj has arrived at the pickup point. Please share the ride OTP 447952 only inside the cab.
+255,0,travel,travel-0-2,Your cab driver Pooja has arrived at the pickup point. Please share the ride OTP 835444 only inside the cab.
+256,0,travel,travel-0-2,Your cab driver Imran has arrived at the pickup point. Please share the ride OTP 943958 only inside the cab.
+257,0,travel,travel-0-2,Your cab driver Neha has arrived at the pickup point. Please share the ride OTP 303761 only inside the cab.
+258,0,travel,travel-0-2,Your cab driver Vikram has arrived at the pickup point. Please share the ride OTP 201364 only inside the cab.
+259,0,travel,travel-0-2,Your cab driver Pooja has arrived at the pickup point. Please share the ride OTP 293670 only inside the cab.
+260,0,travel,travel-0-2,Your cab driver Anil has arrived at the pickup point. Please share the ride OTP 149777 only inside the cab.
+261,0,travel,travel-0-2,Your cab driver Imran has arrived at the pickup point. Please share the ride OTP 319499 only inside the cab.
+262,0,appointment,appointment-0-0,Dr. Neha's clinic has booked you for 12-07-26 at 7:30. Please arrive 10 minutes early.
+263,0,appointment,appointment-0-0,Dr. Pooja's clinic has booked you for 18-01-26 at 3:30. Please arrive 10 minutes early.
+264,0,appointment,appointment-0-0,Dr. Rohit's clinic has booked you for 23-08-26 at 4:30. Please arrive 10 minutes early.
+265,0,appointment,appointment-0-0,Dr. Neha's clinic has booked you for 02-11-26 at 8:30. Please arrive 10 minutes early.
+266,0,appointment,appointment-0-0,Dr. Anil's clinic has booked you for 28-10-26 at 7:30. Please arrive 10 minutes early.
+267,0,appointment,appointment-0-0,Dr. Manoj's clinic has booked you for 16-03-26 at 1:30. Please arrive 10 minutes early.
+268,0,appointment,appointment-0-0,Dr. Anil's clinic has booked you for 12-06-26 at 1:30. Please arrive 10 minutes early.
+269,0,appointment,appointment-0-0,Dr. Imran's clinic has booked you for 28-01-26 at 9:30. Please arrive 10 minutes early.
+270,0,appointment,appointment-0-1,Your lab test report is ready. You can collect it from the centre or view it in the app.
+271,0,appointment,appointment-0-2,Your vaccination slot at the Surat health centre on 15-07-26 is confirmed. Carry an ID card.
+272,0,appointment,appointment-0-2,Your vaccination slot at the Pune health centre on 12-10-26 is confirmed. Carry an ID card.
+273,0,appointment,appointment-0-2,Your vaccination slot at the Lucknow health centre on 15-05-26 is confirmed. Carry an ID card.
+274,0,appointment,appointment-0-2,Your vaccination slot at the Chennai health centre on 13-05-26 is confirmed. Carry an ID card.
+275,0,appointment,appointment-0-2,Your vaccination slot at the Kochi health centre on 21-02-26 is confirmed. Carry an ID card.
+276,0,appointment,appointment-0-2,Your vaccination slot at the Jaipur health centre on 28-11-26 is confirmed. Carry an ID card.
+277,0,appointment,appointment-0-2,Your vaccination slot at the Nagpur health centre on 22-11-26 is confirmed. Carry an ID card.
+278,0,appointment,appointment-0-2,Your vaccination slot at the Indore health centre on 05-06-26 is confirmed. Carry an ID card.
+279,0,account_notice,account_notice-0-0,Net banking password update completed for your Yes Bank login on 04-05-26. Report anything unexpected using the helpline printed on your debit card.
+280,0,account_notice,account_notice-0-0,Net banking password update completed for your SBI login on 14-12-26. Report anything unexpected using the helpline printed on your debit card.
+281,0,account_notice,account_notice-0-0,Net banking password update completed for your Canara Bank login on 04-08-26. Report anything unexpected using the helpline printed on your debit card.
+282,0,account_notice,account_notice-0-0,Net banking password update completed for your IDFC FIRST Bank login on 03-06-26. Report anything unexpected using the helpline printed on your debit card.
+283,0,account_notice,account_notice-0-0,Net banking password update completed for your ICICI Bank login on 02-02-26. Report anything unexpected using the helpline printed on your debit card.
+284,0,account_notice,account_notice-0-0,Net banking password update completed for your IndusInd Bank login on 21-07-26. Report anything unexpected using the helpline printed on your debit card.
+285,0,account_notice,account_notice-0-0,Net banking password update completed for your Axis Bank login on 11-08-26. Report anything unexpected using the helpline printed on your debit card.
+286,0,account_notice,account_notice-0-0,Net banking password update completed for your Yes Bank login on 17-07-26. Report anything unexpected using the helpline printed on your debit card.
+287,0,account_notice,account_notice-0-1,BigBasket: sign-in from a Chrome browser in Pune just now. Recognise it? Then nothing more is needed.
+288,0,account_notice,account_notice-0-1,Reliance Digital: sign-in from a Chrome browser in Lucknow just now. Recognise it? Then nothing more is needed.
+289,0,account_notice,account_notice-0-1,Myntra: sign-in from a Chrome browser in Jaipur just now. Recognise it? Then nothing more is needed.
+290,0,account_notice,account_notice-0-1,DMart: sign-in from a Chrome browser in Jaipur just now. Recognise it? Then nothing more is needed.
+291,0,account_notice,account_notice-0-1,Zomato: sign-in from a Chrome browser in Indore just now. Recognise it? Then nothing more is needed.
+292,0,account_notice,account_notice-0-1,Nykaa: sign-in from a Chrome browser in Nagpur just now. Recognise it? Then nothing more is needed.
+293,0,account_notice,account_notice-0-1,Amazon: sign-in from a Chrome browser in Pune just now. Recognise it? Then nothing more is needed.
+294,0,account_notice,account_notice-0-1,Croma: sign-in from a Chrome browser in Jaipur just now. Recognise it? Then nothing more is needed.
+295,0,account_notice,account_notice-0-2,"Yes Bank security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+296,0,account_notice,account_notice-0-2,"Axis Bank security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+297,0,account_notice,account_notice-0-2,"IndusInd Bank security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+298,0,account_notice,account_notice-0-2,"Bank of Baroda security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+299,0,account_notice,account_notice-0-2,"IDFC FIRST Bank security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+300,0,account_notice,account_notice-0-2,"Canara Bank security tip: our staff will not request your PIN, OTP or card details by call, SMS or email. Stay alert."
+301,0,hinglish,hinglish-0-0,"Aapke Axis Bank khate XX7450 mein Rs 44,560 jama kiye gaye hain. Dhanyavaad."
+302,0,hinglish,hinglish-0-0,"Aapke HDFC Bank khate XX6234 mein Rs 38,224 jama kiye gaye hain. Dhanyavaad."
+303,0,hinglish,hinglish-0-0,"Aapke HDFC Bank khate XX5225 mein Rs 46,412 jama kiye gaye hain. Dhanyavaad."
+304,0,hinglish,hinglish-0-0,"Aapke PNB khate XX7324 mein Rs 33,899 jama kiye gaye hain. Dhanyavaad."
+305,0,hinglish,hinglish-0-0,"Aapke Canara Bank khate XX7446 mein Rs 58,412 jama kiye gaye hain. Dhanyavaad."
+306,0,hinglish,hinglish-0-0,"Aapke Yes Bank khate XX6044 mein Rs 38,606 jama kiye gaye hain. Dhanyavaad."
+307,0,hinglish,hinglish-0-0,"Aapke PNB khate XX2984 mein Rs 91,027 jama kiye gaye hain. Dhanyavaad."
+308,0,hinglish,hinglish-0-0,"Aapke IDFC FIRST Bank khate XX1989 mein Rs 9,152 jama kiye gaye hain. Dhanyavaad."
+309,0,hinglish,hinglish-0-1,Aapka Apollo Pharmacy order kal tak deliver ho jayega. Koi action ki zarurat nahi hai.
+310,0,hinglish,hinglish-0-1,Aapka Amazon order kal tak deliver ho jayega. Koi action ki zarurat nahi hai.
+311,0,hinglish,hinglish-0-1,Aapka Flipkart order kal tak deliver ho jayega. Koi action ki zarurat nahi hai.
+312,0,hinglish,hinglish-0-1,Aapka BigBasket order kal tak deliver ho jayega. Koi action ki zarurat nahi hai.
+313,0,hinglish,hinglish-0-1,Aapka DMart order kal tak deliver ho jayega. Koi action ki zarurat nahi hai.
+314,0,hinglish,hinglish-0-2,BSNL: aapka recharge safal raha. Plan 15-12-26 tak valid hai.
+315,0,hinglish,hinglish-0-2,Jio: aapka recharge safal raha. Plan 24-06-26 tak valid hai.
+316,0,hinglish,hinglish-0-2,Airtel: aapka recharge safal raha. Plan 13-11-26 tak valid hai.
+317,0,hinglish,hinglish-0-2,Airtel: aapka recharge safal raha. Plan 08-03-26 tak valid hai.
+318,0,hinglish,hinglish-0-2,Jio: aapka recharge safal raha. Plan 12-03-26 tak valid hai.
+319,0,hinglish,hinglish-0-2,Airtel: aapka recharge safal raha. Plan 10-10-26 tak valid hai.
+320,0,hinglish,hinglish-0-2,Jio: aapka recharge safal raha. Plan 27-01-26 tak valid hai.
+321,0,hinglish,hinglish-0-2,BSNL: aapka recharge safal raha. Plan 27-12-26 tak valid hai.
+322,1,bank_debit,bank_debit-1-0,"ICICI Bank fraud desk: a Rs 56,217 transfer to an unknown payee is being processed. Stop the payment through https://reward-claim-62.test/b within 9 hours."
+323,1,bank_debit,bank_debit-1-0,"SBI fraud desk: a Rs 5,827 transfer to an unknown payee is being processed. Stop the payment through https://bill-desk-36.test/a within 4 hours."
+324,1,bank_debit,bank_debit-1-0,"Yes Bank fraud desk: a Rs 16,654 transfer to an unknown payee is being processed. Stop the payment through https://refund-desk-4.test/e within 8 hours."
+325,1,bank_debit,bank_debit-1-0,"PNB fraud desk: a Rs 77,866 transfer to an unknown payee is being processed. Stop the payment through https://account-help-7.test/f within 2 hours."
+326,1,bank_debit,bank_debit-1-0,"IndusInd Bank fraud desk: a Rs 52,097 transfer to an unknown payee is being processed. Stop the payment through https://secure-update-65.test/c within 3 hours."
+327,1,bank_debit,bank_debit-1-0,"Canara Bank fraud desk: a Rs 51,830 transfer to an unknown payee is being processed. Stop the payment through https://kyc-verify-92.test/b within 2 hours."
+328,1,bank_debit,bank_debit-1-0,"HDFC Bank fraud desk: a Rs 50,360 transfer to an unknown payee is being processed. Stop the payment through https://refund-desk-25.test/g within 7 hours."
+329,1,bank_debit,bank_debit-1-0,"HDFC Bank fraud desk: a Rs 58,804 transfer to an unknown payee is being processed. Stop the payment through https://secure-update-43.test/e within 12 hours."
+330,1,bank_debit,bank_debit-1-1,Unusual activity on your Axis Bank account XX3944. Verify your identity within 9 hours at https://refund-desk-62.test/d or the account will be frozen.
+331,1,bank_debit,bank_debit-1-1,Unusual activity on your Union Bank account XX5406. Verify your identity within 5 hours at https://bill-desk-75.test/a or the account will be frozen.
+332,1,bank_debit,bank_debit-1-1,Unusual activity on your Union Bank account XX8988. Verify your identity within 8 hours at https://kyc-verify-18.test/g or the account will be frozen.
+333,1,bank_debit,bank_debit-1-1,Unusual activity on your Yes Bank account XX9348. Verify your identity within 6 hours at https://parcel-fee-48.test/a or the account will be frozen.
+334,1,bank_debit,bank_debit-1-1,Unusual activity on your IDFC FIRST Bank account XX6415. Verify your identity within 3 hours at https://account-help-28.test/b or the account will be frozen.
+335,1,bank_debit,bank_debit-1-1,Unusual activity on your Bank of Baroda account XX3945. Verify your identity within 12 hours at https://account-help-3.test/e or the account will be frozen.
+336,1,bank_debit,bank_debit-1-1,Unusual activity on your Bank of Baroda account XX1254. Verify your identity within 6 hours at https://refund-desk-42.test/h or the account will be frozen.
+337,1,bank_debit,bank_debit-1-1,Unusual activity on your Bank of Baroda account XX1194. Verify your identity within 1 hours at https://account-help-1.test/h or the account will be frozen.
+338,1,bank_debit,bank_debit-1-2,"HDFC Bank ALERT: Rs 4,015 left account XX5138 just now. Our reversal officer at 97XXXXXX29 can undo it once you read out the code we texted."
+339,1,bank_debit,bank_debit-1-2,"PNB ALERT: Rs 45,435 left account XX9969 just now. Our reversal officer at 99XXXXXX88 can undo it once you read out the code we texted."
+340,1,bank_debit,bank_debit-1-2,"IndusInd Bank ALERT: Rs 55,254 left account XX9780 just now. Our reversal officer at 93XXXXXX57 can undo it once you read out the code we texted."
+341,1,bank_debit,bank_debit-1-2,"HDFC Bank ALERT: Rs 47,328 left account XX6709 just now. Our reversal officer at 99XXXXXX87 can undo it once you read out the code we texted."
+342,1,bank_debit,bank_debit-1-2,"IDFC FIRST Bank ALERT: Rs 30,234 left account XX2156 just now. Our reversal officer at 93XXXXXX44 can undo it once you read out the code we texted."
+343,1,bank_debit,bank_debit-1-2,"PNB ALERT: Rs 4,650 left account XX9543 just now. Our reversal officer at 97XXXXXX32 can undo it once you read out the code we texted."
+344,1,bank_debit,bank_debit-1-2,"PNB ALERT: Rs 88,983 left account XX6006 just now. Our reversal officer at 93XXXXXX58 can undo it once you read out the code we texted."
+345,1,bank_debit,bank_debit-1-2,"SBI ALERT: Rs 91,525 left account XX7067 just now. Our reversal officer at 99XXXXXX65 can undo it once you read out the code we texted."
+346,1,bank_debit,bank_debit-1-3,"Your Zee5 auto-debit of Rs 98,776 failed. Update your card details at https://support-team-40.test/h to avoid account suspension."
+347,1,bank_debit,bank_debit-1-3,"Your SonyLIV auto-debit of Rs 71,747 failed. Update your card details at https://kyc-verify-92.test/f to avoid account suspension."
+348,1,bank_debit,bank_debit-1-3,"Your Zee5 auto-debit of Rs 26,152 failed. Update your card details at https://reward-claim-78.test/d to avoid account suspension."
+349,1,bank_debit,bank_debit-1-3,"Your SonyLIV auto-debit of Rs 59,488 failed. Update your card details at https://parcel-fee-13.test/d to avoid account suspension."
+350,1,bank_debit,bank_debit-1-3,"Your Spotify auto-debit of Rs 68,395 failed. Update your card details at https://refund-desk-89.test/d to avoid account suspension."
+351,1,bank_debit,bank_debit-1-3,"Your Netflix auto-debit of Rs 56,948 failed. Update your card details at https://account-help-23.test/g to avoid account suspension."
+352,1,bank_debit,bank_debit-1-3,"Your Netflix auto-debit of Rs 29,381 failed. Update your card details at https://account-help-30.test/b to avoid account suspension."
+353,1,bank_debit,bank_debit-1-3,"Your Spotify auto-debit of Rs 24,789 failed. Update your card details at https://bill-desk-53.test/a to avoid account suspension."
+354,1,bank_credit,bank_credit-1-0,"Bank of Baroda rewards: a festive bonus of Rs 54,229 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+355,1,bank_credit,bank_credit-1-0,"SBI rewards: a festive bonus of Rs 4,904 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+356,1,bank_credit,bank_credit-1-0,"IDFC FIRST Bank rewards: a festive bonus of Rs 3,012 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+357,1,bank_credit,bank_credit-1-0,"Yes Bank rewards: a festive bonus of Rs 45,781 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+358,1,bank_credit,bank_credit-1-0,"IDFC FIRST Bank rewards: a festive bonus of Rs 14,176 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+359,1,bank_credit,bank_credit-1-0,"Bank of Baroda rewards: a festive bonus of Rs 37,529 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+360,1,bank_credit,bank_credit-1-0,"HDFC Bank rewards: a festive bonus of Rs 49,769 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+361,1,bank_credit,bank_credit-1-0,"Canara Bank rewards: a festive bonus of Rs 45,701 awaits you. Authorise the incoming UPI mandate with your PIN to collect it."
+362,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 86,094 from Swiggy is pending. Claim it today at https://account-help-9.test/b before it expires."
+363,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 12,290 from Swiggy is pending. Claim it today at https://bill-desk-71.test/a before it expires."
+364,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 76,092 from Zomato is pending. Claim it today at https://support-team-60.test/b before it expires."
+365,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 20,805 from Croma is pending. Claim it today at https://account-help-19.test/f before it expires."
+366,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 97,564 from BookMyShow is pending. Claim it today at https://parcel-fee-33.test/g before it expires."
+367,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 11,367 from Apollo Pharmacy is pending. Claim it today at https://support-team-92.test/b before it expires."
+368,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 22,540 from BookMyShow is pending. Claim it today at https://kyc-verify-44.test/f before it expires."
+369,1,bank_credit,bank_credit-1-1,"Congratulations! Cashback of Rs 13,274 from Croma is pending. Claim it today at https://kyc-verify-10.test/c before it expires."
+370,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 83,814 for this month cannot be posted until your PAN is linked again. Do it at https://bill-desk-31.test/g today."
+371,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 49,587 for this month cannot be posted until your PAN is linked again. Do it at https://reward-claim-45.test/d today."
+372,1,bank_credit,bank_credit-1-2,Payroll credit of Rs 827 for this month cannot be posted until your PAN is linked again. Do it at https://kyc-verify-16.test/a today.
+373,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 55,437 for this month cannot be posted until your PAN is linked again. Do it at https://secure-update-13.test/d today."
+374,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 43,124 for this month cannot be posted until your PAN is linked again. Do it at https://secure-update-87.test/f today."
+375,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 20,868 for this month cannot be posted until your PAN is linked again. Do it at https://bill-desk-88.test/d today."
+376,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 98,800 for this month cannot be posted until your PAN is linked again. Do it at https://bill-desk-44.test/d today."
+377,1,bank_credit,bank_credit-1-2,"Payroll credit of Rs 28,109 for this month cannot be posted until your PAN is linked again. Do it at https://account-help-71.test/a today."
+378,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 3,917 is blocked. Pay a release fee of Rs 3,917 at https://parcel-fee-75.test/f to receive it."
+379,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 39,337 is blocked. Pay a release fee of Rs 39,337 at https://support-team-4.test/c to receive it."
+380,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 79,095 is blocked. Pay a release fee of Rs 79,095 at https://kyc-verify-29.test/c to receive it."
+381,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 56,298 is blocked. Pay a release fee of Rs 56,298 at https://reward-claim-49.test/f to receive it."
+382,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 48,113 is blocked. Pay a release fee of Rs 48,113 at https://parcel-fee-74.test/f to receive it."
+383,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 19,274 is blocked. Pay a release fee of Rs 19,274 at https://secure-update-98.test/e to receive it."
+384,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 66,972 is blocked. Pay a release fee of Rs 66,972 at https://parcel-fee-20.test/b to receive it."
+385,1,bank_credit,bank_credit-1-3,"Your fixed deposit interest of Rs 74,745 is blocked. Pay a release fee of Rs 74,745 at https://account-help-54.test/f to receive it."
+386,1,card,card-1-0,SBI cards division: missing PAN details have put card XX3417 on hold. Submit them at https://account-help-89.test/b to resume spending.
+387,1,card,card-1-0,PNB cards division: missing PAN details have put card XX3156 on hold. Submit them at https://bill-desk-28.test/f to resume spending.
+388,1,card,card-1-0,Axis Bank cards division: missing PAN details have put card XX7809 on hold. Submit them at https://kyc-verify-21.test/d to resume spending.
+389,1,card,card-1-0,ICICI Bank cards division: missing PAN details have put card XX3918 on hold. Submit them at https://parcel-fee-18.test/h to resume spending.
+390,1,card,card-1-0,ICICI Bank cards division: missing PAN details have put card XX8946 on hold. Submit them at https://account-help-93.test/b to resume spending.
+391,1,card,card-1-0,IDFC FIRST Bank cards division: missing PAN details have put card XX1956 on hold. Submit them at https://support-team-1.test/f to resume spending.
+392,1,card,card-1-0,ICICI Bank cards division: missing PAN details have put card XX1563 on hold. Submit them at https://kyc-verify-19.test/a to resume spending.
+393,1,card,card-1-0,ICICI Bank cards division: missing PAN details have put card XX9582 on hold. Submit them at https://refund-desk-92.test/b to resume spending.
+394,1,card,card-1-1,"ICICI Bank: 62,907 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://reward-claim-18.test/c."
+395,1,card,card-1-1,"ICICI Bank: 80,020 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://refund-desk-19.test/g."
+396,1,card,card-1-1,"Union Bank: 84,564 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://parcel-fee-62.test/h."
+397,1,card,card-1-1,"Kotak Bank: 65,421 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://reward-claim-92.test/h."
+398,1,card,card-1-1,"ICICI Bank: 92,040 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://reward-claim-13.test/b."
+399,1,card,card-1-1,"SBI: 50,106 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://reward-claim-80.test/e."
+400,1,card,card-1-1,"HDFC Bank: 82,646 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://reward-claim-82.test/e."
+401,1,card,card-1-1,"Union Bank: 46,730 loyalty coins are about to lapse. Convert them to cash by typing your card number and CVV at https://account-help-89.test/a."
+402,1,card,card-1-2,Pre-approved upgrade: your Yes Bank card qualifies for a Platinum variant. A bank officer will call from 91XXXXXX32; tell them the verification code to confirm.
+403,1,card,card-1-2,Pre-approved upgrade: your IDFC FIRST Bank card qualifies for a Platinum variant. A bank officer will call from 93XXXXXX35; tell them the verification code to confirm.
+404,1,card,card-1-2,Pre-approved upgrade: your Bank of Baroda card qualifies for a Platinum variant. A bank officer will call from 95XXXXXX88; tell them the verification code to confirm.
+405,1,card,card-1-2,Pre-approved upgrade: your ICICI Bank card qualifies for a Platinum variant. A bank officer will call from 94XXXXXX11; tell them the verification code to confirm.
+406,1,card,card-1-2,Pre-approved upgrade: your PNB card qualifies for a Platinum variant. A bank officer will call from 97XXXXXX97; tell them the verification code to confirm.
+407,1,card,card-1-2,Pre-approved upgrade: your Bank of Baroda card qualifies for a Platinum variant. A bank officer will call from 91XXXXXX22; tell them the verification code to confirm.
+408,1,card,card-1-2,Pre-approved upgrade: your SBI card qualifies for a Platinum variant. A bank officer will call from 99XXXXXX63; tell them the verification code to confirm.
+409,1,card,card-1-2,Pre-approved upgrade: your PNB card qualifies for a Platinum variant. A bank officer will call from 94XXXXXX13; tell them the verification code to confirm.
+410,1,card,card-1-3,"PNB: overseas charge of Rs 99,338 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+411,1,card,card-1-3,"IndusInd Bank: overseas charge of Rs 50,605 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+412,1,card,card-1-3,"SBI: overseas charge of Rs 9,254 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+413,1,card,card-1-3,"Bank of Baroda: overseas charge of Rs 48,486 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+414,1,card,card-1-3,"Axis Bank: overseas charge of Rs 56,762 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+415,1,card,card-1-3,"Kotak Bank: overseas charge of Rs 27,009 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+416,1,card,card-1-3,"SBI: overseas charge of Rs 52,760 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+417,1,card,card-1-3,"ICICI Bank: overseas charge of Rs 24,878 pending on your card. Text back the 16 digits and CVV so the fraud team can decline it."
+418,1,upi,upi-1-0,"Sana from the Chennai PG: my payment app shows Rs 90,273 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+419,1,upi,upi-1-0,"Rohit from the Nagpur PG: my payment app shows Rs 96,430 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+420,1,upi,upi-1-0,"Kavya from the Nagpur PG: my payment app shows Rs 32,306 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+421,1,upi,upi-1-0,"Kavya from the Nagpur PG: my payment app shows Rs 78,494 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+422,1,upi,upi-1-0,"Vikram from the Chennai PG: my payment app shows Rs 21,277 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+423,1,upi,upi-1-0,"Kavya from the Nagpur PG: my payment app shows Rs 66,411 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+424,1,upi,upi-1-0,"Anil from the Nagpur PG: my payment app shows Rs 95,782 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+425,1,upi,upi-1-0,"Anil from the Jaipur PG: my payment app shows Rs 4,451 went to your UPI ID wrongly. Kindly accept the refund request with your PIN, my rent is due."
+426,1,upi,upi-1-1,NPCI compliance: unverified UPI handles are closed tonight. Approve the Re 1 request in your app with your PIN to stay active.
+427,1,upi,upi-1-2,"Apollo Pharmacy returns desk: your Rs 72,239 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+428,1,upi,upi-1-2,"Myntra returns desk: your Rs 39,319 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+429,1,upi,upi-1-2,"Zomato returns desk: your Rs 85,813 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+430,1,upi,upi-1-2,"Myntra returns desk: your Rs 8,484 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+431,1,upi,upi-1-2,"Myntra returns desk: your Rs 21,627 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+432,1,upi,upi-1-2,"Nykaa returns desk: your Rs 61,663 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+433,1,upi,upi-1-2,"Myntra returns desk: your Rs 93,171 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+434,1,upi,upi-1-2,"Croma returns desk: your Rs 27,079 payback is ready. Open the QR image we shared and type your PIN to accept the money."
+435,1,otp,otp-1-0,"IDFC FIRST Bank helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+436,1,otp,otp-1-0,"PNB helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+437,1,otp,otp-1-0,"Kotak Bank helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+438,1,otp,otp-1-0,"Yes Bank helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+439,1,otp,otp-1-0,"ICICI Bank helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+440,1,otp,otp-1-0,"Bank of Baroda helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+441,1,otp,otp-1-0,"Canara Bank helpdesk calling about your locked mobile banking. To unlock it during this call, read out the six digit code that just arrived."
+442,1,otp,otp-1-1,Myntra seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+443,1,otp,otp-1-1,Reliance Digital seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+444,1,otp,otp-1-1,DMart seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+445,1,otp,otp-1-1,Zomato seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+446,1,otp,otp-1-1,Flipkart seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+447,1,otp,otp-1-1,BigBasket seller desk: your purchase is on a security hold. Type the 6-digit code from your SMS inbox into our chat so we can dispatch it.
+448,1,otp,otp-1-2,Airtel network team: a number port request needs your consent. Forward the code you just got to 99XXXXXX32 to cancel it.
+449,1,otp,otp-1-2,Jio network team: a number port request needs your consent. Forward the code you just got to 97XXXXXX29 to cancel it.
+450,1,otp,otp-1-2,Airtel network team: a number port request needs your consent. Forward the code you just got to 97XXXXXX43 to cancel it.
+451,1,otp,otp-1-2,BSNL network team: a number port request needs your consent. Forward the code you just got to 92XXXXXX18 to cancel it.
+452,1,otp,otp-1-2,Airtel network team: a number port request needs your consent. Forward the code you just got to 99XXXXXX55 to cancel it.
+453,1,otp,otp-1-2,Airtel network team: a number port request needs your consent. Forward the code you just got to 93XXXXXX74 to cancel it.
+454,1,otp,otp-1-2,Airtel network team: a number port request needs your consent. Forward the code you just got to 99XXXXXX16 to cancel it.
+455,1,otp,otp-1-2,Vi network team: a number port request needs your consent. Forward the code you just got to 95XXXXXX88 to cancel it.
+456,1,otp,otp-1-3,"Your loan of Rs 72,145 is approved. Share the OTP with our agent on 94XXXXXX42 to receive the amount today."
+457,1,otp,otp-1-3,"Your loan of Rs 33,413 is approved. Share the OTP with our agent on 95XXXXXX62 to receive the amount today."
+458,1,otp,otp-1-3,"Your loan of Rs 98,947 is approved. Share the OTP with our agent on 99XXXXXX44 to receive the amount today."
+459,1,otp,otp-1-3,"Your loan of Rs 38,840 is approved. Share the OTP with our agent on 96XXXXXX98 to receive the amount today."
+460,1,otp,otp-1-3,"Your loan of Rs 10,472 is approved. Share the OTP with our agent on 96XXXXXX92 to receive the amount today."
+461,1,otp,otp-1-3,"Your loan of Rs 47,459 is approved. Share the OTP with our agent on 92XXXXXX12 to receive the amount today."
+462,1,otp,otp-1-3,"Your loan of Rs 2,955 is approved. Share the OTP with our agent on 92XXXXXX87 to receive the amount today."
+463,1,otp,otp-1-3,"Your loan of Rs 46,306 is approved. Share the OTP with our agent on 98XXXXXX81 to receive the amount today."
+464,1,delivery,delivery-1-0,"Ekart: house number missing on consignment for Surat. Courier will return it to the sender unless a Rs 37,238 correction charge is paid at https://parcel-fee-82.test/h."
+465,1,delivery,delivery-1-0,"Shadowfax: house number missing on consignment for Jaipur. Courier will return it to the sender unless a Rs 54,702 correction charge is paid at https://kyc-verify-50.test/h."
+466,1,delivery,delivery-1-0,"Blue Dart: house number missing on consignment for Surat. Courier will return it to the sender unless a Rs 88,302 correction charge is paid at https://bill-desk-56.test/f."
+467,1,delivery,delivery-1-0,"Delhivery: house number missing on consignment for Kochi. Courier will return it to the sender unless a Rs 15,041 correction charge is paid at https://account-help-67.test/h."
+468,1,delivery,delivery-1-0,"Blue Dart: house number missing on consignment for Kochi. Courier will return it to the sender unless a Rs 59,397 correction charge is paid at https://kyc-verify-15.test/f."
+469,1,delivery,delivery-1-0,"Ekart: house number missing on consignment for Chennai. Courier will return it to the sender unless a Rs 51,297 correction charge is paid at https://bill-desk-50.test/e."
+470,1,delivery,delivery-1-0,"DTDC: house number missing on consignment for Jaipur. Courier will return it to the sender unless a Rs 20,954 correction charge is paid at https://secure-update-21.test/f."
+471,1,delivery,delivery-1-0,"Shadowfax: house number missing on consignment for Lucknow. Courier will return it to the sender unless a Rs 54,932 correction charge is paid at https://secure-update-14.test/e."
+472,1,delivery,delivery-1-1,"Import clearance for your Apollo Pharmacy order from abroad needs a Rs 25,846 tax payment. Settle it at https://kyc-verify-47.test/h before the package goes back."
+473,1,delivery,delivery-1-1,"Import clearance for your Myntra order from abroad needs a Rs 24,342 tax payment. Settle it at https://refund-desk-39.test/e before the package goes back."
+474,1,delivery,delivery-1-1,"Import clearance for your Nykaa order from abroad needs a Rs 17,511 tax payment. Settle it at https://refund-desk-9.test/a before the package goes back."
+475,1,delivery,delivery-1-1,"Import clearance for your BookMyShow order from abroad needs a Rs 91,129 tax payment. Settle it at https://support-team-93.test/g before the package goes back."
+476,1,delivery,delivery-1-1,"Import clearance for your Nykaa order from abroad needs a Rs 66,037 tax payment. Settle it at https://parcel-fee-34.test/e before the package goes back."
+477,1,delivery,delivery-1-1,"Import clearance for your Reliance Digital order from abroad needs a Rs 22,197 tax payment. Settle it at https://bill-desk-31.test/g before the package goes back."
+478,1,delivery,delivery-1-1,"Import clearance for your Swiggy order from abroad needs a Rs 91,053 tax payment. Settle it at https://refund-desk-43.test/c before the package goes back."
+479,1,delivery,delivery-1-1,"Import clearance for your Amazon order from abroad needs a Rs 52,529 tax payment. Settle it at https://parcel-fee-16.test/d before the package goes back."
+480,1,delivery,delivery-1-2,"Ekart: the courier could not find your door, so the item sits in our godown. A Rs 85,886 holding fee at https://secure-update-70.test/d gets it out within 6 hours."
+481,1,delivery,delivery-1-2,"XpressBees: the courier could not find your door, so the item sits in our godown. A Rs 39,647 holding fee at https://support-team-29.test/c gets it out within 10 hours."
+482,1,delivery,delivery-1-2,"DTDC: the courier could not find your door, so the item sits in our godown. A Rs 69,435 holding fee at https://bill-desk-72.test/b gets it out within 8 hours."
+483,1,delivery,delivery-1-2,"Blue Dart: the courier could not find your door, so the item sits in our godown. A Rs 15,753 holding fee at https://support-team-37.test/d gets it out within 4 hours."
+484,1,delivery,delivery-1-2,"Shadowfax: the courier could not find your door, so the item sits in our godown. A Rs 6,548 holding fee at https://support-team-43.test/d gets it out within 1 hours."
+485,1,delivery,delivery-1-2,"DTDC: the courier could not find your door, so the item sits in our godown. A Rs 4,375 holding fee at https://bill-desk-84.test/f gets it out within 12 hours."
+486,1,delivery,delivery-1-2,"Blue Dart: the courier could not find your door, so the item sits in our godown. A Rs 28,110 holding fee at https://account-help-86.test/f gets it out within 1 hours."
+487,1,delivery,delivery-1-2,"Blue Dart: the courier could not find your door, so the item sits in our godown. A Rs 83,646 holding fee at https://reward-claim-84.test/c gets it out within 10 hours."
+488,1,delivery,delivery-1-3,Missed delivery for your Apollo Pharmacy parcel today. Get our rescheduling app from https://support-team-60.test/a and pick a new slot.
+489,1,delivery,delivery-1-3,Missed delivery for your Amazon parcel today. Get our rescheduling app from https://reward-claim-1.test/f and pick a new slot.
+490,1,delivery,delivery-1-3,Missed delivery for your Nykaa parcel today. Get our rescheduling app from https://secure-update-43.test/h and pick a new slot.
+491,1,delivery,delivery-1-3,Missed delivery for your BigBasket parcel today. Get our rescheduling app from https://kyc-verify-69.test/h and pick a new slot.
+492,1,delivery,delivery-1-3,Missed delivery for your Myntra parcel today. Get our rescheduling app from https://kyc-verify-16.test/d and pick a new slot.
+493,1,delivery,delivery-1-3,Missed delivery for your BigBasket parcel today. Get our rescheduling app from https://kyc-verify-31.test/g and pick a new slot.
+494,1,delivery,delivery-1-3,Missed delivery for your BookMyShow parcel today. Get our rescheduling app from https://account-help-77.test/d and pick a new slot.
+495,1,delivery,delivery-1-3,Missed delivery for your Nykaa parcel today. Get our rescheduling app from https://bill-desk-34.test/b and pick a new slot.
+496,1,order,order-1-0,"Croma: we could not charge your card, so your purchase is on hold. Provide the card number again at https://support-team-46.test/c within 4 hours."
+497,1,order,order-1-0,"Amazon: we could not charge your card, so your purchase is on hold. Provide the card number again at https://support-team-50.test/b within 8 hours."
+498,1,order,order-1-0,"Amazon: we could not charge your card, so your purchase is on hold. Provide the card number again at https://refund-desk-68.test/c within 1 hours."
+499,1,order,order-1-0,"Amazon: we could not charge your card, so your purchase is on hold. Provide the card number again at https://parcel-fee-32.test/e within 9 hours."
+500,1,order,order-1-0,"Amazon: we could not charge your card, so your purchase is on hold. Provide the card number again at https://reward-claim-10.test/d within 7 hours."
+501,1,order,order-1-0,"BookMyShow: we could not charge your card, so your purchase is on hold. Provide the card number again at https://bill-desk-9.test/b within 4 hours."
+502,1,order,order-1-0,"Croma: we could not charge your card, so your purchase is on hold. Provide the card number again at https://kyc-verify-34.test/f within 5 hours."
+503,1,order,order-1-0,"Croma: we could not charge your card, so your purchase is on hold. Provide the card number again at https://support-team-39.test/e within 8 hours."
+504,1,order,order-1-1,"Nykaa security: someone tried to buy a gift voucher of Rs 87,625 with your saved card. Dial 95XXXXXX88 to stop the purchase."
+505,1,order,order-1-1,"Flipkart security: someone tried to buy a gift voucher of Rs 93,633 with your saved card. Dial 94XXXXXX45 to stop the purchase."
+506,1,order,order-1-1,"Croma security: someone tried to buy a gift voucher of Rs 43,120 with your saved card. Dial 91XXXXXX80 to stop the purchase."
+507,1,order,order-1-1,"DMart security: someone tried to buy a gift voucher of Rs 6,053 with your saved card. Dial 93XXXXXX80 to stop the purchase."
+508,1,order,order-1-1,"DMart security: someone tried to buy a gift voucher of Rs 5,024 with your saved card. Dial 95XXXXXX93 to stop the purchase."
+509,1,order,order-1-1,"Swiggy security: someone tried to buy a gift voucher of Rs 8,627 with your saved card. Dial 98XXXXXX85 to stop the purchase."
+510,1,order,order-1-1,"Myntra security: someone tried to buy a gift voucher of Rs 64,466 with your saved card. Dial 93XXXXXX33 to stop the purchase."
+511,1,order,order-1-1,"Zomato security: someone tried to buy a gift voucher of Rs 31,774 with your saved card. Dial 97XXXXXX74 to stop the purchase."
+512,1,order,order-1-2,"Swiggy returns: to push your Rs 19,402 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+513,1,order,order-1-2,"Swiggy returns: to push your Rs 60,238 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+514,1,order,order-1-2,"Zomato returns: to push your Rs 91,405 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+515,1,order,order-1-2,"BookMyShow returns: to push your Rs 74,011 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+516,1,order,order-1-2,"Flipkart returns: to push your Rs 94,493 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+517,1,order,order-1-2,"Swiggy returns: to push your Rs 44,468 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+518,1,order,order-1-2,"Amazon returns: to push your Rs 10,827 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+519,1,order,order-1-2,"DMart returns: to push your Rs 20,170 refund manually, our technician needs remote access. Install QuickSupport and read out the 9-digit ID."
+520,1,bill,bill-1-0,BESCOM final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 96XXXXXX24 before evening to keep supply on.
+521,1,bill,bill-1-0,Tata Power final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 98XXXXXX41 before evening to keep supply on.
+522,1,bill,bill-1-0,Adani Electricity final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 98XXXXXX36 before evening to keep supply on.
+523,1,bill,bill-1-0,BESCOM final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 95XXXXXX64 before evening to keep supply on.
+524,1,bill,bill-1-0,BESCOM final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 93XXXXXX17 before evening to keep supply on.
+525,1,bill,bill-1-0,Tata Power final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 94XXXXXX29 before evening to keep supply on.
+526,1,bill,bill-1-0,BESCOM final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 96XXXXXX71 before evening to keep supply on.
+527,1,bill,bill-1-0,BESCOM final notice: a meter reading mismatch was found on your connection. Speak to the billing officer on 92XXXXXX10 before evening to keep supply on.
+528,1,bill,bill-1-1,"Your Adani Electricity bill payment failed. Pay Rs 84,725 immediately at https://reward-claim-6.test/g to avoid disconnection today."
+529,1,bill,bill-1-1,"Your MSEDCL bill payment failed. Pay Rs 24,090 immediately at https://kyc-verify-23.test/g to avoid disconnection today."
+530,1,bill,bill-1-1,"Your MSEDCL bill payment failed. Pay Rs 45,625 immediately at https://refund-desk-37.test/d to avoid disconnection today."
+531,1,bill,bill-1-1,"Your TNEB bill payment failed. Pay Rs 9,022 immediately at https://reward-claim-71.test/c to avoid disconnection today."
+532,1,bill,bill-1-1,"Your BESCOM bill payment failed. Pay Rs 13,730 immediately at https://bill-desk-93.test/e to avoid disconnection today."
+533,1,bill,bill-1-1,"Your BESCOM bill payment failed. Pay Rs 30,548 immediately at https://support-team-62.test/f to avoid disconnection today."
+534,1,bill,bill-1-1,"Your BESCOM bill payment failed. Pay Rs 71,035 immediately at https://support-team-48.test/g to avoid disconnection today."
+535,1,bill,bill-1-1,"Your BESCOM bill payment failed. Pay Rs 5,768 immediately at https://reward-claim-25.test/a to avoid disconnection today."
+536,1,bill,bill-1-2,"Airtel: your number will be deactivated due to an unpaid bill of Rs 15,374. Pay now at https://secure-update-19.test/b."
+537,1,bill,bill-1-2,"Airtel: your number will be deactivated due to an unpaid bill of Rs 92,096. Pay now at https://parcel-fee-43.test/e."
+538,1,bill,bill-1-2,"Jio: your number will be deactivated due to an unpaid bill of Rs 87,481. Pay now at https://bill-desk-17.test/a."
+539,1,bill,bill-1-2,"Airtel: your number will be deactivated due to an unpaid bill of Rs 71,033. Pay now at https://kyc-verify-33.test/g."
+540,1,bill,bill-1-2,"Jio: your number will be deactivated due to an unpaid bill of Rs 58,738. Pay now at https://account-help-32.test/b."
+541,1,bill,bill-1-2,"BSNL: your number will be deactivated due to an unpaid bill of Rs 69,395. Pay now at https://kyc-verify-5.test/e."
+542,1,bill,bill-1-2,"Jio: your number will be deactivated due to an unpaid bill of Rs 40,732. Pay now at https://refund-desk-27.test/f."
+543,1,bill,bill-1-2,"BSNL: your number will be deactivated due to an unpaid bill of Rs 46,946. Pay now at https://reward-claim-67.test/h."
+544,1,telecom,telecom-1-0,Airtel: your number is selected for a free 5G upgrade. Log in at https://secure-update-18.test/a with your details to activate.
+545,1,telecom,telecom-1-0,Jio: your number is selected for a free 5G upgrade. Log in at https://secure-update-59.test/f with your details to activate.
+546,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://account-help-71.test/e with your details to activate.
+547,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://bill-desk-18.test/f with your details to activate.
+548,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://account-help-47.test/d with your details to activate.
+549,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://secure-update-97.test/e with your details to activate.
+550,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://refund-desk-84.test/c with your details to activate.
+551,1,telecom,telecom-1-0,Vi: your number is selected for a free 5G upgrade. Log in at https://refund-desk-55.test/h with your details to activate.
+552,1,telecom,telecom-1-1,Jio: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 95XXXXXX92 on WhatsApp.
+553,1,telecom,telecom-1-1,Vi: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 91XXXXXX94 on WhatsApp.
+554,1,telecom,telecom-1-1,Vi: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 98XXXXXX10 on WhatsApp.
+555,1,telecom,telecom-1-1,Vi: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 97XXXXXX33 on WhatsApp.
+556,1,telecom,telecom-1-1,Airtel: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 98XXXXXX24 on WhatsApp.
+557,1,telecom,telecom-1-1,Vi: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 93XXXXXX36 on WhatsApp.
+558,1,telecom,telecom-1-1,Jio: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 95XXXXXX62 on WhatsApp.
+559,1,telecom,telecom-1-1,Jio: identity documents for your connection need re-verification. Send a selfie holding your Aadhaar card to 93XXXXXX12 on WhatsApp.
+560,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Jio connection. Outgoing calls stop in 6 hours unless you contact 99XXXXXX93.
+561,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your BSNL connection. Outgoing calls stop in 4 hours unless you contact 96XXXXXX20.
+562,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Jio connection. Outgoing calls stop in 5 hours unless you contact 99XXXXXX55.
+563,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Jio connection. Outgoing calls stop in 4 hours unless you contact 92XXXXXX63.
+564,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Vi connection. Outgoing calls stop in 8 hours unless you contact 98XXXXXX95.
+565,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Jio connection. Outgoing calls stop in 3 hours unless you contact 92XXXXXX56.
+566,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your Airtel connection. Outgoing calls stop in 1 hours unless you contact 98XXXXXX40.
+567,1,telecom,telecom-1-2,Department of Telecom: complaints are registered against your BSNL connection. Outgoing calls stop in 9 hours unless you contact 98XXXXXX83.
+568,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 74,772 unclaimed in your name. Provide your account number and IFSC at https://refund-desk-3.test/c today."
+569,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 56,850 unclaimed in your name. Provide your account number and IFSC at https://reward-claim-79.test/b today."
+570,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 47,301 unclaimed in your name. Provide your account number and IFSC at https://support-team-66.test/d today."
+571,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 50,878 unclaimed in your name. Provide your account number and IFSC at https://reward-claim-28.test/f today."
+572,1,travel,travel-1-0,Rail booking update: a cancelled journey left Rs 421 unclaimed in your name. Provide your account number and IFSC at https://refund-desk-94.test/b today.
+573,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 98,446 unclaimed in your name. Provide your account number and IFSC at https://bill-desk-53.test/g today."
+574,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 52,761 unclaimed in your name. Provide your account number and IFSC at https://kyc-verify-59.test/a today."
+575,1,travel,travel-1-0,"Rail booking update: a cancelled journey left Rs 2,282 unclaimed in your name. Provide your account number and IFSC at https://bill-desk-27.test/a today."
+576,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Chennai at no cost. Reserve it by transferring Rs 78,202 as a security deposit."
+577,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Chennai at no cost. Reserve it by transferring Rs 99,633 as a security deposit."
+578,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Pune at no cost. Reserve it by transferring Rs 6,204 as a security deposit."
+579,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Jaipur at no cost. Reserve it by transferring Rs 22,032 as a security deposit."
+580,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Pune at no cost. Reserve it by transferring Rs 76,073 as a security deposit."
+581,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Jaipur at no cost. Reserve it by transferring Rs 3,700 as a security deposit."
+582,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Jaipur at no cost. Reserve it by transferring Rs 61,451 as a security deposit."
+583,1,travel,travel-1-1,"Your number was picked for a 3-night stay in Nagpur at no cost. Reserve it by transferring Rs 57,274 as a security deposit."
+584,1,travel,travel-1-2,Airline notice: your Lucknow booking was rescheduled. Read out your card number to our desk on 98XXXXXX77 to process compensation.
+585,1,travel,travel-1-2,Airline notice: your Pune booking was rescheduled. Read out your card number to our desk on 95XXXXXX41 to process compensation.
+586,1,travel,travel-1-2,Airline notice: your Chennai booking was rescheduled. Read out your card number to our desk on 97XXXXXX95 to process compensation.
+587,1,travel,travel-1-2,Airline notice: your Surat booking was rescheduled. Read out your card number to our desk on 96XXXXXX48 to process compensation.
+588,1,travel,travel-1-2,Airline notice: your Surat booking was rescheduled. Read out your card number to our desk on 93XXXXXX31 to process compensation.
+589,1,travel,travel-1-2,Airline notice: your Lucknow booking was rescheduled. Read out your card number to our desk on 97XXXXXX15 to process compensation.
+590,1,travel,travel-1-2,Airline notice: your Nagpur booking was rescheduled. Read out your card number to our desk on 96XXXXXX21 to process compensation.
+591,1,travel,travel-1-2,Airline notice: your Indore booking was rescheduled. Read out your card number to our desk on 99XXXXXX41 to process compensation.
+592,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 78,745 is approved. Pay the processing fee at https://bill-desk-28.test/d to receive it."
+593,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 46,688 is approved. Pay the processing fee at https://reward-claim-39.test/f to receive it."
+594,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 44,909 is approved. Pay the processing fee at https://account-help-48.test/e to receive it."
+595,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 51,520 is approved. Pay the processing fee at https://bill-desk-41.test/a to receive it."
+596,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 6,288 is approved. Pay the processing fee at https://refund-desk-12.test/b to receive it."
+597,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 35,680 is approved. Pay the processing fee at https://secure-update-8.test/a to receive it."
+598,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 19,962 is approved. Pay the processing fee at https://bill-desk-14.test/h to receive it."
+599,1,appointment,appointment-1-0,"Your health insurance bonus of Rs 59,599 is approved. Pay the processing fee at https://kyc-verify-25.test/e to receive it."
+600,1,appointment,appointment-1-1,"Ayushman card camp in Chennai: free treatment cover up to Rs 80,759. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://secure-update-10.test/d."
+601,1,appointment,appointment-1-1,"Ayushman card camp in Indore: free treatment cover up to Rs 46,170. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://secure-update-75.test/b."
+602,1,appointment,appointment-1-1,"Ayushman card camp in Chennai: free treatment cover up to Rs 84,752. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://refund-desk-62.test/c."
+603,1,appointment,appointment-1-1,"Ayushman card camp in Jaipur: free treatment cover up to Rs 99,455. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://support-team-69.test/f."
+604,1,appointment,appointment-1-1,"Ayushman card camp in Kochi: free treatment cover up to Rs 91,201. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://parcel-fee-50.test/g."
+605,1,appointment,appointment-1-1,"Ayushman card camp in Kochi: free treatment cover up to Rs 99,165. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://kyc-verify-93.test/c."
+606,1,appointment,appointment-1-1,"Ayushman card camp in Surat: free treatment cover up to Rs 65,206. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://support-team-6.test/a."
+607,1,appointment,appointment-1-1,"Ayushman card camp in Lucknow: free treatment cover up to Rs 26,807. Enrolment needs your ATM PIN and Aadhaar number, fill them at https://secure-update-80.test/c."
+608,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://kyc-verify-34.test/g to download it.
+609,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://support-team-59.test/e to download it.
+610,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://support-team-3.test/c to download it.
+611,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://account-help-81.test/a to download it.
+612,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://support-team-34.test/b to download it.
+613,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://refund-desk-60.test/b to download it.
+614,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://secure-update-95.test/g to download it.
+615,1,appointment,appointment-1-2,Your vaccination certificate is on hold. Verify your Aadhaar and OTP at https://reward-claim-10.test/c to download it.
+616,1,account_notice,account_notice-1-0,ICICI Bank alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://bill-desk-31.test/c.
+617,1,account_notice,account_notice-1-0,Bank of Baroda alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://parcel-fee-25.test/d.
+618,1,account_notice,account_notice-1-0,Yes Bank alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://refund-desk-73.test/f.
+619,1,account_notice,account_notice-1-0,Yes Bank alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://kyc-verify-86.test/c.
+620,1,account_notice,account_notice-1-0,Yes Bank alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://reward-claim-69.test/c.
+621,1,account_notice,account_notice-1-0,Axis Bank alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://secure-update-65.test/e.
+622,1,account_notice,account_notice-1-0,PNB alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://kyc-verify-62.test/b.
+623,1,account_notice,account_notice-1-0,SBI alert: online banking access stops at 6 PM because your mobile number is not verified. Re-confirm it at https://reward-claim-87.test/h.
+624,1,account_notice,account_notice-1-1,Your Flipkart account is locked after unusual sign-in attempts. Confirm your password at https://bill-desk-21.test/e.
+625,1,account_notice,account_notice-1-1,Your Zomato account is locked after unusual sign-in attempts. Confirm your password at https://support-team-58.test/f.
+626,1,account_notice,account_notice-1-1,Your Swiggy account is locked after unusual sign-in attempts. Confirm your password at https://parcel-fee-26.test/b.
+627,1,account_notice,account_notice-1-1,Your Croma account is locked after unusual sign-in attempts. Confirm your password at https://refund-desk-35.test/f.
+628,1,account_notice,account_notice-1-1,Your BigBasket account is locked after unusual sign-in attempts. Confirm your password at https://secure-update-8.test/d.
+629,1,account_notice,account_notice-1-1,Your Flipkart account is locked after unusual sign-in attempts. Confirm your password at https://support-team-42.test/e.
+630,1,account_notice,account_notice-1-1,Your Amazon account is locked after unusual sign-in attempts. Confirm your password at https://reward-claim-23.test/c.
+631,1,account_notice,account_notice-1-1,Your Reliance Digital account is locked after unusual sign-in attempts. Confirm your password at https://account-help-34.test/e.
+632,1,account_notice,account_notice-1-2,"ICICI Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 97XXXXXX80 to lift the hold."
+633,1,account_notice,account_notice-1-2,"Union Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 92XXXXXX11 to lift the hold."
+634,1,account_notice,account_notice-1-2,"PNB compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 93XXXXXX85 to lift the hold."
+635,1,account_notice,account_notice-1-2,"ICICI Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 95XXXXXX32 to lift the hold."
+636,1,account_notice,account_notice-1-2,"Axis Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 94XXXXXX70 to lift the hold."
+637,1,account_notice,account_notice-1-2,"PNB compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 99XXXXXX89 to lift the hold."
+638,1,account_notice,account_notice-1-2,"Axis Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 96XXXXXX46 to lift the hold."
+639,1,account_notice,account_notice-1-2,"Union Bank compliance cell: re-KYC is pending, so debit transactions are paused. Upload a selfie and PAN copy through the WhatsApp number 95XXXXXX49 to lift the hold."
+640,1,hinglish,hinglish-1-0,Aapka Bank of Baroda khata aaj band ho jayega. Turant KYC update karein: https://secure-update-81.test/d
+641,1,hinglish,hinglish-1-0,Aapka Union Bank khata aaj band ho jayega. Turant KYC update karein: https://kyc-verify-26.test/c
+642,1,hinglish,hinglish-1-0,Aapka Bank of Baroda khata aaj band ho jayega. Turant KYC update karein: https://parcel-fee-97.test/f
+643,1,hinglish,hinglish-1-0,Aapka PNB khata aaj band ho jayega. Turant KYC update karein: https://support-team-9.test/c
+644,1,hinglish,hinglish-1-0,Aapka Union Bank khata aaj band ho jayega. Turant KYC update karein: https://secure-update-21.test/g
+645,1,hinglish,hinglish-1-0,Aapka Kotak Bank khata aaj band ho jayega. Turant KYC update karein: https://reward-claim-15.test/b
+646,1,hinglish,hinglish-1-0,Aapka IndusInd Bank khata aaj band ho jayega. Turant KYC update karein: https://parcel-fee-44.test/f
+647,1,hinglish,hinglish-1-0,Aapka Yes Bank khata aaj band ho jayega. Turant KYC update karein: https://secure-update-70.test/g
+648,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 38,036 fees bharein warna parcel wapas chala jayega: https://support-team-77.test/a"
+649,1,hinglish,hinglish-1-1,Aapka parcel ruka hua hai. Rs 635 fees bharein warna parcel wapas chala jayega: https://secure-update-18.test/b
+650,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 30,129 fees bharein warna parcel wapas chala jayega: https://reward-claim-27.test/d"
+651,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 27,574 fees bharein warna parcel wapas chala jayega: https://support-team-64.test/c"
+652,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 17,651 fees bharein warna parcel wapas chala jayega: https://parcel-fee-1.test/a"
+653,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 33,591 fees bharein warna parcel wapas chala jayega: https://support-team-46.test/e"
+654,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 14,866 fees bharein warna parcel wapas chala jayega: https://reward-claim-89.test/g"
+655,1,hinglish,hinglish-1-1,"Aapka parcel ruka hua hai. Rs 3,709 fees bharein warna parcel wapas chala jayega: https://refund-desk-17.test/e"
+656,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 50,822 jeete hain. Claim karne ke liye 96XXXXXX51 par call karein."
+657,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 43,577 jeete hain. Claim karne ke liye 99XXXXXX42 par call karein."
+658,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 30,222 jeete hain. Claim karne ke liye 96XXXXXX91 par call karein."
+659,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 86,513 jeete hain. Claim karne ke liye 96XXXXXX12 par call karein."
+660,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 33,328 jeete hain. Claim karne ke liye 97XXXXXX35 par call karein."
+661,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 32,534 jeete hain. Claim karne ke liye 96XXXXXX78 par call karein."
+662,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 97,077 jeete hain. Claim karne ke liye 92XXXXXX23 par call karein."
+663,1,hinglish,hinglish-1-2,"Badhai ho! Aapne Rs 40,836 jeete hain. Claim karne ke liye 92XXXXXX11 par call karein."

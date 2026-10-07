@@ -136,8 +136,8 @@
       }
     },
     "normalizer": "sms",
-    "sha256": "3f14287bc89d49710f700093c1d072a19c10e1d28f72fb6d77e1d29d6ce1cf3d",
+    "sha256": "69a348584abe81b56ccf56ab06012da16418d2337ec5225b38341c97544ebe4f",
     "sklearn_version": "1.9.1",
-    "trained_at": "2026-10-07T20:20:12Z"
+    "trained_at": "2026-10-07T21:30:03Z"
   }
 }

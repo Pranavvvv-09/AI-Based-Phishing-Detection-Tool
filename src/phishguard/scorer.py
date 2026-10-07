@@ -21,6 +21,15 @@ a probability with the sigmoid function::
   They are capped so that wording can still push a verified sender to "review",
   because scammers abuse real platforms too (fake invoices sent by paypal.com).
 
+SMS wording is judged by *two* models, averaged in log-odds::
+
+    logit(text_probability) = (logit(p_sms_model) + logit(p_email_model)) / 2
+
+The public SMS corpora's legitimate messages are personal chats, so the SMS model alone
+flags genuine bank, OTP and delivery alerts; the email model has seen formal legitimate
+mail. The blend was chosen by a pre-registered experiment on frozen evaluation sets
+(scripts/sms_experiment.py, results in models/sms_experiment.json).
+
 Every contribution is returned as a ``Reason`` with its signed weight, so a verdict
 can always answer "why?". All parameters are fixed constants chosen before
 evaluation, never tuned on test data.
@@ -217,8 +226,37 @@ def _layer_reasons(source: str, items: list[tuple[str, float, str]]) -> list[Rea
     return [Reason(source, code, detail, weight * scale) for code, weight, detail in items]
 
 
-def _text_reason(model: TextScorer, text: str) -> tuple[Reason, float]:
-    probability = model.predict_proba(text)
+class BlendedText:
+    """Two text models averaged in log-odds; explanations split each word's weight too."""
+
+    def __init__(self, first: TextScorer, second: TextScorer) -> None:
+        self.first, self.second = first, second
+
+    @staticmethod
+    def blend(p_first: float, p_second: float) -> float:
+        return _sigmoid((_logit(p_first) + _logit(p_second)) / 2)
+
+    def predict_proba(self, text: str) -> float:
+        return self.blend(self.first.predict_proba(text), self.second.predict_proba(text))
+
+    def token_count(self, text: str) -> int:
+        return self.first.token_count(text)  # the first (SMS) model's view: digits dropped
+
+    def top_terms(self, text: str, k: int = 5) -> list[tuple[str, float]]:
+        # Each model's word contributions count half in the averaged log-odds.
+        merged: dict[str, float] = {}
+        for model in (self.first, self.second):
+            for term, weight in model.top_terms(text, 3 * k):
+                merged[term] = merged.get(term, 0.0) + weight / 2
+        ranked = sorted(merged.items(), key=lambda item: -item[1])[:k]
+        return [(term, round(weight, 3)) for term, weight in ranked]
+
+
+def _text_reason(
+    model: TextScorer, text: str, probability: float | None = None
+) -> tuple[Reason, float]:
+    if probability is None:
+        probability = model.predict_proba(text)
     weight = max(-TEXT_CLIP, min(TEXT_CLIP, _logit(probability)))
     if model.token_count(text) < MIN_TEXT_TOKENS:
         detail = "Too little readable text to judge the wording"
@@ -350,15 +388,25 @@ class Scorer:
         return verdict
 
     def _score_text(self, text: str, kind: str, truncated: bool) -> Verdict:
-        model = self.models["sms" if kind == "sms" else "email"]
         links = check_text_links(text)
-        text_reason, probability = _text_reason(model, text)
+        if kind == "sms":
+            model: TextScorer = BlendedText(self.models["sms"], self.models["email"])
+            p_sms = self.models["sms"].predict_proba(text)
+            p_email = self.models["email"].predict_proba(text)
+            text_reason, probability = _text_reason(model, text, BlendedText.blend(p_sms, p_email))
+        else:
+            text_reason, probability = _text_reason(self.models["email"], text)
         link_reasons = _layer_reasons(
             "link", [(code, LINK_WEIGHTS[code], detail) for code, detail in links.findings.items()]
         )
         summary = {"characters": len(text), "links": len(links.urls), "truncated": truncated,
                    "link_domains": sorted({u.domain for u in links.urls if u.domain})[:10]}
-        return self._verdict(kind, probability, text_reason, 0.0, links.risk, link_reasons, summary)
+        verdict = self._verdict(kind, probability, text_reason, 0.0, links.risk, link_reasons,
+                                summary)
+        if kind == "sms":
+            verdict.components["sms_model_probability"] = round(p_sms, 4)
+            verdict.components["email_model_probability"] = round(p_email, 4)
+        return verdict
 
     def _verdict(
         self,
