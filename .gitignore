@@ -51,3 +51,9 @@ Thumbs.db
 
 # ---------- Frontend (React dashboard) ----------
 frontend/node_modules/
+
+# transitions.dev skill: install it per machine (npx skills add
+# https://github.com/jakubantalik/transitions.dev --skill transitions-dev). Its license
+# allows using the transitions in this app but not republishing the collection.
+.agents/skills/transitions-dev/
+.claude/skills/transitions-dev

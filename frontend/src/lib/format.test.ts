@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRelative, formatScore, formatWeight, humanizeCode } from "./format";
+import { formatChange, formatPointChange, formatRelative, formatScore, formatWeight, humanizeCode, niceTicks } from "./format";
 
 describe("format", () => {
   it("humanizes reason codes", () => {
@@ -23,5 +23,24 @@ describe("format", () => {
     const now = Date.parse("2026-10-08T17:30:00Z");
     expect(formatRelative("2026-10-08T17:30:02Z", now)).toBe("just now");
     expect(formatRelative("2026-10-08T17:25:00Z", now)).toMatch(/5 minutes ago/);
+  });
+});
+
+describe("overview helpers", () => {
+  it("picks whole-number ticks", () => {
+    expect(niceTicks(0)).toEqual([0, 1, 2, 3, 4]);
+    expect(niceTicks(7)).toEqual([0, 2, 4, 6, 8]);
+    expect(niceTicks(19)).toEqual([0, 5, 10, 15, 20]);
+    expect(niceTicks(130)).toEqual([0, 50, 100, 150, 200]);
+    expect(niceTicks(430, 2)).toEqual([0, 250, 500]);
+    expect(niceTicks(6, 2)).toEqual([0, 5, 10]);
+  });
+
+  it("describes change against the previous window", () => {
+    expect(formatChange(12, 10)).toEqual({ direction: "up", text: "+20%" });
+    expect(formatChange(9, 10)).toEqual({ direction: "down", text: "−10%" });
+    expect(formatChange(3, 0)).toEqual({ direction: "up", text: "New" });
+    expect(formatChange(0, 0)).toEqual({ direction: "flat", text: "No change" });
+    expect(formatPointChange(0.125, 0.11)).toEqual({ direction: "up", text: "+1.5 pts" });
   });
 });

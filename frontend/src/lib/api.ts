@@ -33,6 +33,30 @@ export interface Kpis {
   held: number;
 }
 
+export type RangeDays = 7 | 30 | 90;
+
+export interface DayCounts {
+  scanned: number;
+  quarantined: number;
+  restored: number;
+}
+
+/** Totals for a window, plus precision inputs for the mail quarantined in it. */
+export interface WindowTotals extends DayCounts {
+  released: number; // quarantined in this window and later restored (false positives)
+  mean_score: number | null; // the model's mean phishing probability for them
+}
+
+/** GET /api/overview: per-day activity, this window vs the one before, top signals. */
+export interface Overview {
+  days: RangeDays;
+  series: (DayCounts & { date: string })[]; // one entry per UTC day, oldest first
+  current: WindowTotals;
+  previous: WindowTotals;
+  held: number;
+  signals: { code: string; count: number }[];
+}
+
 export interface Session {
   user: string;
   csrf: string;
@@ -87,6 +111,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const api = {
   session: () => request<Session>("/api/session"),
   quarantine: () => request<{ rows: QuarantineRow[]; kpis: Kpis }>("/api/quarantine"),
+  overview: (days: RangeDays) => request<Overview>(`/api/overview?days=${days}`),
   restore: (incidentId: string, csrf: string) =>
     request<RestoreResult>(`/api/restore/${encodeURIComponent(incidentId)}`, {
       method: "POST",

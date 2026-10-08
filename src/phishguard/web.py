@@ -9,13 +9,14 @@ IMAP_USER and IMAP_APP_PASSWORD are set in ``.env``.
 
 Pages (login required)
 ----------------------
-* ``/``          Dashboard: KPI cards, and the quarantine table with colour-coded
-                 explanation chips and a Restore button per message.
-* ``/scan``      Quick Scan: paste an email or SMS (or upload an ``.eml``) and see why.
+* ``/``          Dashboard (the React app in ``static/app``): KPI cards with trends, a
+                 daily activity chart, the top threat signals, and the quarantine
+                 table with colour-coded explanation chips and a Restore button.
+* ``/scan``      Quick Scan: paste an email or SMS (or upload an ``.eml``) and see why
+                 (server-rendered, with a small vendored **htmx** script).
 
-The browser side uses **htmx** (a small vendored script): Restore posts to
-``/api/restore/{id}`` and swaps in the updated table row; the KPI cards reload when
-the server signals ``kpis-changed``; the table refreshes itself every 30 seconds.
+The dashboard reads ``/api/session``, ``/api/quarantine`` and ``/api/overview`` and
+posts to ``/api/restore/{id}``.
 
 Security, kept deliberately simple
 ----------------------------------
@@ -39,6 +40,7 @@ import threading
 import time
 from collections import Counter, deque
 from contextlib import asynccontextmanager
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Annotated
 from urllib.parse import quote, urlsplit
@@ -169,6 +171,86 @@ def kpis(store: IncidentStore) -> dict:
         "quarantined": len(records),
         "restored": sum(bool(r.get("restored_at")) for r in records),
         "held": sum(not r.get("restored_at") for r in records),
+    }
+
+
+OVERVIEW_DAYS = (7, 30, 90)
+TOP_SIGNALS = 6
+
+
+def _utc_day(stamp: object) -> date | None:
+    """The UTC calendar day of a stored timestamp such as ``2026-10-08T16:55:54Z``."""
+    if not isinstance(stamp, str):
+        return None
+    try:
+        return date.fromisoformat(stamp[:10])
+    except ValueError:
+        return None
+
+
+def overview(store: IncidentStore, days: int, today: date | None = None) -> dict:
+    """The dashboard's charts: messages per UTC day for the last ``days`` days, totals for
+    that window and for the window before it (for the trend arrows), and the evidence seen
+    most often in the mail quarantined during the window.
+
+    Scans come from the audit log; quarantines and restores from the quarantine records,
+    which are the source of truth for the table too, so the numbers always agree."""
+    today = today or datetime.now(UTC).date()
+    first = today - timedelta(days=days - 1)
+    before = first - timedelta(days=days)
+    fields = ("scanned", "quarantined", "restored")
+    window = {first + timedelta(days=i): dict.fromkeys(fields, 0) for i in range(days)}
+    previous = dict.fromkeys(fields, 0)
+
+    def count(day: date | None, field: str) -> None:
+        if day in window:
+            window[day][field] += 1
+        elif day is not None and before <= day < first:
+            previous[field] += 1
+
+    for entry in store.audit_tail(limit=50_000):
+        if entry.get("event") == "scanned":
+            count(_utc_day(entry.get("ts")), "scanned")
+
+    records = store.quarantined()
+    signals: Counter[str] = Counter()
+    # Precision inputs per window: of the messages quarantined in it, how many a person
+    # later released (false positives), and the model's mean score for them.
+    quality = {name: {"released": 0, "scores": []} for name in ("current", "previous")}
+    for record in records:
+        quarantined_on = _utc_day(record.get("quarantined_at"))
+        count(quarantined_on, "quarantined")
+        count(_utc_day(record.get("restored_at")), "restored")
+        side = ("current" if quarantined_on in window
+                else "previous" if quarantined_on is not None and before <= quarantined_on < first
+                else None)
+        if side:
+            quality[side]["released"] += bool(record.get("restored_at"))
+            if isinstance(record.get("score"), int | float):
+                quality[side]["scores"].append(float(record["score"]))
+        if side != "current":
+            continue
+        try:
+            reasons = store.load_report(record["incident_id"]).get("verdict", {}).get("reasons", [])
+        except (KeyError, OSError, ValueError):
+            continue
+        # Each message counts once per signal that pushed it towards phishing.
+        signals.update({r["code"] for r in reasons
+                        if isinstance(r, dict) and isinstance(r.get("code"), str)
+                        and isinstance(r.get("weight"), int | float) and r["weight"] > 0})
+
+    def summary(totals: dict, side: str) -> dict:
+        scores = quality[side]["scores"]
+        return {**totals, "released": quality[side]["released"],
+                "mean_score": round(sum(scores) / len(scores), 4) if scores else None}
+
+    return {
+        "days": days,
+        "series": [{"date": day.isoformat(), **counts} for day, counts in window.items()],
+        "current": summary({f: sum(c[f] for c in window.values()) for f in fields}, "current"),
+        "previous": summary(previous, "previous"),
+        "held": sum(not r.get("restored_at") for r in records),
+        "signals": [{"code": code, "count": n} for code, n in signals.most_common(TOP_SIGNALS)],
     }
 
 
@@ -495,6 +577,13 @@ def create_app(settings: Settings | None = None, scorer=None,
     def api_quarantine(request: Request):
         require_login(request)
         return {"rows": quarantine_rows(store), "kpis": kpis(store)}
+
+    @app.get("/api/overview")
+    def api_overview(request: Request, days: int = 30):
+        require_login(request)
+        if days not in OVERVIEW_DAYS:
+            return JSONResponse({"error": "days must be 7, 30 or 90"}, status_code=400)
+        return overview(store, days)
 
     @app.get("/api/health")
     def health():

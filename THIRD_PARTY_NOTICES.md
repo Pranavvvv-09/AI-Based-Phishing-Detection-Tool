@@ -67,6 +67,7 @@ The built dashboard bundles these packages (source and versions in `frontend/pac
 | tailwindcss | MIT | Tailwind Labs, Inc. |
 | @phosphor-icons/react | MIT | 2020 Phosphor Icons |
 | Geist and Geist Mono fonts (@fontsource-variable/geist, geist-mono) | SIL Open Font License 1.1 | 2024 The Geist Project Authors |
+| transitions.dev CSS transitions (number pop-in, modal, tabs sliding, toast; adapted in `frontend/src/index.css`) | Transitions.dev License, https://transitions.dev/terms.html | 2026 Jakub Antalik / Transitions.dev |
 
 The fonts are redistributed as `.woff2` files under the SIL Open Font License, reproduced
 in full below as the license requires.

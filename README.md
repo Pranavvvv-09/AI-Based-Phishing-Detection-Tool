@@ -109,19 +109,40 @@ Add `IMAP_USER` and `IMAP_APP_PASSWORD` (a Gmail app password, see
 poller** in the background: it checks the inbox every `IMAP_POLL_SECONDS` and, with
 `MODE=quarantine`, moves phishing to the `PhishGuard-Quarantine` folder.
 
-**Dashboard** (`/`, React + Tailwind CSS, dark mode): the three totals (scanned,
-quarantined, restored) and the quarantine table: **Time, Type, Sender, Score, Status**, plus
-**explainability chips** for the signals behind each verdict. Red chips push towards
-phishing, green towards legitimate; a solid chip is strong evidence (|weight| >= 2), a
-tinted one medium (>= 1), an outlined one weak. "+N more" opens every signal with its
-explanation. **Restore to Inbox** asks for confirmation, shows a spinner while the server
-moves the message back to your inbox over IMAP (`POST /api/restore/{id}`), then updates
-the row and the totals without a reload. Held / Restored / All filters live in the URL
-(`?status=restored`). A restored message is remembered by its content hash, so the poller
-never quarantines it again.
+**Dashboard** (`/`, React + Tailwind CSS, dark mode), one page in three sections that the
+sidebar (or the top tabs on smaller screens) slides between:
 
-**Quick Scan** (`/scan`): paste an email (raw source with headers, or just the text) or
-an SMS with its sender, or upload an `.eml`, and see the verdict with every reason.
+- **Threat Overview**: four security KPIs for the chosen range (7, 30 or 90 days, kept in
+  the URL as `?range=7d`), each with its change against the range before: *Total emails
+  analyzed*, *False positive rate* (messages restored to the inbox / analyzed), *Quarantined
+  threats* (with the number still isolated) and *Model precision* (quarantined mail nobody
+  had to release, with the model's mean confidence). Below them, *Mail Activity* (emails
+  analyzed and threats quarantined per day, two aligned panels with one crosshair, plus a
+  table view) and *Top Threat Vectors* (the signals found most often in quarantined mail,
+  such as phishing language, credential-harvesting links and DMARC failures). The header
+  shows a live poller heartbeat ("Watching inbox · Active").
+- **Quarantine**: the table: **Time, Type, Sender, Score, Status**, plus **explainability
+  chips** for the signals behind each verdict. Red chips push towards phishing, green
+  towards legitimate; a solid chip is strong evidence (|weight| >= 2), a tinted one medium
+  (>= 1), a dashed one weak; hover or focus a chip for its evidence. "+N more" opens every
+  signal with its explanation. **Restore to Inbox** asks for confirmation, shows a spinner
+  while the server moves the message back to your inbox over IMAP
+  (`POST /api/restore/{id}`), then updates the row and the numbers without a reload.
+  Held / Restored / All filters live in the URL (`?status=restored`). A restored message is
+  remembered by its content hash, so the poller never quarantines it again.
+- **Quick Scan sandbox**: paste an email or SMS and run it through the model on the spot.
+
+Motion is short (250 ms or less), uses only `transform` and `opacity`, and switches off when
+the system asks for reduced motion: KPI digits pop in when a number changes, the confirm
+dialog scales in over a blurred backdrop, toasts rise from the bottom right, a restored row
+fades and slides out of the Held list, the nav indicator slides between sections, and the
+poller beacon pings while it is live. The transitions come from the
+[transitions.dev](https://transitions.dev) skill (install it with
+`npx skills add https://github.com/jakubantalik/transitions.dev --skill transitions-dev`;
+it is not committed here because its license does not allow republishing the collection).
+
+**Quick Scan** (`/scan`): the full page also takes an SMS sender or an uploaded `.eml`, and
+shows the verdict with every reason.
 
 | Dashboard | Confirm | Restoring | Phone |
 |---|---|---|---|
@@ -129,7 +150,9 @@ an SMS with its sender, or upload an `.eml`, and see the verdict with every reas
 
 How it fits together: the dashboard is a small React app in [`frontend/`](frontend/)
 (Vite, TypeScript, Tailwind CSS v4, Phosphor icons, Geist fonts). It reads
-`GET /api/session` (CSRF token, poller status) and `GET /api/quarantine`, and posts to
+`GET /api/session` (CSRF token, poller status), `GET /api/quarantine` and
+`GET /api/overview?days=30` (daily counts, the totals for this range and the one before,
+precision inputs and the top signals), and posts to
 `/api/restore/{id}` with the session cookie and an `X-CSRF-Token` header. The built
 files are committed to `src/phishguard/static/app/`, so running PhishGuard needs only
 Python; CI rebuilds them and fails if the committed copy is out of date. Login and Quick

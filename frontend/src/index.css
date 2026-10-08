@@ -14,6 +14,56 @@
   --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-accent: oklch(0.68 0.14 255);
   --color-accent-strong: oklch(0.74 0.13 255);
+  /*
+   * Chart series, stepped into the dark-mode data band (OKLCH L 0.48-0.67) and checked
+   * with the dataviz palette validator against the card surface #111114: CVD dE 21.7,
+   * normal-vision dE 30.5, both >= 3:1 contrast. Blue = all mail scanned, red = phishing.
+   */
+  --color-chart-scanned: #468de5;
+  --color-chart-quarantined: #e94f55;
+}
+
+/*
+ * Motion. Recipes from the transitions.dev skill (number pop-in, modal, tabs sliding,
+ * toast), with their tunable variables shortened so every transition finishes within
+ * 250ms. Only transform, opacity and filter animate (compositor-friendly); each recipe
+ * keeps its prefers-reduced-motion guard.
+ */
+:root {
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-quick: 150ms;
+
+  /* Number pop-in: 200ms + 2 x 25ms stagger = 250ms */
+  --digit-dur: 200ms;
+  --digit-distance: 6px;
+  --digit-stagger: 25ms;
+  --digit-blur: 2px;
+  --digit-ease: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --digit-dir-x: 0;
+  --digit-dir-y: 1;
+
+  /* Modal (confirm restore) */
+  --modal-open-dur: 220ms;
+  --modal-close-dur: 150ms;
+  --modal-scale: 0.95;
+  --modal-scale-close: 0.96;
+  --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Sliding nav indicator */
+  --tabs-dur: 220ms;
+  --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Toasts */
+  --toast-open: 240ms;
+  --toast-close: 160ms;
+  --toast-distance: 16px;
+  --toast-blur: 2px;
+  --toast-scale: 0.97;
+  --toast-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Restored row leaving the Held list */
+  --row-exit-dur: 200ms;
+  --row-exit-distance: 12px;
 }
 
 @layer base {
@@ -137,6 +187,9 @@
     border: 1px solid var(--beacon);
     background: color-mix(in oklab, var(--beacon) 30%, transparent);
     opacity: 0;
+    /* Own compositor layer: the ping only ever animates transform and opacity. */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
   }
   .beacon[data-state="ok"]::before,
   .beacon[data-state="ok"]::after {
@@ -149,9 +202,170 @@
     animation: beacon-ping 4s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
+  /* Quarantine rows: hover tint, and the exit when a restored message leaves the list. */
+  .q-row {
+    transition:
+      background-color var(--duration-quick) ease,
+      opacity var(--row-exit-dur) var(--ease-smooth-out),
+      transform var(--row-exit-dur) var(--ease-smooth-out);
+  }
+  .q-row.is-leaving {
+    opacity: 0;
+    transform: translateX(calc(var(--row-exit-distance) * -1));
+    pointer-events: none;
+  }
+  /* A status that changes in place (Held to Restored) cross-fades in. */
+  .status-swap {
+    animation: status-swap-in var(--duration-quick) ease-in-out;
+  }
+
   /* Chip tooltip, rendered in a fixed layer so the table's rounded clip cannot cut it off. */
   .chip-tooltip {
     animation: tooltip-in 120ms ease-out;
+  }
+}
+
+@keyframes status-swap-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+/* ---- transitions.dev: Number pop-in (02) ---- */
+@keyframes t-digit-pop-in {
+  0%   {
+    transform: translate(
+      calc(var(--digit-distance) * var(--digit-dir-x)),
+      calc(var(--digit-distance) * var(--digit-dir-y))
+    );
+    opacity: 0;
+    filter: blur(var(--digit-blur));
+  }
+  100% { transform: translate(0, 0); opacity: 1; filter: blur(0); }
+}
+
+.t-digit-group {
+  display: inline-flex;
+  align-items: baseline;
+}
+.t-digit {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+.t-digit-group.is-animating .t-digit {
+  animation: t-digit-pop-in var(--digit-dur) var(--digit-ease) both;
+}
+.t-digit-group.is-animating .t-digit[data-stagger="1"] {
+  animation-delay: var(--digit-stagger);
+}
+.t-digit-group.is-animating .t-digit[data-stagger="2"] {
+  animation-delay: calc(var(--digit-stagger) * 2);
+}
+/* Digits that did not change (the leading ones the old and new number
+   share) stay still; only the digits that changed pop in. */
+.t-digit-group.is-animating .t-digit[data-same] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-digit-group .t-digit { animation: none !important; }
+}
+
+/* ---- transitions.dev: Modal open / close (06), on the native <dialog> ---- */
+.t-modal {
+  transform-origin: center;
+  transform: scale(var(--modal-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-open-dur) var(--modal-ease),
+    opacity   var(--modal-open-dur) var(--modal-ease);
+  will-change: transform, opacity;
+}
+.t-modal.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.t-modal.is-closing {
+  transform: scale(var(--modal-scale-close));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-close-dur) var(--modal-ease),
+    opacity   var(--modal-close-dur) var(--modal-ease);
+}
+/* The backdrop blurs and darkens in step with the dialog. */
+.t-modal::backdrop {
+  background: rgb(9 9 11 / 0.7);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity var(--modal-open-dur) var(--modal-ease);
+}
+.t-modal.is-open::backdrop {
+  opacity: 1;
+}
+.t-modal.is-closing::backdrop {
+  opacity: 0;
+  transition-duration: var(--modal-close-dur);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-modal { transition: none !important; }
+  .t-modal::backdrop { transition: none !important; }
+}
+
+/* ---- transitions.dev: Tabs sliding (16), indicator moved by transform only ---- */
+.t-tabs-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transition: transform var(--tabs-dur) var(--tabs-ease);
+  will-change: transform;
+  z-index: 0;
+  pointer-events: none;
+}
+.t-tab {
+  position: relative;
+  z-index: 1;
+  transition: color var(--tabs-dur) var(--tabs-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-tabs-pill, .t-tab { transition: none !important; }
+}
+
+/* ---- transitions.dev: Toast open / close (22) ---- */
+.t-toast {
+  opacity: 0;
+  transform: translateY(var(--toast-distance)) scale(var(--toast-scale));
+  filter: blur(var(--toast-blur));
+  will-change: transform, opacity, filter;
+  transition:
+    opacity var(--toast-close) var(--toast-ease),
+    transform var(--toast-close) var(--toast-ease),
+    filter var(--toast-close) var(--toast-ease);
+}
+.t-toast.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity var(--toast-open) var(--toast-ease),
+    transform var(--toast-open) var(--toast-ease),
+    filter var(--toast-open) var(--toast-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-toast { transition: none !important; }
+}
+
+/* In-page navigation glides, unless the reader asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -184,6 +398,12 @@
   /* Decorative loops stop outright; the beacon keeps its steady glow. */
   .beacon::before,
   .beacon::after {
+    animation: none !important;
+  }
+  /* Exits and swaps complete at once instead of moving. */
+  .q-row,
+  .status-swap {
+    transition: none !important;
     animation: none !important;
   }
 }

@@ -1,7 +1,9 @@
 import hashlib
+import json
 import re
 import threading
 import time
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
@@ -12,7 +14,7 @@ from phishguard.config import ConfigError, load_settings
 from phishguard.incidents import IncidentStore, new_incident_id
 from phishguard.mailbox import Mailbox
 from phishguard.poller import Poller
-from phishguard.web import PACKAGE_DIR, chip_class, create_app, pct
+from phishguard.web import PACKAGE_DIR, chip_class, create_app, overview, pct
 
 from .imap_fake import FakeServer
 from .test_poller import MarkerScorer, email
@@ -149,7 +151,7 @@ def test_pages_require_login(client, path):
     assert response.status_code == 303 and response.headers["location"].startswith("/login")
 
 
-@pytest.mark.parametrize("path", ["/api/session", "/api/quarantine"])
+@pytest.mark.parametrize("path", ["/api/session", "/api/quarantine", "/api/overview"])
 def test_api_without_session_is_401_json(client, path):
     response = client.get(path)
     assert response.status_code == 401 and response.json() == {"error": "log in first"}
@@ -244,6 +246,62 @@ def test_quarantine_api_has_what_the_table_needs(world):
     assert row["status"] == "held" and row["score"] == 0.97
     assert row["reasons"] and {"source", "code", "detail", "weight"} <= set(row["reasons"][0])
     assert data["kpis"] == {"scanned": 1, "quarantined": 1, "restored": 0, "held": 1}
+
+
+def test_overview_api_counts_today_and_the_top_signals(world):
+    _, _, _, _, client = world
+    incident = quarantine_one(world)
+    login(client)
+    data = client.get("/api/overview?days=7").json()
+    assert data["days"] == 7 and len(data["series"]) == 7
+    assert data["series"][-1] == {"date": datetime.now(UTC).date().isoformat(),
+                                  "scanned": 1, "quarantined": 1, "restored": 0}
+    assert data["current"] == {"scanned": 1, "quarantined": 1, "restored": 0,
+                               "released": 0, "mean_score": 0.97}
+    assert data["previous"] == {"scanned": 0, "quarantined": 0, "restored": 0,
+                                "released": 0, "mean_score": None}
+    assert data["held"] == 1
+    assert data["signals"] == []  # the stub scorer's only reason has weight 0
+
+    assert restore(client, incident, api_csrf(client)).status_code == 200
+    after = client.get("/api/overview?days=7").json()
+    assert after["current"]["restored"] == 1 and after["current"]["released"] == 1
+    assert after["held"] == 0
+
+
+@pytest.mark.parametrize("days", ["1", "365", "abc"])
+def test_overview_api_only_offers_the_three_ranges(world, days):
+    _, _, _, _, client = world
+    login(client)
+    assert client.get(f"/api/overview?days={days}").status_code in (400, 422)
+
+
+def test_overview_splits_the_window_from_the_one_before(tmp_path):
+    store = IncidentStore(tmp_path / "reports", tmp_path / "quarantine")
+    today = date(2026, 10, 8)
+    for day in ("2026-10-08", "2026-10-02", "2026-10-01", "2026-09-20"):
+        store.audit.path.parent.mkdir(parents=True, exist_ok=True)
+        with store.audit.path.open("a") as log:
+            log.write(json.dumps({"ts": f"{day}T10:00:00Z", "event": "scanned"}) + "\n")
+    store.write_report("20261008T100000Z-aaaaaaaa", {"verdict": {"reasons": [
+        {"code": "dmarc_fail", "weight": 1.4}, {"code": "verified_sender", "weight": -2.0},
+        {"code": "dmarc_fail", "weight": 0.5}]}})
+    store.save_quarantine("20261008T100000Z-aaaaaaaa", {
+        "incident_id": "20261008T100000Z-aaaaaaaa", "quarantined_at": "2026-10-08T10:00:00Z",
+        "restored_at": "2026-10-08T11:00:00Z", "score": 0.9})
+    store.save_quarantine("20261001T100000Z-bbbbbbbb", {
+        "incident_id": "20261001T100000Z-bbbbbbbb", "quarantined_at": "2026-10-01T10:00:00Z",
+        "restored_at": None, "score": 0.99})
+    data = overview(store, 7, today=today)
+    assert [d["date"] for d in data["series"]] == [f"2026-10-0{d}" for d in range(2, 9)]
+    assert data["current"] == {"scanned": 2, "quarantined": 1, "restored": 1,
+                               "released": 1, "mean_score": 0.9}
+    # 09-20 is older than both windows.
+    assert data["previous"] == {"scanned": 1, "quarantined": 1, "restored": 0,
+                                "released": 0, "mean_score": 0.99}
+    assert data["held"] == 1
+    # Only evidence towards phishing, once per message; the older message is out of range.
+    assert data["signals"] == [{"code": "dmarc_fail", "count": 1}]
 
 
 def test_untrusted_message_fields_stay_data(world):

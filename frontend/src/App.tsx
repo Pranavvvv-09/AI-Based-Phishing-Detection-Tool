@@ -1,15 +1,24 @@
 import { ArrowClockwise, Eye } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityChart, ActivityLegend } from "./components/ActivityChart";
 import { ConfirmRestoreDialog } from "./components/ConfirmRestoreDialog";
 import { QuarantineTable } from "./components/QuarantineTable";
+import { QuickScanCard } from "./components/QuickScanCard";
+import { RangeFilter } from "./components/RangeFilter";
+import { Sidebar } from "./components/Sidebar";
 import { StatCards } from "./components/StatCards";
 import { type Filter, StatusFilter } from "./components/StatusFilter";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
-import { ApiError, api, type Kpis, type QuarantineRow, type Session } from "./lib/api";
-import { useNow, useStatusFilter, useToasts } from "./lib/hooks";
+import { TopVectors } from "./components/TopVectors";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import { ApiError, api, type Overview, type QuarantineRow, type Session } from "./lib/api";
+import { useActiveSection, useNow, useRange, useStatusFilter, useToasts } from "./lib/hooks";
+import { SECTIONS } from "./lib/sections";
+import { motionMs } from "./lib/motion";
 
 const REFRESH_MS = 60_000;
+const NONE: ReadonlySet<string> = new Set();
 
 const EMPTY_TEXT: Record<Filter, string> = {
   held: "Nothing is held right now",
@@ -20,29 +29,44 @@ const EMPTY_TEXT: Record<Filter, string> = {
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [rows, setRows] = useState<QuarantineRow[] | null>(null);
-  const [kpis, setKpis] = useState<Kpis | null>(null);
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
+  // Rows that no longer match the filter but are still playing their exit transition.
+  const [leaving, setLeaving] = useState<ReadonlySet<string>>(new Set());
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
   const [confirming, setConfirming] = useState<QuarantineRow | null>(null);
   const [filter, setFilter] = useStatusFilter();
+  const [range, setRange] = useRange();
+  const [section, goTo] = useActiveSection(SECTIONS);
   const { toasts, push, dismiss } = useToasts();
   const now = useNow();
 
   const load = useCallback(async () => {
+    setRefreshing(true);
     try {
-      const [nextSession, data] = await Promise.all([api.session(), api.quarantine()]);
+      const [nextSession, data, nextOverview] = await Promise.all([
+        api.session(),
+        api.quarantine(),
+        api.overview(range),
+      ]);
       setSession(nextSession);
       setRows(data.rows);
-      setKpis(data.kpis);
+      setOverview(nextOverview);
+      setUpdatedAt(Date.now());
       setLoadError(null);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) return; // redirecting to login
-      setLoadError(error instanceof Error ? error.message : "Could not load the quarantine.");
+      setLoadError(error instanceof Error ? error.message : "Could not load the dashboard.");
+    } finally {
+      setRefreshing(false);
     }
-  }, []);
+  }, [range]);
 
-  // First load, then a quiet refresh every minute while the tab is visible.
+  // First load (and again when the range changes), then a quiet refresh every minute
+  // while the tab is visible.
   useEffect(() => {
     void load();
     const timer = window.setInterval(() => {
@@ -72,7 +96,27 @@ export default function App() {
               : r,
           ) ?? current,
         );
-        setKpis((current) => current && { ...current, held: current.held - 1, restored: current.restored + 1 });
+        setOverview(
+          (current) =>
+            current && {
+              ...current,
+              held: current.held - 1,
+              current: { ...current.current, restored: current.current.restored + 1 },
+            },
+        );
+        // Under "Held" the row now leaves the list: keep it on screen while it fades and
+        // slides out (transitions run on transform and opacity only), then drop it.
+        setLeaving((current) => new Set(current).add(id));
+        window.setTimeout(
+          () =>
+            setLeaving((current) => {
+              const next = new Set(current);
+              next.delete(id);
+              return next;
+            }),
+          // A short buffer: the class lands during a busy re-render, so let the fade finish.
+          motionMs("--row-exit-dur", 200) + 60,
+        );
         push({ tone: "success", title: "Restored to Inbox", body: row.subject || row.from });
         void load();
       } catch (error) {
@@ -104,8 +148,14 @@ export default function App() {
   const visible = useMemo(() => {
     if (!rows) return null;
     if (filter === "all") return rows;
-    return rows.filter((r) => (filter === "restored" ? r.status === "restored" : r.status !== "restored"));
-  }, [rows, filter]);
+    return rows.filter(
+      (r) =>
+        leaving.has(r.incident_id) || (filter === "restored" ? r.status === "restored" : r.status !== "restored"),
+    );
+  }, [rows, filter, leaving]);
+
+  // While a new range loads, the old numbers stay on screen, dimmed (no layout jump).
+  const stale = overview !== null && overview.days !== range;
 
   return (
     <div className="relative isolate min-h-[100dvh]">
@@ -116,36 +166,42 @@ export default function App() {
       >
         Skip to Main Content
       </a>
-      <TopBar session={session} />
-      <main id="main" className="mx-auto flex max-w-[1400px] flex-col gap-8 px-4 py-8 sm:px-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 text-balance">Quarantine</h1>
-          <p className="max-w-[65ch] text-sm text-zinc-400 text-pretty">
-            Messages PhishGuard moved out of your inbox, with the evidence behind each verdict.
-            Restore anything you know is safe.
-          </p>
-        </div>
+      <Sidebar session={session} held={overview?.held ?? null} section={section} onNavigate={goTo} />
 
-        {session?.mode === "monitor" && (
-          <p className="flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
-            <Eye aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-accent" />
-            Monitor mode: PhishGuard reports phishing but does not move it. Set MODE=quarantine in .env
-            to quarantine automatically.
-          </p>
-        )}
-
-        <StatCards kpis={kpis} />
-
-        <section aria-labelledby="queue-title" className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="queue-title" className="text-base font-semibold text-zinc-100">
-              Quarantined Messages
-            </h2>
-            <StatusFilter value={filter} counts={counts} onChange={setFilter} />
+      <div className="xl:pl-60">
+        <TopBar
+          session={session}
+          updatedAt={updatedAt}
+          now={now}
+          refreshing={refreshing}
+          onRefresh={() => void load()}
+          section={section}
+          onNavigate={goTo}
+        />
+        <main id="main" className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-8 sm:px-6 xl:px-8">
+          <div id="overview" className="flex scroll-mt-24 flex-col gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 text-balance">Threat Overview</h1>
+            <p className="max-w-[70ch] text-sm text-zinc-400 text-pretty">
+              What PhishGuard caught in your mailbox, how often it was wrong, and the evidence behind every
+              quarantine. Restore anything you know is safe.
+            </p>
           </div>
 
-          {loadError ? (
-            <div role="alert" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <RangeFilter value={range} onChange={setRange} />
+            <p className="text-xs text-zinc-500">Trends compare with the {range} days before.</p>
+          </div>
+
+          {session?.mode === "monitor" && (
+            <p className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
+              <Eye aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-accent" />
+              Monitor mode: PhishGuard reports phishing but does not move it. Set MODE=quarantine in .env
+              to quarantine automatically.
+            </p>
+          )}
+
+          {loadError && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
               <p className="text-sm text-red-200">{loadError}</p>
               <button
                 type="button"
@@ -156,24 +212,63 @@ export default function App() {
                 Retry
               </button>
             </div>
-          ) : (
-            <QuarantineTable
-              rows={visible}
-              busy={busy}
-              errors={rowErrors}
-              now={now}
-              emptyText={EMPTY_TEXT[filter]}
-              onRestore={setConfirming}
-            />
           )}
 
-          <p className="text-xs text-zinc-500">
-            Chips show the strongest signals: red pushes towards phishing, green towards legitimate.
-            A solid chip is strong evidence, a tinted one medium, a dashed one weak. Hover or focus a
-            chip to read the evidence.
-          </p>
-        </section>
-      </main>
+          <StatCards overview={overview} />
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <Card aria-labelledby="activity-title" className="xl:col-span-2">
+              <CardHeader>
+                <CardTitle id="activity-title">Mail Activity</CardTitle>
+                <CardDescription>Emails analyzed and threats quarantined per day (UTC).</CardDescription>
+                <CardAction>
+                  <ActivityLegend />
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <ActivityChart series={overview?.series ?? null} stale={stale} />
+              </CardContent>
+            </Card>
+            <Card aria-labelledby="vectors-title">
+              <CardHeader>
+                <CardTitle id="vectors-title">Top Threat Vectors</CardTitle>
+                <CardDescription>Share of quarantined mail that carried each signal.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <TopVectors overview={overview} stale={stale} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card id="quarantine" aria-labelledby="queue-title" className="scroll-mt-24">
+            <CardHeader className="max-sm:grid-cols-1">
+              <CardTitle id="queue-title">Quarantined Messages</CardTitle>
+              <CardDescription>The model's evidence for each message, strongest first.</CardDescription>
+              <CardAction className="max-sm:col-start-1 max-sm:row-span-1 max-sm:row-start-3 max-sm:justify-self-start max-sm:pt-2">
+                <StatusFilter value={filter} counts={counts} onChange={setFilter} />
+              </CardAction>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <QuarantineTable
+                rows={visible}
+                busy={busy}
+                leaving={filter === "held" ? leaving : NONE}
+                errors={rowErrors}
+                now={now}
+                emptyText={EMPTY_TEXT[filter]}
+                onRestore={setConfirming}
+              />
+              <p className="text-xs text-zinc-500">
+                Chips show the strongest signals: red pushes towards phishing, green towards legitimate.
+                A solid chip is strong evidence, a tinted one medium, a dashed one weak. Hover or focus a
+                chip to read the evidence.
+              </p>
+            </CardContent>
+          </Card>
+
+          <QuickScanCard csrf={session?.csrf ?? null} />
+        </main>
+      </div>
 
       <ConfirmRestoreDialog
         row={confirming}

@@ -15,7 +15,7 @@ const STYLE: Record<RowStatus, string> = {
 export function StatusBadge({ status }: { status: RowStatus }) {
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STYLE[status]}`}
+      className={`status-swap inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STYLE[status]}`}
     >
       {LABEL[status]}
     </span>

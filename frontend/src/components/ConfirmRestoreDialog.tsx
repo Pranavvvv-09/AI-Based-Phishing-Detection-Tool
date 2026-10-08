@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { type SyntheticEvent, useEffect, useRef } from "react";
 import type { QuarantineRow } from "../lib/api";
 import { formatScore } from "../lib/format";
+import { motionMs } from "../lib/motion";
 
 interface Props {
   row: QuarantineRow | null;
@@ -11,18 +12,27 @@ interface Props {
 /**
  * Releasing a message the model flagged as phishing is a risky action, so it is confirmed
  * first. Native <dialog> gives focus trapping, Esc to close and an inert background.
+ * Motion: transitions.dev modal (scale 0.95 to 1 with a blurred backdrop fading in);
+ * closing plays the shorter scale-down before the dialog actually closes.
  */
 export function ConfirmRestoreDialog({ row, onCancel, onConfirm }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const confirmed = useRef(false);
+
+  const closing = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     if (row && !dialog.open) {
       confirmed.current = false;
+      window.clearTimeout(closing.current);
+      dialog.classList.remove("is-closing");
       dialog.showModal();
+      // Next frame, so the browser paints the resting scale first and the open tweens.
+      requestAnimationFrame(() => dialog.classList.add("is-open"));
     } else if (!row && dialog.open) {
+      dialog.classList.remove("is-open");
       dialog.close();
     }
   }, [row]);
@@ -34,17 +44,31 @@ export function ConfirmRestoreDialog({ row, onCancel, onConfirm }: Props) {
   }
 
   function close(confirm: boolean) {
+    const dialog = ref.current;
+    if (!dialog || dialog.classList.contains("is-closing")) return;
     confirmed.current = confirm;
-    ref.current?.close();
+    dialog.classList.remove("is-open");
+    dialog.classList.add("is-closing");
+    closing.current = window.setTimeout(() => {
+      dialog.classList.remove("is-closing");
+      dialog.close();
+    }, motionMs("--modal-close-dur", 150));
+  }
+
+  // Esc: play the same close animation instead of the browser's instant close.
+  function handleCancel(event: SyntheticEvent<HTMLDialogElement>) {
+    event.preventDefault();
+    close(false);
   }
 
   return (
     <dialog
       ref={ref}
       onClose={handleClose}
+      onCancel={handleCancel}
       aria-labelledby="restore-title"
       aria-describedby="restore-description"
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] overscroll-contain rounded-lg border border-zinc-800 bg-zinc-900 p-0 text-zinc-200 shadow-2xl shadow-black/40 backdrop:bg-zinc-950/75"
+      className="t-modal m-auto w-[min(32rem,calc(100vw-2rem))] overscroll-contain rounded-xl border border-zinc-800 bg-zinc-900 p-0 text-zinc-200 shadow-2xl shadow-black/50"
     >
       {row && (
         <div className="flex flex-col gap-5 p-6">
