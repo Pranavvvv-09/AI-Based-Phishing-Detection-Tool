@@ -27,7 +27,7 @@ phishing from your own mailbox.
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
-- [x] Day 8: dark-mode web console (FastAPI + Jinja + htmx), started together with the mailbox poller by one command: KPI cards, quarantine table with colour-coded explanation chips and a working **Restore** (`POST /api/restore/{id}`, real IMAP move, row and cards update in place), and Quick Scan for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
+- [x] Day 8: dark-mode web console started together with the mailbox poller by one command: a React + Tailwind dashboard (quarantine table with colour-coded explainability chips and **Restore to Inbox** with confirmation and a loading spinner, `POST /api/restore/{id}`, real IMAP move, in-place update) and a Quick Scan page for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
 - [x] Day 9: Tests + CI hardening (GitHub Actions on Python 3.11 and 3.13: ruff, bandit, 369 tests with a 85% coverage floor (92% measured, without the datasets), pip-audit; least-privilege token, SHA-pinned actions, Dependabot; timing tests made CI-safe)
 - [ ] Day 10: Docs & release
 
@@ -109,33 +109,47 @@ Add `IMAP_USER` and `IMAP_APP_PASSWORD` (a Gmail app password, see
 poller** in the background: it checks the inbox every `IMAP_POLL_SECONDS` and, with
 `MODE=quarantine`, moves phishing to the `PhishGuard-Quarantine` folder.
 
-**Dashboard** (`/`): three cards (total scanned, quarantined, restored), and the
-quarantine table. Each message shows its score and **colour-coded explanation chips**:
-red pushes towards phishing, green towards legitimate; a solid chip is strong evidence
-(|weight| >= 2), a tinted one medium (>= 1), an outline weak. "All N reasons" expands the
-full explanation. **Restore** asks for confirmation, moves the message back to your inbox
-over IMAP (`POST /api/restore/{id}`), and the row and cards update in place; the table
-also refreshes itself every minute. A restored message is remembered by its content hash,
-so the poller never quarantines it again.
+**Dashboard** (`/`, React + Tailwind CSS, dark mode): the three totals (scanned,
+quarantined, restored) and the quarantine table: **Time, Type, Sender, Score, Status**, plus
+**explainability chips** for the signals behind each verdict. Red chips push towards
+phishing, green towards legitimate; a solid chip is strong evidence (|weight| >= 2), a
+tinted one medium (>= 1), an outlined one weak. "+N more" opens every signal with its
+explanation. **Restore to Inbox** asks for confirmation, shows a spinner while the server
+moves the message back to your inbox over IMAP (`POST /api/restore/{id}`), then updates
+the row and the totals without a reload. Held / Restored / All filters live in the URL
+(`?status=restored`). A restored message is remembered by its content hash, so the poller
+never quarantines it again.
 
 **Quick Scan** (`/scan`): paste an email (raw source with headers, or just the text) or
 an SMS with its sender, or upload an `.eml`, and see the verdict with every reason.
 
-| Dashboard with Restore | Quick Scan | Phone |
-|---|---|---|
-| ![Dashboard](docs/screenshots/web_dashboard.png) | ![Quick Scan](docs/screenshots/web_scan_sms.png) | ![Phone](docs/screenshots/web_dashboard_mobile.png) |
+| Dashboard | Confirm | Restoring | Phone |
+|---|---|---|---|
+| ![Dashboard](docs/screenshots/web_dashboard.png) | ![Confirm restore](docs/screenshots/web_restore_confirm.png) | ![Restoring spinner](docs/screenshots/web_restore_spinner.png) | ![Phone](docs/screenshots/web_dashboard_mobile.png) |
 
-How the page works: it is server-rendered (FastAPI + Jinja) with
-[htmx](https://htmx.org) for the live parts, so there is no hand-written JavaScript.
-The Restore button is `hx-post="/api/restore/{id}"`; the server answers with the new
-table row and an `HX-Trigger: kpis-changed` header, which makes the cards reload.
+How it fits together: the dashboard is a small React app in [`frontend/`](frontend/)
+(Vite, TypeScript, Tailwind CSS v4, Phosphor icons, Geist fonts). It reads
+`GET /api/session` (CSRF token, poller status) and `GET /api/quarantine`, and posts to
+`/api/restore/{id}` with the session cookie and an `X-CSRF-Token` header. The built
+files are committed to `src/phishguard/static/app/`, so running PhishGuard needs only
+Python; CI rebuilds them and fails if the committed copy is out of date. Login and Quick
+Scan stay server-rendered (FastAPI + Jinja, htmx for the scan form).
+
+Working on the dashboard:
+```bash
+cd frontend
+npm ci --ignore-scripts      # exact versions from package-lock.json
+npm run dev                  # http://localhost:5173, proxies /api to python -m phishguard.web
+npm test                     # Vitest + Testing Library
+npm run build                # typecheck, then write src/phishguard/static/app/ (commit it)
+```
 
 Safety: one login from `.env`; the app won't start with a weak secret key or a plain-text
 password; every form and the Restore call carry a CSRF token; login and Restore are rate
-limited; only the app's own script and stylesheet may load (strict CSP); every Restore is
-in the hash-chained audit log. It listens on `127.0.0.1` only; the web app holds your IMAP
-app password, so keep it on your own machine. Headless use without the web page:
-`python -m phishguard.poller run` (see above).
+limited; only the app's own scripts, styles and fonts may load (strict CSP, no inline
+code); every Restore is in the hash-chained audit log. It listens on `127.0.0.1` only;
+the web app holds your IMAP app password, so keep it on your own machine. Headless use
+without the web page: `python -m phishguard.poller run` (see above).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,

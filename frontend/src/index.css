@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/*
+ * PhishGuard design tokens (dark only, as requested).
+ * Neutrals: zinc. One accent: a desaturated electric blue, used for focus, links and the
+ * primary action only. Red and emerald are semantic (phishing vs. legitimate evidence),
+ * never decoration.
+ * Shape rule: controls and panels are rounded-lg (8px); chips and badges rounded-md (6px).
+ */
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-accent: oklch(0.68 0.14 255);
+  --color-accent-strong: oklch(0.74 0.13 255);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-zinc-950 text-zinc-200 font-sans antialiased;
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* The spinner is feedback, but it must still stop for people who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

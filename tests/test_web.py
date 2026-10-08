@@ -19,6 +19,7 @@ from .test_poller import MarkerScorer, email
 from .test_scorer import scorer as stub_scorer
 
 FIXTURES = Path(__file__).parent / "fixtures"
+ROOT = Path(__file__).resolve().parent.parent
 PASSWORD = "correct horse battery staple"
 QFOLDER = "PhishGuard-Quarantine"
 HTMX = {"HX-Request": "true"}
@@ -62,6 +63,11 @@ def csrf_of(client, path="/login"):
     return re.search(r'"X-CSRF-Token": "([^"]+)"', client.get(path).text).group(1)
 
 
+def api_csrf(client):
+    """The CSRF token the React dashboard gets from /api/session (after login)."""
+    return client.get("/api/session").json()["csrf"]
+
+
 def login(client, password=PASSWORD, username="admin", next_url=""):
     return client.post("/login", data={"csrf_token": csrf_of(client), "username": username,
                                        "password": password, "next": next_url},
@@ -76,10 +82,8 @@ def quarantine_one(world, marker="PHISH"):
     return [r for r in store.quarantined() if not r.get("restored_at")][-1]["incident_id"]
 
 
-def restore(client, incident, token, htmx=False):
+def restore(client, incident, token):
     headers = {"X-CSRF-Token": token} if token else {}
-    if htmx:
-        headers.update(HTMX)
     return client.post(f"/api/restore/{incident}", headers=headers)
 
 
@@ -123,7 +127,7 @@ def test_background_poller_runs_with_the_app_and_stops_on_shutdown(tmp_path):
             time.sleep(0.05)
         assert store.load_state()["INBOX"]["last_uid"] == 1  # it polled the inbox
         login(client)
-        assert "Watching me@example.test" in client.get("/").text
+        assert "Watching me@example.test" in client.get("/api/session").json()["poller"]["text"]
     assert not background.running  # stopped cleanly with the app
 
 
@@ -132,20 +136,27 @@ def test_no_poller_without_mailbox_credentials(tmp_path):
     with TestClient(app, base_url="https://testserver") as client:
         assert app.state.app_state["background"] is None
         login(client)
-        assert "Mailbox not connected" in client.get("/").text
+        session = client.get("/api/session").json()
+        assert session["poller"]["state"] == "off" and "not connected" in session["poller"]["text"]
 
 
 # ---------------------------------------------------------------- login
 
 
-@pytest.mark.parametrize("path", ["/", "/scan", "/partials/kpis", "/partials/quarantine"])
+@pytest.mark.parametrize("path", ["/", "/scan"])
 def test_pages_require_login(client, path):
     response = client.get(path, follow_redirects=False)
     assert response.status_code == 303 and response.headers["location"].startswith("/login")
 
 
+@pytest.mark.parametrize("path", ["/api/session", "/api/quarantine"])
+def test_api_without_session_is_401_json(client, path):
+    response = client.get(path)
+    assert response.status_code == 401 and response.json() == {"error": "log in first"}
+
+
 def test_htmx_requests_after_session_expiry_redirect_the_whole_page(client):
-    response = client.get("/partials/kpis", headers=HTMX)
+    response = client.post("/scan", headers=HTMX)
     assert response.status_code == 401 and response.headers["hx-redirect"] == "/login"
 
 
@@ -157,7 +168,7 @@ def test_login_and_logout(world):
     assert response.status_code == 303 and response.headers["location"] == "/"
     assert client.get("/").status_code == 200
     assert client.post("/logout", data={}).status_code == 400  # CSRF token required
-    client.post("/logout", data={"csrf_token": csrf_of(client, "/")})
+    client.post("/logout", data={"csrf_token": api_csrf(client)})
     assert client.get("/", follow_redirects=False).status_code == 303
     assert [e["event"] for e in store.audit_tail()] == [
         "web_login_failed", "web_login_failed", "web_login"]
@@ -202,37 +213,51 @@ def test_security_headers_and_no_inline_script(client):
 # ---------------------------------------------------------------- dashboard
 
 
-def test_dashboard_shows_kpis_chips_and_restore_buttons(world):
+def test_dashboard_serves_the_react_app(world):
+    _, _, _, _, client = world
+    login(client)
+    page = client.get("/")
+    assert page.status_code == 200 and '<div id="root"></div>' in page.text
+    scripts = re.findall(r'<script[^>]*src="([^"]+)"', page.text)
+    assert len(scripts) == 1 and scripts[0].startswith("/static/app/assets/")
+    assert "<script>" not in page.text and "style=" not in page.text  # CSP: no inline code
+    assert client.get(scripts[0]).status_code == 200
+    assert "font-src 'self'" in page.headers["content-security-policy"]
+
+
+def test_session_api_gives_the_dashboard_its_csrf_token_and_status(world):
+    _, _, _, _, client = world
+    login(client)
+    session = client.get("/api/session").json()
+    assert session["user"] == "admin" and session["mode"] == "quarantine"
+    assert session["csrf"] == csrf_of(client, "/scan")  # same token as the server pages
+    assert session["threshold"] == 0.8
+
+
+def test_quarantine_api_has_what_the_table_needs(world):
     _, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    page = client.get("/").text
-    assert re.search(r'data-kpi="quarantined">1<', page)
-    assert re.search(r'data-kpi="held">1<', page)
-    assert f'hx-post="/api/restore/{incident}"' in page
-    assert 'class="chip' in page and "text_model" in page
-    assert "All 1 reasons" in page  # expandable full explanation
+    data = client.get("/api/quarantine").json()
+    (row,) = data["rows"]
+    assert row["incident_id"] == incident and row["kind"] == "email"
+    assert row["status"] == "held" and row["score"] == 0.97
+    assert row["reasons"] and {"source", "code", "detail", "weight"} <= set(row["reasons"][0])
+    assert data["kpis"] == {"scanned": 1, "quarantined": 1, "restored": 0, "held": 1}
 
 
-def test_partials_render_alone(world):
-    _, _, _, _, client = world
-    quarantine_one(world)
-    login(client)
-    kpis = client.get("/partials/kpis", headers=HTMX).text
-    assert kpis.startswith('<section id="kpis"') and "<html" not in kpis
-    rows = client.get("/partials/quarantine", headers=HTMX).text
-    assert rows.startswith('<tbody id="qbody"') and "Restore" in rows
-
-
-def test_untrusted_message_fields_are_escaped(world):
+def test_untrusted_message_fields_stay_data(world):
     server, _, poller, _, client = world
     poller.poll_once()
     server.deliver(b"From: <img src=x onerror=alert(1)>@evil.test\r\n"
                    b"Subject: <b>PHISH</b>\r\nMessage-ID: <x@y>\r\n\r\nPHISH")
     poller.poll_once()
     login(client)
-    page = client.get("/").text
-    assert "<img src=x" not in page and "<b>PHISH</b>" not in page
+    response = client.get("/api/quarantine")
+    assert response.headers["content-type"].startswith("application/json")
+    # React renders these as text; the frontend never injects HTML.
+    source = "".join(p.read_text() for p in (ROOT / "frontend" / "src").rglob("*.tsx"))
+    assert "dangerouslySetInnerHTML" not in source and ".innerHTML" not in source
 
 
 @pytest.mark.parametrize(("weight", "css"), [
@@ -246,44 +271,33 @@ def test_chip_colour_follows_direction_and_strength(weight, css):
 # ---------------------------------------------------------------- restore
 
 
-def test_restore_button_swaps_the_row_and_refreshes_the_kpis(world):
+def test_restore_moves_the_message_back_and_updates_the_table_data(world):
     server, store, poller, _, client = world
     incident = quarantine_one(world)
     login(client)
-    response = restore(client, incident, csrf_of(client, "/"), htmx=True)
+    response = restore(client, incident, api_csrf(client))
     assert response.status_code == 200
-    assert response.headers["hx-trigger"] == "kpis-changed"
-    row = response.text.strip()
-    assert row.startswith(f'<tr data-incident="{incident}"') and "Restored" in row
-    assert "hx-post" not in row  # no Restore button any more
+    body = response.json()
+    assert body["status"] == "restored" and body["to_folder"] == "INBOX"
     # The real IMAP effect: out of quarantine, back in the inbox ...
     assert server.messages(QFOLDER) == {}
     assert any(b"PHISH" in raw for raw in server.messages("INBOX").values())
-    # ... the KPI partial the page reloads shows it ...
-    assert re.search(r'data-kpi="restored">1<', client.get("/partials/kpis").text)
+    # ... the data the dashboard re-fetches shows it ...
+    data = client.get("/api/quarantine").json()
+    assert data["rows"][0]["status"] == "restored" and data["kpis"]["restored"] == 1
     # ... and the poller leaves the released message alone.
     assert poller.poll_once().quarantined == 0
     assert "skipped_released" in [e["event"] for e in store.audit_tail()]
 
 
-def test_restore_json_for_scripts(world):
+def test_restore_twice_is_a_conflict(world):
     _, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    body = restore(client, incident, csrf_of(client, "/")).json()
-    assert body["status"] == "restored" and body["to_folder"] == "INBOX"
-    rows = client.get("/api/quarantine").json()["rows"]
-    assert rows[0]["status"] == "restored"
-
-
-def test_restore_twice_shows_a_conflict_in_the_row(world):
-    _, _, _, _, client = world
-    incident = quarantine_one(world)
-    login(client)
-    token = csrf_of(client, "/")
-    assert restore(client, incident, token, htmx=True).status_code == 200
-    again = restore(client, incident, token, htmx=True)
-    assert again.status_code == 409 and "already restored" in again.text
+    token = api_csrf(client)
+    assert restore(client, incident, token).status_code == 200
+    again = restore(client, incident, token)
+    assert again.status_code == 409 and "already restored" in again.json()["error"]
 
 
 def test_restore_requires_login_and_csrf(world):
@@ -299,21 +313,21 @@ def test_restore_requires_login_and_csrf(world):
 def test_restore_unknown_incident(world):
     _, _, _, _, client = world
     login(client)
-    token = csrf_of(client, "/")
+    token = api_csrf(client)
     assert restore(client, new_incident_id(), token).status_code == 404
-    missing = restore(client, "not-an-id", token, htmx=True)
-    assert missing.status_code == 404 and "No such quarantined message" in missing.text
+    missing = restore(client, "not-an-id", token)
+    assert missing.status_code == 404 and "No such quarantined message" in missing.json()["error"]
 
 
 def test_mail_server_failure_keeps_the_message_held(world):
     server, store, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    token = csrf_of(client, "/")
+    token = api_csrf(client)
     server.fail_connect = 1
-    failed = restore(client, incident, token, htmx=True)
-    assert failed.status_code == 502 and "cannot connect" in failed.text
-    assert "Held" in failed.text and "hx-post" in failed.text  # can try again
+    failed = restore(client, incident, token)
+    assert failed.status_code == 502 and "cannot connect" in failed.json()["error"]
+    assert client.get("/api/quarantine").json()["rows"][0]["status"] == "held"  # retry OK
     record = store.load_quarantine(incident)
     assert not record.get("restored_at") and "restore_started_at" not in record
     assert restore(client, incident, token).status_code == 200
@@ -326,7 +340,7 @@ def test_restore_without_mailbox_credentials(tmp_path):
     incident = new_incident_id()
     store.save_quarantine(incident, {"content_sha256": "ab"})
     login(client)
-    response = restore(client, incident, csrf_of(client, "/"))
+    response = restore(client, incident, api_csrf(client))
     assert response.status_code == 503 and "IMAP_APP_PASSWORD" in response.json()["error"]
 
 
@@ -334,7 +348,7 @@ def test_concurrent_clicks_move_the_message_once(world):
     server, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    token = csrf_of(client, "/")
+    token = api_csrf(client)
     codes: list[int] = []
     threads = [threading.Thread(target=lambda: codes.append(
         restore(client, incident, token).status_code)) for _ in range(4)]
@@ -350,7 +364,7 @@ def test_concurrent_clicks_move_the_message_once(world):
 def test_restore_is_rate_limited(world):
     _, _, _, _, client = world
     login(client)
-    token = csrf_of(client, "/")
+    token = api_csrf(client)
     codes = [restore(client, new_incident_id(), token).status_code for _ in range(11)]
     assert codes[:10] == [404] * 10 and codes[10] == 429
 

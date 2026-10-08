@@ -40,7 +40,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-phishguard = ["templates/*.html", "static/*.css", "static/*.svg", "static/*.js"]
+phishguard = ["templates/*.html", "static/*.css", "static/*.svg", "static/*.js", "static/app/*.html", "static/app/assets/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

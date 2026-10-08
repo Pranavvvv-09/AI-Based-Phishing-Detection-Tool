@@ -62,14 +62,16 @@ FORM_OVERHEAD_BYTES = 64 * 1024
 MAX_PASTE_CHARS = 200_000
 MIN_SECRET_KEY_CHARS = 32
 SESSION_IDLE_SECONDS = 30 * 60
-CHIPS_PER_ROW = 4
 # A real hash of a random password: an unknown user name takes as long to reject.
 _DUMMY_HASH = generate_password_hash(secrets.token_urlsafe(16))
 # Pasted text that starts with mail headers ("From: ...", "Received: ...") is a raw email.
 _LOOKS_LIKE_HEADERS = re.compile(r"\A(?:[A-Za-z][A-Za-z0-9-]{0,40}:[^\n]*\r?\n){2,}")
 
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
-       "connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+       "font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; "
+       "base-uri 'none'")
+# The React dashboard, built by `npm run build` in frontend/ (committed, so Python alone runs it).
+DASHBOARD_HTML = PACKAGE_DIR / "static" / "app" / "index.html"
 
 
 # ------------------------------------------------------------------------ helpers
@@ -128,8 +130,10 @@ def quarantine_rows(store: IncidentStore, limit: int = 200) -> list[dict]:
     records = sorted(store.quarantined(), key=lambda r: r.get("incident_id", ""), reverse=True)
     for record in records[:limit]:
         reasons: list[dict] = []
+        kind = "email"  # the mailbox poller only quarantines email today
         try:
             verdict = store.load_report(record["incident_id"]).get("verdict", {})
+            kind = verdict.get("kind") or kind
             reasons = [{k: r.get(k) for k in ("source", "code", "detail", "weight")}
                        for r in verdict.get("reasons", [])]
         except (KeyError, OSError, ValueError):
@@ -149,6 +153,7 @@ def quarantine_rows(store: IncidentStore, limit: int = 200) -> list[dict]:
             "status": status,
             "restored_at": record.get("restored_at"),
             "restored_by": record.get("restored_by"),
+            "kind": kind,
             "reasons": reasons,
         })
     return rows
@@ -320,17 +325,18 @@ def create_app(settings: Settings | None = None, scorer=None,
     def poller_status() -> dict:
         background = state["background"]
         poller = state["poller"]
+        status = {"mailbox": settings.imap_user, "last_poll_at": None, "error": ""}
         if not mailbox_configured(settings):
-            return {"state": "off", "text": "Mailbox not connected (set IMAP_USER and "
-                                            "IMAP_APP_PASSWORD in .env)"}
-        if background is None or not background.running:
-            error = getattr(poller, "last_error", "") or "stopped"
-            return {"state": "error", "text": f"Poller stopped: {error}"}
-        last = when(getattr(poller, "last_poll_at", None)) or "starting…"
+            return {**status, "state": "off", "text": "Mailbox not connected (set IMAP_USER "
+                                                      "and IMAP_APP_PASSWORD in .env)"}
+        last = getattr(poller, "last_poll_at", None)
         error = getattr(poller, "last_error", "")
-        text = f"Watching {settings.imap_user} · mode {settings.mode} · last check {last}"
-        return {"state": "warn" if error else "ok", "text": text + (f" · {error}" if error
-                                                                    else "")}
+        status.update(last_poll_at=last, error=error)
+        if background is None or not background.running:
+            return {**status, "state": "error", "text": f"Poller stopped: {error or 'stopped'}"}
+        text = f"Watching {settings.imap_user}. Last check {when(last) or 'starting…'}"
+        return {**status, "state": "warn" if error else "ok",
+                "text": f"{text}. {error}" if error else text}
 
     def render(request: Request, name: str, status: int = 200, **context) -> HTMLResponse:
         context.update(logged_in=logged_in(request), csrf=csrf_token(request),
@@ -396,21 +402,12 @@ def create_app(settings: Settings | None = None, scorer=None,
 
     @app.get("/", response_class=HTMLResponse)
     def dashboard(request: Request):
+        """The React dashboard (frontend/). It loads its data from the JSON API below."""
         require_login(request)
-        return render(request, "dashboard.html", tab="dashboard", kpis=kpis(store),
-                      rows=quarantine_rows(store), poller=poller_status(),
-                      chips_per_row=CHIPS_PER_ROW)
-
-    @app.get("/partials/kpis", response_class=HTMLResponse)
-    def kpis_partial(request: Request):
-        require_login(request)
-        return render(request, "_kpis.html", kpis=kpis(store), poller=poller_status())
-
-    @app.get("/partials/quarantine", response_class=HTMLResponse)
-    def quarantine_partial(request: Request):
-        require_login(request)
-        return render(request, "_quarantine_rows.html", rows=quarantine_rows(store),
-                      chips_per_row=CHIPS_PER_ROW)
+        if not DASHBOARD_HTML.exists():
+            raise HTTPException(503, "Dashboard not built. Run: cd frontend && npm ci && "
+                                     "npm run build")
+        return HTMLResponse(DASHBOARD_HTML.read_text(encoding="utf-8"))
 
     # ------------------------------------------------------------- quick scan
 
@@ -454,8 +451,8 @@ def create_app(settings: Settings | None = None, scorer=None,
     def restore(request: Request, incident_id: str):
         """Move a quarantined message back to the inbox (real IMAP MOVE).
 
-        htmx gets the updated table row (and ``HX-Trigger: kpis-changed``);
-        any other caller gets JSON. Both need the session and the CSRF header.
+        Needs the session cookie and the CSRF token in the ``X-CSRF-Token`` header
+        (the dashboard gets it from ``/api/session``).
         """
         from .poller import AlreadyRestored, RestoreInProgress
 
@@ -479,17 +476,20 @@ def create_app(settings: Settings | None = None, scorer=None,
         except OSError as exc:
             error, status = f"Mail server unreachable ({type(exc).__name__})", 502
 
-        if not is_htmx(request):
-            if error:
-                return JSONResponse({"error": error}, status_code=status)
-            return {"incident_id": incident_id, "status": "restored",
-                    "restored_at": record["restored_at"],
-                    "restored_by": record["restored_by"], "to_folder": record["source_folder"]}
-        row = next((r for r in quarantine_rows(store) if r["incident_id"] == incident_id), None)
-        response = render(request, "_row.html", status=status, row=row, error=error,
-                          chips_per_row=CHIPS_PER_ROW)
-        response.headers["HX-Trigger"] = "kpis-changed"
-        return response
+        if error:
+            return JSONResponse({"error": error}, status_code=status)
+        return {"incident_id": incident_id, "status": "restored",
+                "restored_at": record["restored_at"],
+                "restored_by": record["restored_by"], "to_folder": record["source_folder"]}
+
+    @app.get("/api/session")
+    def api_session(request: Request):
+        """What the dashboard needs to start: who is logged in, the CSRF token for
+        POST requests, the mode, and whether the mailbox poller is running."""
+        require_login(request)
+        return {"user": settings.admin_username, "csrf": csrf_token(request),
+                "mode": settings.mode, "threshold": settings.quarantine_threshold,
+                "poller": poller_status()}
 
     @app.get("/api/quarantine")
     def api_quarantine(request: Request):
