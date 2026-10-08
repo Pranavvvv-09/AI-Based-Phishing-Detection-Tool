@@ -30,6 +30,11 @@ flags genuine bank, OTP and delivery alerts; the email model has seen formal leg
 mail. The blend was chosen by a pre-registered experiment on frozen evaluation sets
 (scripts/sms_experiment.py, results in models/sms_experiment.json).
 
+SMS also get their own evidence (``sms_checks.py``): a "sender" layer (brand claims
+from personal numbers or email addresses), a brand-vs-link check in the link layer, and
+two capped trust credits (nothing to act on; every link on the named brand's domains).
+Chosen by a second pre-registered experiment (scripts/rules_experiment.py).
+
 Every contribution is returned as a ``Reason`` with its signed weight, so a verdict
 can always answer "why?". All parameters are fixed constants chosen before
 evaluation, never tuned on test data.
