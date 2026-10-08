@@ -30,11 +30,13 @@ Behaviour
 from __future__ import annotations
 
 import argparse
+import contextlib
 import getpass
 import hashlib
 import logging
 import re
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -55,6 +57,29 @@ MAX_BACKOFF_SECONDS = 30 * 60
 _MESSAGE_ID = re.compile(rb"^message-id:[ \t]*(<[^<>\s]{1,250}>)", re.IGNORECASE | re.MULTILINE)
 
 log = logging.getLogger("phishguard.poller")
+_locks_guard = threading.Lock()
+_locks: dict[str, threading.Lock] = {}
+
+
+class AlreadyRestored(ValueError):
+    """The message was released before (by someone else, or a double click)."""
+
+
+class RestoreInProgress(RuntimeError):
+    """Another request is restoring this message right now."""
+
+
+@contextlib.contextmanager
+def _restore_lock(incident_id: str):
+    """One restore per incident at a time within this process (no waiting)."""
+    with _locks_guard:
+        lock = _locks.setdefault(incident_id, threading.Lock())
+    if not lock.acquire(blocking=False):
+        raise RestoreInProgress(f"{incident_id} is being restored right now")
+    try:
+        yield
+    finally:
+        lock.release()
 
 
 def message_id_of(raw: bytes) -> str:
@@ -116,8 +141,11 @@ class Poller:
                 box.ensure_folder(self.settings.imap_quarantine_folder)
             selected = box.select(INBOX, readonly=not self.quarantine_mode)
             cursor = self._cursor(box, selected.uidvalidity, backfill)
+            new_uids = box.uids_after(cursor)[:MAX_PER_POLL]
+            # Read the released set *after* listing new mail: a restore marks its record
+            # before moving the message, so anything a restore put back is in this set.
             released = self.store.restored_hashes()
-            for uid in box.uids_after(cursor)[:MAX_PER_POLL]:
+            for uid in new_uids:
                 self._process(box, selected.uidvalidity, uid, released, result)
                 self._save_cursor(selected.uidvalidity, uid)
         return result
@@ -219,21 +247,39 @@ class Poller:
     # ------------------------------------------------------------------ restore
 
     def restore(self, incident_id: str, actor: str = "") -> dict:
-        """Move a quarantined message back to where it came from."""
+        """Move a quarantined message back to where it came from.
+
+        Safe to call from the web app while the poller runs in another process: the
+        record is marked ``restore_started_at`` *before* the IMAP move, and the poller
+        treats marked messages as released, so it can never re-quarantine the message
+        in the moment between the move and the final record update.
+        """
         if not valid_incident_id(incident_id):
             raise ValueError("invalid incident id")
-        record = self.store.load_quarantine(incident_id)
-        if record.get("restored_at"):
-            raise ValueError(f"{incident_id} was already restored at {record['restored_at']}")
-        with self.connect() as box:
-            selected = box.select(record["quarantine_folder"], readonly=False)
-            uid = self._locate(box, record, selected.uidvalidity)
-            if uid is None:
-                raise MailboxError("message not found in the quarantine folder "
-                                   "(moved or deleted by hand?)")
-            box.move(uid, record["source_folder"])
-        record.update(restored_at=utc_now(), restored_by=actor or "unknown")
-        self.store.save_quarantine(incident_id, record)
+        with _restore_lock(incident_id):
+            record = self.store.load_quarantine(incident_id)
+            if record.get("restored_at"):
+                raise AlreadyRestored(f"{incident_id} was already restored at "
+                                      f"{record['restored_at']}")
+            record["restore_started_at"] = utc_now()
+            self.store.save_quarantine(incident_id, record)
+            try:
+                with self.connect() as box:
+                    selected = box.select(record["quarantine_folder"], readonly=False)
+                    uid = self._locate(box, record, selected.uidvalidity)
+                    if uid is None:
+                        raise MailboxError("message not found in the quarantine folder "
+                                           "(moved or deleted by hand?)")
+                    box.move(uid, record["source_folder"])
+            except BaseException:
+                record.pop("restore_started_at", None)
+                self.store.save_quarantine(incident_id, record)
+                self.store.audit.append("restore_failed", incident_id=incident_id,
+                                        by=actor or "unknown")
+                raise
+            record.pop("restore_started_at", None)
+            record.update(restored_at=utc_now(), restored_by=actor or "unknown")
+            self.store.save_quarantine(incident_id, record)
         self.store.audit.append("restored", incident_id=incident_id, by=record["restored_by"],
                                 to_folder=record["source_folder"],
                                 content_sha256=record.get("content_sha256"))

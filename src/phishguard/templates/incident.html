@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Incident · PhishGuard{% endblock %}
 {% block content %}
-<p><a href="{{ url_for('dashboard') }}">&larr; Dashboard</a></p>
+<p><a href="/dashboard">&larr; Dashboard</a></p>
 <h1>Incident <code>{{ report.incident_id }}</code></h1>
 <dl class="facts card">
   <dt>Created</dt><dd>{{ report.created_at }}</dd>
@@ -11,9 +11,11 @@
   <dt>Content SHA-256</dt><dd><code>{{ report.content_sha256 }}</code></dd>
   {% if record %}
   <dt>Quarantine</dt>
-  <dd>{% if record.restored_at %}restored {{ record.restored_at }} by {{ record.restored_by }}
-      {% else %}held in {{ record.quarantine_folder }}
-      (release: <code>python -m phishguard.poller restore {{ report.incident_id }}</code>){% endif %}</dd>
+  <dd data-incident="{{ report.incident_id }}">
+    <span class="status">{% if record.restored_at %}restored {{ record.restored_at }} by {{ record.restored_by }}{% else %}held in {{ record.quarantine_folder }}{% endif %}</span>
+    {% if not record.restored_at %}<button type="button" class="restore" data-restore="{{ report.incident_id }}">Restore to inbox</button>{% endif %}
+    <span id="restore-status" class="hint" role="status" aria-live="polite"></span>
+  </dd>
   {% endif %}
 </dl>
 {% with verdict = report.verdict %}{% include "_verdict.html" %}{% endwith %}

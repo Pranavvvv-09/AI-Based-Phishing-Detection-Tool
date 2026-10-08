@@ -42,9 +42,11 @@ checked that the scores look right.
    `python -m phishguard.poller run`. Phishing now moves to the
    `PhishGuard-Quarantine` label (created if missing). In Gmail it disappears from the
    inbox but stays in *All Mail*.
-5. A false positive? `python -m phishguard.poller list`, then
-   `python -m phishguard.poller restore <incident-id>`. The message goes back to the
-   inbox and is remembered (by content hash), so the next poll leaves it alone.
+5. A false positive? Open the dashboard (`python -m phishguard.web`, then
+   http://127.0.0.1:5000/dashboard) and click **Restore** on its row, or use
+   `python -m phishguard.poller list` and `python -m phishguard.poller restore <incident-id>`.
+   The message goes back to the inbox and is remembered (by content hash), so the next
+   poll leaves it alone.
 6. `python -m phishguard.poller verify-audit` checks that no audit line was edited,
    removed or reordered.
 

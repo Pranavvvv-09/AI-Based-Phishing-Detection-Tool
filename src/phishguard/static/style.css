@@ -32,7 +32,7 @@ button.link { background: none; color: var(--accent); padding: 0; }
 form.inline { display: inline; }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line);
-         vertical-align: top; overflow-wrap: anywhere; }
+         vertical-align: top; overflow-wrap: break-word; }
 th { color: var(--muted); font-weight: 600; font-size: 13px; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tr.up .num { color: var(--bad); } tr.down .num { color: var(--good); }
@@ -58,3 +58,25 @@ tr.up .num { color: var(--bad); } tr.down .num { color: var(--good); }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
 .facts dt { color: var(--muted); } .facts dd { margin: 0; overflow-wrap: anywhere; }
 code { font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+td.when, td.status { white-space: nowrap; }
+td.who { min-width: 15rem; overflow-wrap: break-word; }
+.weight { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 12px;
+          border: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.weight.up { color: var(--bad); } .weight.down { color: var(--good); }
+button.restore { padding: 4px 12px; font-size: 13px; white-space: nowrap; }
+button:disabled { opacity: .6; cursor: progress; }
+
+/* Phones: wide tables scroll sideways; quarantine rows become stacked cards so the
+   Restore button is always visible. */
+@media (max-width: 700px) {
+  .card > table:not(#quarantine) { display: block; overflow-x: auto; white-space: nowrap; }
+  #quarantine thead { display: none; }
+  #quarantine, #quarantine tbody, #quarantine tr, #quarantine td { display: block; width: 100%; }
+  #quarantine tr { border: 1px solid var(--line); border-radius: 8px; padding: 8px;
+                   margin-bottom: 10px; }
+  #quarantine td { border: 0; padding: 3px 0; min-width: 0; text-align: left; }
+  #quarantine td.num::before { content: "Score "; color: var(--muted); }
+  #quarantine td.status { white-space: normal; }
+  #quarantine button.restore { width: 100%; padding: 8px; margin-top: 4px; }
+}

@@ -15,7 +15,7 @@ phishing from your own mailbox.
 - 🤖 TF-IDF + Logistic Regression models for email and SMS
 - 💡 Explainable verdicts ("why was this flagged?")
 - 🛡️ Reversible quarantine with JSON incident reports and an audit log
-- 📊 Login-protected, read-only admin dashboard
+- 📊 Login-protected dashboard: quarantined mail with its weighted reasons and a one-click Restore
 
 ## Progress
 - [x] Day 1: Project setup, secure repo hygiene, config validation
@@ -25,7 +25,7 @@ phishing from your own mailbox.
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
-- [x] Day 8: Web UI, JSON API and read-only admin dashboard (login with hashed password, CSRF on every form, rate-limited login and API, constant-time API-key check, strict CSP with no JavaScript, fails closed on weak secrets)
+- [x] Day 8: FastAPI web app: scan page, quarantine dashboard showing each message's top ML/rule weights, a **Restore** button that moves the message back to the inbox over IMAP (`POST /api/restore/{id}`) and refreshes the table in place, JSON API (hashed-password login, CSRF on every form and on restore, rate limits, strict CSP with no inline script, fails closed on weak secrets). Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
 - [ ] Day 9: Tests + CI hardening
 - [ ] Day 10: Docs & release
 
@@ -77,30 +77,48 @@ reported. Nothing is deleted, marked as read or modified. Reports go to `reports
 (one JSON per flagged message, no body text, plus `audit.log`); quarantine records go to
 `quarantine/`. Setup and safety notes: [docs/lab-setup.md](docs/lab-setup.md).
 
-## Web UI, API and dashboard (Day 8)
+## Web app: dashboard, Restore and API (Day 8)
 ```bash
+pip install -e ".[web]"
 python -c "import secrets; print(secrets.token_urlsafe(32))"   # FLASK_SECRET_KEY, API_KEY
 python -c "from werkzeug.security import generate_password_hash as g; print(g('your-password'))"
 python -m phishguard.web                                         # http://127.0.0.1:5000
 ```
-Log in to scan an uploaded `.eml` or a pasted SMS (with its sender) and see every reason
-with its weight. `/dashboard` shows scan counts, recent incidents, the quarantine and
-whether the audit log is intact. It is **read-only**: releasing mail stays a deliberate
-`python -m phishguard.poller restore` on the command line.
+Put the three values in `.env` (`FLASK_SECRET_KEY` signs the session cookie, `API_KEY`,
+`ADMIN_PASSWORD_HASH`), plus `IMAP_USER` and `IMAP_APP_PASSWORD` so Restore can reach
+your mailbox. Run the poller (`python -m phishguard.poller run`) in a second terminal:
+it fills the quarantine, the web app shows and releases it.
+
+* **Scan** (`/`): upload an `.eml` or paste an SMS with its sender; every reason is listed
+  with its weight.
+* **Dashboard** (`/dashboard`): counts, the quarantine with each message's top weights
+  (hover a chip for the detail), recent incidents and whether the audit log is intact.
+* **Restore**: click it, confirm, and the message is moved back to your inbox over IMAP;
+  the row and counters update without reloading, and the table also refreshes every 30 s.
+  The poller remembers released mail by content hash and never quarantines it again.
 
 ```bash
+# Restore from a script (the browser uses the session cookie + CSRF token instead)
+curl -s -X POST http://127.0.0.1:5000/api/restore/<incident-id> -H "Authorization: Bearer $API_KEY"
+curl -s http://127.0.0.1:5000/api/quarantine -H "Authorization: Bearer $API_KEY"
 curl -s -X POST http://127.0.0.1:5000/api/v1/scan/sms -H "Authorization: Bearer $API_KEY" \
      -H "Content-Type: application/json" -d '{"text": "Your KYC expires today...", "sender": "+91 98301 44728"}'
 curl -s -X POST http://127.0.0.1:5000/api/v1/scan/email -H "Authorization: Bearer $API_KEY" \
      --data-binary @message.eml
 ```
-| Scan with explanation | Dashboard | Incident |
+Restore answers `200` with where the message went, `404` for an unknown incident, `409` if
+it was already restored (or another click is restoring it right now), `502` with the
+reason if the mail server refuses or the message was moved by hand, and `503` if the
+mailbox credentials aren't configured. Every attempt is in the audit log.
+
+| Scan with explanation | Dashboard with Restore | Incident |
 |---|---|---|
 | ![SMS scan](docs/screenshots/web_scan_sms.png) | ![Dashboard](docs/screenshots/web_dashboard.png) | ![Incident](docs/screenshots/web_incident.png) |
 
-The app won't start with missing or placeholder secrets. It binds to `127.0.0.1` by
-default; to reach it from other machines, put it behind a TLS reverse proxy rather than
-setting `WEB_HOST=0.0.0.0`.
+The app won't start with missing, placeholder or short secrets. It binds to `127.0.0.1`
+by default; to reach it from other machines, put it behind a TLS reverse proxy rather
+than setting `WEB_HOST=0.0.0.0`. Because Restore needs the IMAP app password, the web
+app holds the same mailbox access as the poller: keep it on your own machine.
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,
