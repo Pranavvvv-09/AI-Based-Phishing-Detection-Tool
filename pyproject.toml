@@ -48,6 +48,9 @@ addopts = "-q"
 filterwarnings = [
     # starlette's TestClient uses an anyio alias deprecated upstream; not our code
     "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
+    # starlette >= 1.7 prefers httpx2 for its TestClient but still supports httpx (the
+    # only option on older versions); revisit when starlette drops httpx
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
 ]
 
 [tool.coverage.run]
