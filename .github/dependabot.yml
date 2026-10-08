@@ -1,0 +1,13 @@
+# Weekly pull requests for outdated Python packages and GitHub Actions
+# (this also keeps the SHA-pinned actions in ci.yml up to date).
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

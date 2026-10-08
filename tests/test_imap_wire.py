@@ -12,6 +12,8 @@ from phishguard.mailbox import Mailbox
 
 MESSAGE = b"Subject: hi\r\nMessage-ID: <a@b.test>\r\n\r\nbody\r\n"
 REPLIES = {
+    # Python 3.11's imaplib asks for CAPABILITY explicitly; 3.13 reads it from the greeting.
+    b"CAPABILITY": b"* CAPABILITY IMAP4rev1 MOVE UIDPLUS\r\n{tag} OK done\r\n",
     b"LOGIN": b"{tag} OK [CAPABILITY IMAP4rev1 MOVE UIDPLUS] logged in\r\n",
     b"SELECT": (b"* 3 EXISTS\r\n* OK [UIDVALIDITY 777] UIDs valid\r\n"
                 b"{tag} OK [READ-WRITE] done\r\n"),

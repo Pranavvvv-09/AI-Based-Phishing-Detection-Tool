@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=78.1.1"]  # 78.1.1 fixes PYSEC-2025-49
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -49,6 +49,15 @@ filterwarnings = [
     # starlette's TestClient uses an anyio alias deprecated upstream; not our code
     "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
 ]
+
+[tool.coverage.run]
+source = ["phishguard"]
+
+[tool.coverage.report]
+# Measured without the datasets/models (as in CI): 92%. The floor leaves some headroom.
+fail_under = 85
+show_missing = true
+skip_covered = true
 
 [tool.ruff]
 line-length = 100
