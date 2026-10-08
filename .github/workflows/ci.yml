@@ -1,0 +1,94 @@
+# Lint, security checks, tests and a dependency audit on every push and pull request.
+# Runs without the datasets or trained models: tests that need them skip themselves.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: the workflow only needs to read the code.
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]  # oldest supported and newest
+    steps:
+      # Actions are pinned to full commit SHAs (tags can be moved); Dependabot updates them.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip setuptools
+          python -m pip install -e ".[web,dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Security lint (bandit)
+        run: bandit -q -c pyproject.toml -r src
+
+      - name: Tests with coverage
+        run: python -m pytest --cov=phishguard --cov-report=term-missing:skip-covered
+
+      - name: Dependency audit (pip-audit)
+        run: pip-audit --skip-editable --progress-spinner off
+
+  frontend:
+    name: Dashboard (React)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npm test
+
+      - name: Dependency audit
+        run: npm audit --omit=dev --audit-level=moderate
+
+      # The built dashboard is committed so `python -m phishguard.web` needs no Node.
+      # Rebuild it here and fail if the committed copy is out of date.
+      - name: Build and check the committed bundle is current
+        run: |
+          npx vite build
+          if [ -n "$(git status --porcelain -- ../src/phishguard/static/app)" ]; then
+            git status --short -- ../src/phishguard/static/app
+            echo "::error::The committed dashboard is out of date: run 'npm run build' in frontend/ and commit it"
+            exit 1
+          fi

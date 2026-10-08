@@ -48,3 +48,6 @@ models/*.pkl
 .idea/
 .DS_Store
 Thumbs.db
+
+# ---------- Frontend (React dashboard) ----------
+frontend/node_modules/

@@ -25,7 +25,7 @@ phishing, so work in a contained lab.
 ## 4. Configuration
 ```bash
 cp .env.example .env
-python -c "import secrets; print(secrets.token_urlsafe(32))"   # use for API_KEY and FLASK_SECRET_KEY
+python -c "import secrets; print(secrets.token_urlsafe(32))"   # use for FLASK_SECRET_KEY
 ```
 Start with `MODE=monitor` (report only). Switch to `MODE=quarantine` only after you've
 checked that the scores look right.
@@ -42,9 +42,11 @@ checked that the scores look right.
    `python -m phishguard.poller run`. Phishing now moves to the
    `PhishGuard-Quarantine` label (created if missing). In Gmail it disappears from the
    inbox but stays in *All Mail*.
-5. A false positive? `python -m phishguard.poller list`, then
-   `python -m phishguard.poller restore <incident-id>`. The message goes back to the
-   inbox and is remembered (by content hash), so the next poll leaves it alone.
+5. A false positive? Open the dashboard (`python -m phishguard.web`, then
+   http://127.0.0.1:5000) and click **Restore** on its row, or use
+   `python -m phishguard.poller list` and `python -m phishguard.poller restore <incident-id>`.
+   The message goes back to the inbox and is remembered (by content hash), so the next
+   poll leaves it alone.
 6. `python -m phishguard.poller verify-audit` checks that no audit line was edited,
    removed or reordered.
 

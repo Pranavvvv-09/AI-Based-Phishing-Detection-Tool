@@ -30,11 +30,13 @@ Behaviour
 from __future__ import annotations
 
 import argparse
+import contextlib
 import getpass
 import hashlib
 import logging
 import re
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -55,6 +57,29 @@ MAX_BACKOFF_SECONDS = 30 * 60
 _MESSAGE_ID = re.compile(rb"^message-id:[ \t]*(<[^<>\s]{1,250}>)", re.IGNORECASE | re.MULTILINE)
 
 log = logging.getLogger("phishguard.poller")
+_locks_guard = threading.Lock()
+_locks: dict[str, threading.Lock] = {}
+
+
+class AlreadyRestored(ValueError):
+    """The message was released before (by someone else, or a double click)."""
+
+
+class RestoreInProgress(RuntimeError):
+    """Another request is restoring this message right now."""
+
+
+@contextlib.contextmanager
+def _restore_lock(incident_id: str):
+    """One restore per incident at a time within this process (no waiting)."""
+    with _locks_guard:
+        lock = _locks.setdefault(incident_id, threading.Lock())
+    if not lock.acquire(blocking=False):
+        raise RestoreInProgress(f"{incident_id} is being restored right now")
+    try:
+        yield
+    finally:
+        lock.release()
 
 
 def message_id_of(raw: bytes) -> str:
@@ -92,6 +117,8 @@ class Poller:
         self.store = store
         self.connect = connect
         self._scorer = scorer
+        self.last_poll_at: str | None = None  # shown on the dashboard
+        self.last_error = ""
 
     @property
     def scorer(self):
@@ -116,8 +143,11 @@ class Poller:
                 box.ensure_folder(self.settings.imap_quarantine_folder)
             selected = box.select(INBOX, readonly=not self.quarantine_mode)
             cursor = self._cursor(box, selected.uidvalidity, backfill)
+            new_uids = box.uids_after(cursor)[:MAX_PER_POLL]
+            # Read the released set *after* listing new mail: a restore marks its record
+            # before moving the message, so anything a restore put back is in this set.
             released = self.store.restored_hashes()
-            for uid in box.uids_after(cursor)[:MAX_PER_POLL]:
+            for uid in new_uids:
                 self._process(box, selected.uidvalidity, uid, released, result)
                 self._save_cursor(selected.uidvalidity, uid)
         return result
@@ -219,21 +249,39 @@ class Poller:
     # ------------------------------------------------------------------ restore
 
     def restore(self, incident_id: str, actor: str = "") -> dict:
-        """Move a quarantined message back to where it came from."""
+        """Move a quarantined message back to where it came from.
+
+        Safe to call from the web app while the poller runs in another process: the
+        record is marked ``restore_started_at`` *before* the IMAP move, and the poller
+        treats marked messages as released, so it can never re-quarantine the message
+        in the moment between the move and the final record update.
+        """
         if not valid_incident_id(incident_id):
             raise ValueError("invalid incident id")
-        record = self.store.load_quarantine(incident_id)
-        if record.get("restored_at"):
-            raise ValueError(f"{incident_id} was already restored at {record['restored_at']}")
-        with self.connect() as box:
-            selected = box.select(record["quarantine_folder"], readonly=False)
-            uid = self._locate(box, record, selected.uidvalidity)
-            if uid is None:
-                raise MailboxError("message not found in the quarantine folder "
-                                   "(moved or deleted by hand?)")
-            box.move(uid, record["source_folder"])
-        record.update(restored_at=utc_now(), restored_by=actor or "unknown")
-        self.store.save_quarantine(incident_id, record)
+        with _restore_lock(incident_id):
+            record = self.store.load_quarantine(incident_id)
+            if record.get("restored_at"):
+                raise AlreadyRestored(f"{incident_id} was already restored at "
+                                      f"{record['restored_at']}")
+            record["restore_started_at"] = utc_now()
+            self.store.save_quarantine(incident_id, record)
+            try:
+                with self.connect() as box:
+                    selected = box.select(record["quarantine_folder"], readonly=False)
+                    uid = self._locate(box, record, selected.uidvalidity)
+                    if uid is None:
+                        raise MailboxError("message not found in the quarantine folder "
+                                           "(moved or deleted by hand?)")
+                    box.move(uid, record["source_folder"])
+            except BaseException:
+                record.pop("restore_started_at", None)
+                self.store.save_quarantine(incident_id, record)
+                self.store.audit.append("restore_failed", incident_id=incident_id,
+                                        by=actor or "unknown")
+                raise
+            record.pop("restore_started_at", None)
+            record.update(restored_at=utc_now(), restored_by=actor or "unknown")
+            self.store.save_quarantine(incident_id, record)
         self.store.audit.append("restored", incident_id=incident_id, by=record["restored_by"],
                                 to_folder=record["source_folder"],
                                 content_sha256=record.get("content_sha256"))
@@ -259,24 +307,32 @@ class Poller:
     # ------------------------------------------------------------------ loop
 
     def run(self, once: bool = False, backfill: int = 0,
-            sleep: Callable[[float], None] = time.sleep) -> int:
+            sleep: Callable[[float], None] = time.sleep,
+            stop: threading.Event | None = None) -> int:
+        """Poll until stopped. ``stop`` (set by the web app on shutdown) ends the loop
+        promptly, because the wait between polls is ``stop.wait``."""
+        if stop is not None:
+            sleep = stop.wait
         failures = 0
-        while True:
+        while stop is None or not stop.is_set():
             try:
                 result = self.poll_once(backfill=backfill)
                 backfill = 0  # only on the first pass
                 failures = 0
+                self.last_poll_at, self.last_error = utc_now(), ""
                 log.info("poll done: scanned=%d quarantined=%d would_quarantine=%d review=%d "
                          "skipped=%d errors=%d", result.scanned, result.quarantined,
                          result.would_quarantine, result.flagged_for_review, result.skipped,
                          len(result.errors))
                 delay = self.settings.imap_poll_seconds
             except LoginError as exc:
+                self.last_error = "IMAP login failed - check the app password"
                 self.store.audit.append("login_failed")
                 log.error("%s - stopping (retrying could lock the account)", exc)
                 return 2
             except (MailboxError, OSError) as exc:
                 failures += 1
+                self.last_error = f"last poll failed ({type(exc).__name__})"
                 delay = min(self.settings.imap_poll_seconds * 2 ** failures, MAX_BACKOFF_SECONDS)
                 self.store.audit.append("poll_error", error=type(exc).__name__)
                 log.warning("poll failed (%s: %s); retrying in %ds", type(exc).__name__, exc,
@@ -286,6 +342,31 @@ class Poller:
             if once:
                 return 0
             sleep(delay)
+        return 0
+
+
+class BackgroundPoller:
+    """Runs ``Poller.run`` in a daemon thread for the lifetime of the web app."""
+
+    def __init__(self, poller) -> None:
+        self.poller = poller
+        self.stop = threading.Event()
+        self.thread = threading.Thread(target=self._run, name="phishguard-poller", daemon=True)
+        self.exit_code: int | None = None
+
+    def _run(self) -> None:
+        self.exit_code = self.poller.run(stop=self.stop)
+
+    def start(self) -> None:
+        self.thread.start()
+
+    def shutdown(self, timeout: float = 15) -> None:
+        self.stop.set()
+        self.thread.join(timeout)
+
+    @property
+    def running(self) -> bool:
+        return self.thread.is_alive()
 
 
 # ---------------------------------------------------------------------- CLI

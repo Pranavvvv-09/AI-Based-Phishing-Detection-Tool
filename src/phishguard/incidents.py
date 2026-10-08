@@ -170,9 +170,11 @@ class IncidentStore:
         return records
 
     def restored_hashes(self) -> set[str]:
-        """Content hashes of messages a person released: never re-quarantine them."""
+        """Content hashes of messages a person released (or is releasing right now):
+        never re-quarantine them."""
         return {r["content_sha256"] for r in self.quarantined()
-                if r.get("restored_at") and r.get("content_sha256")}
+                if (r.get("restored_at") or r.get("restore_started_at"))
+                and r.get("content_sha256")}
 
     # ------------------------------------------------------------ read side (web)
 

@@ -1,30 +1,15 @@
 <section class="card verdict verdict-{{ verdict.label }}">
-  <h2>
-    {% if verdict.score is none %}Not analysed: needs manual review
-    {% else %}{{ verdict.label|capitalize }} · {{ verdict.score|pct }}{% endif %}
-    <span class="action">{{ verdict.action }}</span>
-  </h2>
+  <div class="card-head">
+    <h2>{% if verdict.score is none %}Not analysed: needs manual review{% else %}{{ verdict.label|capitalize }}{% endif %}</h2>
+    <span class="score big">{{ verdict.score|pct }}</span>
+  </div>
+  <p class="muted">Recommended action: <b>{{ verdict.action }}</b> · {{ verdict.kind }}</p>
+  {% with reasons = verdict.reasons, limit = 99 %}{% include "_chips.html" %}{% endwith %}
   <h3>Why?</h3>
   <table class="reasons">
-    <thead><tr><th>Evidence</th><th>Detail</th><th class="num">Weight</th></tr></thead>
-    <tbody>
     {% for r in verdict.reasons %}
-      <tr class="{{ 'up' if r.weight > 0 else 'down' if r.weight < 0 else '' }}">
-        <td><span class="tag">{{ r.source }}</span> {{ r.code }}</td>
-        <td>{{ r.detail }}</td>
-        <td class="num">{{ "%+.2f"|format(r.weight) }}</td>
-      </tr>
+    <tr><td><span class="{{ r.weight|chip }}">{{ r.source }} · {{ r.code }}</span></td><td>{{ r.detail }}</td><td class="num">{{ "%+.2f"|format(r.weight) }}</td></tr>
     {% endfor %}
-    </tbody>
   </table>
-  <p class="hint">Positive weights push towards phishing, negative towards legitimate (log-odds).</p>
-  {% if verdict.summary %}
-  <details><summary>Message facts</summary>
-    <dl class="facts">
-    {% for key, value in verdict.summary.items() %}
-      <dt>{{ key }}</dt><dd>{{ value }}</dd>
-    {% endfor %}
-    </dl>
-  </details>
-  {% endif %}
+  <p class="legend">Positive weights push towards phishing, negative towards legitimate (log-odds).</p>
 </section>

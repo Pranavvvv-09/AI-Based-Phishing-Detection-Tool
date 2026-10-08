@@ -1,5 +1,7 @@
 # PhishGuard: AI-Based Phishing Detection Tool
 
+[![CI](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml)
+
 > 🚧 Work in progress: a 10-day build of an explainable phishing detector for email and SMS.
 
 AI has made scams look genuine: phishing emails now have perfect grammar and are
@@ -15,7 +17,7 @@ phishing from your own mailbox.
 - 🤖 TF-IDF + Logistic Regression models for email and SMS
 - 💡 Explainable verdicts ("why was this flagged?")
 - 🛡️ Reversible quarantine with JSON incident reports and an audit log
-- 📊 Login-protected, read-only admin dashboard
+- 📊 Login-protected dashboard: quarantined mail with its weighted reasons and a one-click Restore
 
 ## Progress
 - [x] Day 1: Project setup, secure repo hygiene, config validation
@@ -25,8 +27,8 @@ phishing from your own mailbox.
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
-- [x] Day 8: Web UI, JSON API and read-only admin dashboard (login with hashed password, CSRF on every form, rate-limited login and API, constant-time API-key check, strict CSP with no JavaScript, fails closed on weak secrets)
-- [ ] Day 9: Tests + CI hardening
+- [x] Day 8: dark-mode web console started together with the mailbox poller by one command: a React + Tailwind dashboard (quarantine table with colour-coded explainability chips and **Restore to Inbox** with confirmation and a loading spinner, `POST /api/restore/{id}`, real IMAP move, in-place update) and a Quick Scan page for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
+- [x] Day 9: Tests + CI hardening (GitHub Actions on Python 3.11 and 3.13: ruff, bandit, 369 tests with a 85% coverage floor (92% measured, without the datasets), pip-audit; least-privilege token, SHA-pinned actions, Dependabot; timing tests made CI-safe)
 - [ ] Day 10: Docs & release
 
 ## Development setup
@@ -36,10 +38,22 @@ pip install -e ".[web,dev]"
 python scripts/bootstrap.py   # download datasets + train email and SMS models (~7 min first run)
 cp .env.example .env          # then fill in secrets (see docs/lab-setup.md)
 pre-commit install
-pytest
-ruff check .
-bandit -c pyproject.toml -r src
 ```
+
+## Checks (the same ones CI runs)
+```bash
+ruff check .                                   # lint
+bandit -q -c pyproject.toml -r src             # security lint
+pytest --cov=phishguard                        # tests; fails below 85% coverage
+pip-audit --skip-editable                      # known vulnerabilities in dependencies
+```
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs these on every push and pull
+request, on Python 3.11 (oldest supported) and 3.13. CI has no datasets or trained models:
+the few tests that need them skip themselves, everything else uses small stand-in models
+and an in-memory IMAP server (`tests/imap_fake.py`), plus one test that feeds real
+`imaplib` the exact bytes an IMAP server sends (`tests/test_imap_wire.py`).
+The workflow is locked down: read-only token, actions pinned to commit SHAs (kept current
+by [Dependabot](.github/dependabot.yml)), no stored credentials, 15-minute timeout.
 
 ## Score a message
 ```bash
@@ -77,30 +91,65 @@ reported. Nothing is deleted, marked as read or modified. Reports go to `reports
 (one JSON per flagged message, no body text, plus `audit.log`); quarantine records go to
 `quarantine/`. Setup and safety notes: [docs/lab-setup.md](docs/lab-setup.md).
 
-## Web UI, API and dashboard (Day 8)
+## Run it (one command)
 ```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"   # FLASK_SECRET_KEY, API_KEY
+pip install -e ".[web]"
+python scripts/bootstrap.py        # first time only: data + models
+cp .env.example .env               # then fill in the values below
+python -m phishguard.web           # open http://127.0.0.1:5000
+```
+`.env` needs `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` and `FLASK_SECRET_KEY` (signs the
+session cookie):
+```bash
 python -c "from werkzeug.security import generate_password_hash as g; print(g('your-password'))"
-python -m phishguard.web                                         # http://127.0.0.1:5000
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
-Log in to scan an uploaded `.eml` or a pasted SMS (with its sender) and see every reason
-with its weight. `/dashboard` shows scan counts, recent incidents, the quarantine and
-whether the audit log is intact. It is **read-only**: releasing mail stays a deliberate
-`python -m phishguard.poller restore` on the command line.
+Add `IMAP_USER` and `IMAP_APP_PASSWORD` (a Gmail app password, see
+[docs/lab-setup.md](docs/lab-setup.md)) and the same command also starts the **mailbox
+poller** in the background: it checks the inbox every `IMAP_POLL_SECONDS` and, with
+`MODE=quarantine`, moves phishing to the `PhishGuard-Quarantine` folder.
 
+**Dashboard** (`/`, React + Tailwind CSS, dark mode): the three totals (scanned,
+quarantined, restored) and the quarantine table: **Time, Type, Sender, Score, Status**, plus
+**explainability chips** for the signals behind each verdict. Red chips push towards
+phishing, green towards legitimate; a solid chip is strong evidence (|weight| >= 2), a
+tinted one medium (>= 1), an outlined one weak. "+N more" opens every signal with its
+explanation. **Restore to Inbox** asks for confirmation, shows a spinner while the server
+moves the message back to your inbox over IMAP (`POST /api/restore/{id}`), then updates
+the row and the totals without a reload. Held / Restored / All filters live in the URL
+(`?status=restored`). A restored message is remembered by its content hash, so the poller
+never quarantines it again.
+
+**Quick Scan** (`/scan`): paste an email (raw source with headers, or just the text) or
+an SMS with its sender, or upload an `.eml`, and see the verdict with every reason.
+
+| Dashboard | Confirm | Restoring | Phone |
+|---|---|---|---|
+| ![Dashboard](docs/screenshots/web_dashboard.png) | ![Confirm restore](docs/screenshots/web_restore_confirm.png) | ![Restoring spinner](docs/screenshots/web_restore_spinner.png) | ![Phone](docs/screenshots/web_dashboard_mobile.png) |
+
+How it fits together: the dashboard is a small React app in [`frontend/`](frontend/)
+(Vite, TypeScript, Tailwind CSS v4, Phosphor icons, Geist fonts). It reads
+`GET /api/session` (CSRF token, poller status) and `GET /api/quarantine`, and posts to
+`/api/restore/{id}` with the session cookie and an `X-CSRF-Token` header. The built
+files are committed to `src/phishguard/static/app/`, so running PhishGuard needs only
+Python; CI rebuilds them and fails if the committed copy is out of date. Login and Quick
+Scan stay server-rendered (FastAPI + Jinja, htmx for the scan form).
+
+Working on the dashboard:
 ```bash
-curl -s -X POST http://127.0.0.1:5000/api/v1/scan/sms -H "Authorization: Bearer $API_KEY" \
-     -H "Content-Type: application/json" -d '{"text": "Your KYC expires today...", "sender": "+91 98301 44728"}'
-curl -s -X POST http://127.0.0.1:5000/api/v1/scan/email -H "Authorization: Bearer $API_KEY" \
-     --data-binary @message.eml
+cd frontend
+npm ci --ignore-scripts      # exact versions from package-lock.json
+npm run dev                  # http://localhost:5173, proxies /api to python -m phishguard.web
+npm test                     # Vitest + Testing Library
+npm run build                # typecheck, then write src/phishguard/static/app/ (commit it)
 ```
-| Scan with explanation | Dashboard | Incident |
-|---|---|---|
-| ![SMS scan](docs/screenshots/web_scan_sms.png) | ![Dashboard](docs/screenshots/web_dashboard.png) | ![Incident](docs/screenshots/web_incident.png) |
 
-The app won't start with missing or placeholder secrets. It binds to `127.0.0.1` by
-default; to reach it from other machines, put it behind a TLS reverse proxy rather than
-setting `WEB_HOST=0.0.0.0`.
+Safety: one login from `.env`; the app won't start with a weak secret key or a plain-text
+password; every form and the Restore call carry a CSRF token; login and Restore are rate
+limited; only the app's own scripts, styles and fonts may load (strict CSP, no inline
+code); every Restore is in the hash-chained audit log. It listens on `127.0.0.1` only;
+the web app holds your IMAP app password, so keep it on your own machine. Headless use
+without the web page: `python -m phishguard.poller run` (see above).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,
