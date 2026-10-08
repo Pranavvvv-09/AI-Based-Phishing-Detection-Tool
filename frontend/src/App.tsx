@@ -2,7 +2,7 @@ import { ArrowClockwise, Eye } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ConfirmRestoreDialog } from "./components/ConfirmRestoreDialog";
 import { QuarantineTable } from "./components/QuarantineTable";
-import { StatStrip } from "./components/StatStrip";
+import { StatCards } from "./components/StatCards";
 import { type Filter, StatusFilter } from "./components/StatusFilter";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
@@ -108,7 +108,8 @@ export default function App() {
   }, [rows, filter]);
 
   return (
-    <div className="min-h-[100dvh]">
+    <div className="relative isolate min-h-[100dvh]">
+      <div aria-hidden="true" className="spotlight" />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-zinc-900 focus:px-4 focus:py-2"
@@ -133,7 +134,7 @@ export default function App() {
           </p>
         )}
 
-        <StatStrip kpis={kpis} />
+        <StatCards kpis={kpis} />
 
         <section aria-labelledby="queue-title" className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -168,7 +169,8 @@ export default function App() {
 
           <p className="text-xs text-zinc-500">
             Chips show the strongest signals: red pushes towards phishing, green towards legitimate.
-            A solid chip is strong evidence, a tinted one medium, an outlined one weak.
+            A solid chip is strong evidence, a tinted one medium, a dashed one weak. Hover or focus a
+            chip to read the evidence.
           </p>
         </section>
       </main>

@@ -180,7 +180,7 @@ function ReasonList({ row }: { row: QuarantineRow }) {
         {row.reasons.map((reason) => (
           <li key={`${reason.source}-${reason.code}`} className="grid grid-cols-[minmax(0,14rem)_1fr_auto] items-start gap-3 max-sm:grid-cols-[1fr_auto]">
             <span className="min-w-0">
-              <SignalChip reason={reason} />
+              <SignalChip reason={reason} tooltip={false} />
             </span>
             <span className="text-zinc-300 max-sm:col-span-2 max-sm:row-start-2">{reason.detail}</span>
             <span className="whitespace-nowrap text-right font-mono text-xs text-zinc-500">
