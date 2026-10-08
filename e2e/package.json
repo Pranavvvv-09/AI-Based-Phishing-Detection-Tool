@@ -1,0 +1,13 @@
+{
+  "name": "phishguard-e2e",
+  "description": "Playwright browser tests for the PhishGuard web app",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^26.6.4"
+  },
+  "private": true
+}
