@@ -35,6 +35,9 @@ class Settings:
     intel_enabled: bool
     trusted_authserv_id: str
     extra_brands_file: str
+    web_host: str
+    web_port: int
+    web_cookie_secure: bool
     # Secrets: hidden from repr() so printing settings never leaks them.
     imap_app_password: str = field(repr=False)
     api_key: str = field(repr=False)
@@ -111,6 +114,10 @@ def load_settings(
     if not authserv or not all(c.isalnum() or c in ".-" for c in authserv):
         raise ConfigError("TRUSTED_AUTHSERV_ID must be a hostname such as mx.google.com")
 
+    web_host = env.get("WEB_HOST", "127.0.0.1").strip()
+    if not web_host or not all(c.isalnum() or c in ".:-" for c in web_host):
+        raise ConfigError("WEB_HOST must be a hostname or IP address")
+
     return Settings(
         imap_host=env.get("IMAP_HOST", "imap.gmail.com").strip(),
         imap_user=env.get("IMAP_USER", "").strip(),
@@ -124,6 +131,10 @@ def load_settings(
         intel_enabled=_bool(env, "INTEL_ENABLED", False),
         trusted_authserv_id=authserv,
         extra_brands_file=env.get("EXTRA_BRANDS_FILE", "").strip(),
+        web_host=web_host,
+        web_port=_int(env, "WEB_PORT", 5000, 1024, 65535),
+        # Browsers treat http://localhost as secure, so Secure cookies work locally too.
+        web_cookie_secure=_bool(env, "WEB_COOKIE_SECURE", True),
         imap_app_password=env.get("IMAP_APP_PASSWORD", ""),
         api_key=env.get("API_KEY", ""),
         flask_secret_key=env.get("FLASK_SECRET_KEY", ""),

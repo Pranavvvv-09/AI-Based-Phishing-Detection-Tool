@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid">
+  <section class="card">
+    <h1>Scan an email</h1>
+    <form method="post" enctype="multipart/form-data">
+      {{ email_form.csrf_token }}
+      <label>{{ email_form.eml.label.text }} {{ email_form.eml(accept=".eml,message/rfc822") }}</label>
+      <button type="submit">Scan email</button>
+    </form>
+    <p class="hint">Headers, links and attachments are checked without opening anything.</p>
+  </section>
+  <section class="card">
+    <h1>Scan an SMS</h1>
+    <form method="post">
+      {{ sms_form.csrf_token }}
+      <label>{{ sms_form.text.label.text }} {{ sms_form.text(rows=4) }}</label>
+      <label>{{ sms_form.sender.label.text }} {{ sms_form.sender(placeholder="e.g. VM-HDFCBK-S or +91 98xxx xxxxx") }}</label>
+      <button type="submit">Scan SMS</button>
+    </form>
+  </section>
+</div>
+{% if verdict %}{% include "_verdict.html" %}{% endif %}
+{% endblock %}

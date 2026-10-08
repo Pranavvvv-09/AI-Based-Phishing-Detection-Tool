@@ -158,3 +158,13 @@ def test_extra_brands_file_is_validated(tmp_path, restore_brands, content):
     path.write_text(content)
     with pytest.raises(ValueError):
         load_extra_brands(path)
+
+
+def test_indian_consumer_brands_and_no_typo_matching_for_ordinary_words():
+    from phishguard.domains import lookalike_brand, official_brand
+
+    assert official_brand("swiggy.in") == "swiggy" and official_brand("zoma.to") == "zomato"
+    assert lookalike_brand("swiggy-account-alerts.com") == "swiggy"
+    assert lookalike_brand("zomato-refund.in") == "zomato"
+    assert lookalike_brand("tomato.in") is None  # one edit from "zomato", but a real word
+    assert lookalike_brand("mantra.com") is None  # one edit from "myntra"

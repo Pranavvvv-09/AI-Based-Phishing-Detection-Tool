@@ -26,6 +26,8 @@ The full download is about 1.7 GB, most of it honeypot attachments that are neve
 | `data/curated/modern_lures.csv` | 112 (committed) | modern phishing + legitimate | Hand-written for this project | Same as this repository |
 | `data/curated/sms_transactional_eval.csv` | 72 (committed, frozen) | **evaluation only**: genuine transactional SMS + smishing | Hand-written for this project | Same as this repository |
 | `data/curated/sms_independent_bank.csv` | 12 (committed, frozen) | **evaluation only**: genuine bank SMS | Example SMS from two MIT-licensed open-source parsers | MIT (see `THIRD_PARTY_NOTICES.md`) |
+| `data/curated/sms_eval_v2.csv` | 120 (committed, frozen) | **evaluation only**: genuine SMS + smishing, each with its **sender** and realistic links | Hand-written for this project | Same as this repository |
+| `data/curated/email_eval_v2.csv` | 60 (committed, frozen) | **evaluation only**: modern genuine notices + phishing, each with sender, DMARC result and Reply-To | Hand-written for this project | Same as this repository |
 | `data/curated/sms_templates.csv` | 663 (committed, generated) | experiment data for SMS variants V1/V2 (**not** used by the shipped model) | `scripts/generate_sms_templates.py` | Same as this repository |
 
 **Total training rows: 6,125 phishing and 30,304 legitimate,** plus the curated train half.
@@ -159,6 +161,89 @@ optimistic. The blend costs recall on the public 2011-2022 smishing at the 0.8 l
 (85.1% to 54.0%), although 90.8% is still flagged for review. Genuine transactional SMS
 are still flagged too often (about 1 in 5). The real fix is consented, anonymised
 transactional SMS from your *own* phone, evaluated on a fresh frozen set.
+
+## Fresh frozen sets for the Day 6 rule fixes (`*_eval_v2.csv`)
+The test half of `sms_transactional_eval.csv` was looked at during the SMS experiment,
+so it can't judge a new fix fairly. Before any of the SMS sender/link rules or the email
+false-positive fix was written, two new sets were committed:
+
+* **`sms_eval_v2.csv`**: 120 SMS (60 genuine, 60 smishing) in 16 categories, each with
+  the `sender` as a phone would show it: Indian DLT headers (`VM-HDFCBK-S`), mobile
+  numbers, email addresses (iMessage-style) and fictional foreign numbers. Links are
+  realistic, so the link rules run: genuine messages use the companies' real domains
+  (`amzn.in`, `zoma.to`, `hdfcbank.com`, ...); smishing uses **invented** domains that
+  must never be visited (the project never fetches links). Deliberately hard cases are
+  included on both sides: genuine messages from personal numbers (couriers, delivery
+  partners), genuine SMS with toll-free and "SMS BLOCK" numbers, smishing from
+  header-style senders, and smishing with **no link or number at all** (OTP theft,
+  "Hi Mum", wrong-number).
+* **`email_eval_v2.csv`**: 60 modern emails (30 genuine, 30 phishing) with sender,
+  display name, the DMARC result your provider would record, and Reply-To. Most genuine
+  mail comes from companies outside the built-in brand list (Swiggy, Groww, Myntra,
+  your employer, your college), and most phishing passes DMARC from the attacker's
+  **own** domain, as modern phishing does.
+
+Phone numbers are placeholders (`{MOBILE}`, `{TOLLFREE}`) filled in at load time, so
+no real person's number is published. Each category has a validation third (chooses
+between variants) and a test two-thirds (only reported). The same author wrote the sets
+and the rules, which is a bias we can only limit, not remove: the sets were frozen
+first and include cases written to defeat the rules.
+
+### Results of the Day 6 rule fixes (`scripts/rules_experiment.py`)
+The variants, guards and choice rule were committed before the script was first run
+(see its docstring). Both guards passed for every variant.
+
+* **Email: E0 kept.** Dropping person pronouns (E1) or pronouns plus "account" (E2)
+  from the email model tied with E0 on the validation third (F1 0.875 each), so the
+  rule kept the simplest variant. On test E2 would have done better (genuine mail at
+  quarantine level 9.1% instead of 18.2%), but switching after seeing the test data
+  would make the reported numbers optimistic.
+* **SMS: S2 chosen** (sender evidence, brand-vs-link mismatch and the two capped
+  credits). It won on validation mainly through fewer false positives (1 of 27 instead
+  of 4).
+
+| Blind result on the v2 test thirds | Before (E0 / S0) | **Pre-registered choice** | After the post-hoc fixes below |
+|---|---|---|---|
+| Genuine SMS flagged / at quarantine level (n=45) | 17.8% / 4.4% | **11.1% / 0%** | 13.3% / 0% |
+| Smishing flagged / quarantined (n=45) | 77.8% / 62.2% | **82.2% / 66.7%** | 84.4% / 66.7% |
+| Genuine modern email flagged / quarantined (n=22) | 22.7% / 18.2% | **22.7% / 18.2%** (E0) | 13.6% / 9.1% |
+| Phishing email flagged / quarantined (n=22) | 95.5% / 86.4% | **95.5% / 86.4%** | 95.5% / 86.4% |
+
+"Before" already includes two brand-list corrections made while writing the rules:
+HDFC's alert domain `hdfcbank.net` and Amazon's short-link domains (`amzn.in`, `amzn.to`,
+`a.co`). The first was found on an email validation message.
+
+**Post-hoc fixes (not blind).** Two changes were made *after* reading the test
+errors, so their test numbers (last column) are optimistic:
+1. A bug: bare short links with one-letter domains (`t.me/...`, `wa.me/...`, `a.co/...`)
+   were dropped as "not a domain", so a Telegram stock-tip scam earned the
+   "nothing to act on" credit.
+2. Thirteen Indian consumer services added to the brand list (Swiggy, Zomato, Myntra,
+   Nykaa, BigBasket, Meesho, Groww, Zerodha, Uber, Ola, MakeMyTrip, IndiGo, Hotstar).
+   Their genuine DMARC-verified mail now earns the verified-sender credit, and scams
+   imitating them (`swiggy-account-alerts.com`) are caught as lookalikes. It also adds
+   one SMS false positive: a Zomato delivery partner texting from a personal number.
+
+**Effect on the other sets** (final scorer vs. the original Day 6 scorer):
+
+| Set | Before | After |
+|---|---|---|
+| Old frozen SMS test: genuine flagged / quarantined | 20.8% / 4.2% | **4.2% / 0%** |
+| Old frozen SMS test: smishing flagged / quarantined | 100% / 79.2% | 83.3% / 45.8% |
+| Independent bank SMS flagged (of 12) | 2 | **1** |
+| Public SMS test split: FPR / recall / recall at quarantine | 0.4% / 90.8% / 54.0% | **0.1%** / 90.8% / 50.6% |
+| Modern hand-written test as SMS: FPR / recall | 21.4% / 85.7% | **10.7%** / 82.1% |
+| Honeypot future phishing, legitimate email test split | unchanged | unchanged |
+
+**The cost, honestly:** the "nothing to act on" credit lets through scams that set up
+contact *later* or ask for a payment inside the message: OTP theft ("share the OTP
+you receive"), "Hi Mum, send money to my friend's UPI", wrong-number romance openers,
+UPI collect requests and "pay a processing fee" prizes. On the old frozen test 3 of its
+4 newly missed smishing are of this kind (the fourth has a link on the reserved `.test` TLD, which the bare-domain
+extractor ignores on purpose, so it looks link-free). Quarantine-level recall also
+falls, so more smishing goes to review instead of quarantine. Remaining false positives
+are genuine alerts whose formal wording the SMS model still dislikes, and couriers or
+delivery partners texting from personal numbers while naming their company.
 
 ## Handling rules
 - These files contain **real phishing**, with live malicious links and, in the honeypot,

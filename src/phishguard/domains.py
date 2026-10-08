@@ -27,7 +27,8 @@ BRANDS: dict[str, frozenset[str]] = {
          "paypal.es"}
     ),
     "amazon": frozenset(
-        {"amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonses.com", "amazonaws.com"}
+        {"amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonses.com", "amazonaws.com",
+         "amzn.in", "amzn.to", "a.co"}  # the last three: Amazon's own short-link domains
     ),
     "microsoft": frozenset(
         {
@@ -71,7 +72,7 @@ BRANDS: dict[str, frozenset[str]] = {
     "indiapost": frozenset({"indiapost.gov.in"}),
     # --- Indian banks, payments, government (common scam targets) ---
     "sbi": frozenset({"sbi.co.in", "onlinesbi.sbi", "sbi.bank.in"}),
-    "hdfc": frozenset({"hdfcbank.com", "hdfc.bank.in"}),
+    "hdfc": frozenset({"hdfcbank.com", "hdfcbank.net", "hdfc.bank.in"}),  # .net: InstaAlerts
     "icici": frozenset({"icicibank.com", "icici.bank.in"}),
     "axis": frozenset({"axisbank.com", "axis.bank.in"}),
     "kotak": frozenset({"kotak.com"}),
@@ -91,6 +92,21 @@ BRANDS: dict[str, frozenset[str]] = {
     "epfo": frozenset({"epfindia.gov.in"}),
     "rbi": frozenset({"rbi.org.in"}),
     "lic": frozenset({"licindia.in"}),
+    # --- Indian consumer apps that send account, order and payment notices (and are
+    # impersonated in refund, KYC and "order on hold" scams) ---
+    "swiggy": frozenset({"swiggy.com", "swiggy.in"}),
+    "zomato": frozenset({"zomato.com", "zoma.to"}),
+    "myntra": frozenset({"myntra.com"}),
+    "nykaa": frozenset({"nykaa.com"}),
+    "bigbasket": frozenset({"bigbasket.com"}),
+    "meesho": frozenset({"meesho.com"}),
+    "groww": frozenset({"groww.in"}),
+    "zerodha": frozenset({"zerodha.com", "zerodha.net"}),
+    "uber": frozenset({"uber.com"}),
+    "ola": frozenset({"olacabs.com"}),
+    "makemytrip": frozenset({"makemytrip.com"}),
+    "indigo": frozenset({"goindigo.in"}),
+    "hotstar": frozenset({"hotstar.com"}),
 }
 
 # Phrases in a display name or link text that claim a brand (brand key -> phrases).
@@ -119,10 +135,15 @@ BRAND_PHRASES: dict[str, tuple[str, ...]] = {
     "rbi": ("rbi", "reserve bank of india"),
     "lic": ("lic", "life insurance corporation"),
     "twitter": ("twitter",),
+    "indigo": ("indigo airlines", "goindigo", "indigo flight"),  # not the colour
+    "hotstar": ("hotstar", "jiohotstar"),
+    "ola": ("ola cabs", "ola ride", "olacabs"),
 }
 
 # Short names that are also ordinary words: only matched as whole tokens, never fuzzily.
 _MIN_FUZZY_LEN = 6
+# Long names one edit away from ordinary words (tomato, mantra): no typo matching.
+_NO_FUZZY = frozenset({"zomato", "myntra"})
 
 # Domains where *anyone* can get an address. Some are official brand domains (gmail.com,
 # outlook.com, Microsoft 365's default tenant domain onmicrosoft.com), but an address
@@ -248,7 +269,9 @@ def lookalike_brand(domain: str) -> str | None:
             return brand
         # Substring and one-edit typos only for longer names: "paypalsecure"/"paypall"
         # yes, but "applebees"/"apply" (apple) and "paytv" (paytm) are real words.
-        if len(brand) >= _MIN_FUZZY_LEN and (brand in shape or _distance_at_most_one(shape, brand)):
+        if len(brand) >= _MIN_FUZZY_LEN and brand not in _NO_FUZZY and (
+            brand in shape or _distance_at_most_one(shape, brand)
+        ):
             return brand
     return None
 

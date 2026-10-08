@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PhishGuard{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="{{ url_for('scan') }}">PhishGuard</a>
+    {% if current_user.is_authenticated %}
+    <nav>
+      <a href="{{ url_for('scan') }}">Scan</a>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        {{ logout_form.csrf_token }}
+        <button type="submit" class="link">Log out</button>
+      </form>
+    </nav>
+    {% endif %}
+  </header>
+  <main>
+    {% for message in get_flashed_messages() %}<p class="flash">{{ message }}</p>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>Static analysis only: PhishGuard never opens links or attachments.</footer>
+</body>
+</html>

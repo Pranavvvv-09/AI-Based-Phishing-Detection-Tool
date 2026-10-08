@@ -16,6 +16,9 @@ Test sets (all held out from training):
 * Frozen SMS sets (data/curated/sms_transactional_eval.csv, validation and test halves,
   and sms_independent_bank.csv): committed before the SMS false-positive fix and never
   used for training. The validation half chose the fix; the test half is only reported.
+* Fresh frozen sets (data/curated/sms_eval_v2.csv with senders, email_eval_v2.csv as
+  .eml files with your provider's Authentication-Results): committed before the Day 6
+  rule fixes; scripts/rules_experiment.py chose on their validation thirds.
 
 "Flagged" = review or quarantine (score >= 0.5); "quarantined" = score >= threshold.
 Unanalysed (fail-safe) verdicts count as flagged, because they go to review.
@@ -43,6 +46,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from phishguard import scorer as sc  # noqa: E402
 from phishguard import text_model as tm  # noqa: E402
 from phishguard.config import load_settings  # noqa: E402
+
+sys.path.insert(0, str(ROOT / "scripts"))
+import rules_experiment as rx  # noqa: E402  (frozen v2 sets: loaders shared, not copied)
 
 OUT = ROOT / "models" / "scorer_metrics.json"
 
@@ -100,6 +106,8 @@ def main() -> int:
             "verified_sender_credit": sc.VERIFIED_SENDER_CREDIT,
             "aligned_links_credit": sc.ALIGNED_LINKS_CREDIT,
             "review_threshold": sc.REVIEW_THRESHOLD, "quarantine_threshold": threshold,
+            "sms_no_contact_credit": sc.NO_CONTACT_CREDIT,
+            "sms_aligned_links_credit": sc.ALIGNED_SMS_LINKS_CREDIT,
         },
     }
 
@@ -182,6 +190,26 @@ def main() -> int:
         "legitimate": _summarise([scorer.scan_sms(t) for t in independent["text"]], False,
                                  threshold),
     }
+
+    # ---------------- fresh frozen sets (v2): senders for SMS, real headers for email
+    sms_v2, email_v2 = rx.load_sms_eval(), rx.load_email_eval()
+    for split in ("validation", "test"):
+        part = sms_v2[sms_v2["split"] == split]
+        verdicts = {lab: [scorer.scan_sms(t, sender=s) for t, s in
+                          zip(part.loc[part["label"] == lab, "text"],
+                              part.loc[part["label"] == lab, "sender"], strict=True)]
+                    for lab in (0, 1)}
+        results[f"sms_v2_{split}"] = {
+            "smishing": _summarise(verdicts[1], True, threshold),
+            "legitimate": _summarise(verdicts[0], False, threshold),
+        }
+        part = email_v2[email_v2["split"] == split]
+        verdicts = {lab: [scorer.scan_email_bytes(rx.email_bytes(row)) for _, row in
+                          part[part["label"] == lab].iterrows()] for lab in (0, 1)}
+        results[f"email_v2_{split}"] = {
+            "phishing": _summarise(verdicts[1], True, threshold),
+            "legitimate": _summarise(verdicts[0], False, threshold),
+        }
 
     # ---------------- fixtures
     fixtures = {}

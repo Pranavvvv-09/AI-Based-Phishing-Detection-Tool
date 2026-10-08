@@ -1,0 +1,121 @@
+id,split,label,category,sender,text
+1,validation,0,bank_debit,VM-HDFCBK-S,"Sent Rs.2,340.00 from HDFC Bank A/c *4417 to SURESH TRADERS on 07-10-26. Not you? Call {TOLLFREE} or SMS BLOCK 4417 to {MOBILE}"
+2,test,0,bank_debit,AD-SBIINB-S,Dear SBI User - your A/c X9921 debited by Rs. 560.00 on 06Oct26 transfer to ZOMATO Ref No 628011457731. If not done by you call {TOLLFREE} -SBI
+3,test,0,bank_debit,JM-CANBNK-S,"An amount of INR 4,500.00 has been DEBITED to your account XXX7720 on 05/10/2026 towards ATM WDL. Total Avail.Bal INR 11,203.40 - Canara Bank"
+4,test,0,bank_debit,VK-ICICIT-S,"ICICI Bank Acct XX902 debited for Rs 1,180.00 on 07-Oct-26; BESCOM credited. UPI:428812773310. Call {TOLLFREE} for dispute. SMS BLOCK 902 to {MOBILE}."
+5,validation,1,bank_debit,{MOBILE},HDFC Bank: Rs 49999 debited from your account for Rewards conversion. If not done by you cancel immediately at hdfc-reward-cancel.in/stop
+6,test,1,bank_debit,{MOBILE},"Dear SBI customer, Rs.24,800 debit request received from your a/c. To cancel this transaction call our cancellation desk {MOBILE} within 30 mins."
+7,test,1,bank_debit,VM-ALERTS,Your A/c XX4471 will be debited Rs 9999 for annual card charges today. To reverse charges update details at https://bit.ly/3rvChg9
+8,test,1,bank_debit,{MOBILE},ICICI: Unauthorised debit of Rs 15000 detected. Your account is on hold. Verify yourself now: icici-secure-verify.top/login
+9,validation,0,bank_credit,AX-KOTAKB-S,"Received Rs.3,000.00 in your Kotak Bank a/c X3318 from MEERA JOSHI on 06-10-26. UPI Ref 628114902211. Bal Rs 22,450.10"
+10,test,0,bank_credit,VM-AXISBK-S,"Your Axis Bank A/c XX7790 has been credited with INR 52,300.00 on 01-10-2026 by NEFT/SALARY/TCS LTD. Available balance INR 61,872.55"
+11,test,0,bank_credit,JD-BOBTXN-S,"Rs.2,100.00 Credited to A/c ...5528 thru UPI/628201114567 by priyanka.r@okaxis. Total Bal:Rs.8,904.00CR. -Bank of Baroda"
+12,test,0,bank_credit,AD-HDFCBK-S,"Update! INR 1,450.00 refund from AMAZON credited to HDFC Bank Card x8812 on 04-OCT-26. Avl Lmt INR 88,210"
+13,validation,1,bank_credit,{MOBILE},Congratulations! Rs 25000 has been credited to your PM Kisan account. Complete your e-KYC to withdraw: pmkisan-ekyc.online/claim
+14,test,1,bank_credit,{MOBILE},"Sir I sent Rs 5000 to your Paytm by mistake, it was for my brother's hospital. Please return it, I am sending you the payment request now. God bless"
+15,test,1,bank_credit,AX-REWARD,Dear Customer your 7840 SBI reward points (worth Rs 7840) expire today. Redeem now to your account: sbi-yono-points.xyz
+16,test,1,bank_credit,salaryupdate.hr@outlook.com,Your salary credit for October is on hold due to incomplete bank details. Update your account within 24 hrs at payroll-hrportal.co/update to avoid delay.
+17,validation,0,card_spend,VM-ICICIT-S,"INR 849.00 spent on ICICI Bank Card XX5521 on 07-Oct-26 at SWIGGY. Avl Lmt: INR 1,12,430. If not you, call {TOLLFREE} or SMS BLOCK 5521 to {MOBILE}"
+18,test,0,card_spend,AX-AXISBK-S,"Spent INR 1,999 Axis Bank Card no. XX0034 06-10-26 19:42:10 IST AMAZON PAY IN Avl Limit: INR 74,553 Not you? SMS BLOCK 0034 to {MOBILE}"
+19,test,0,card_spend,VK-SBICRD-S,"Transaction of Rs.3,245.00 on your SBI Credit Card ending 6678 at DMART on 05/10/26. Total outstanding Rs. 21,890. Pay using the SBI Card app."
+20,test,0,card_spend,JM-KOTAKB-S,"Rs.12,000 spent on Kotak Credit Card x4401 at MAKEMYTRIP on 03-Oct-26. Convert to EMI on the Kotak app. Not you? Call {TOLLFREE}"
+21,validation,1,card_spend,{MOBILE},"Your HDFC credit card is charged Rs 29,999 for Apple iPhone order. If not you, cancel order and block card at hdfccard-block.com"
+22,test,1,card_spend,VM-CRDHLP,Your credit card limit increase of Rs 2 lakh is approved. Activate within 24 hrs by sharing card details with our executive at {MOBILE} else offer expires
+23,test,1,card_spend,{MOBILE},Axis Bank: Rs 18450 spent on your card at a foreign merchant. If this was not you reply NO with your card number and expiry for immediate block.
+24,test,1,card_spend,+1 (415) 555-0148,Chase Fraud Alert: did you attempt a $1249.00 purchase at BESTBUY.COM? Reply YES or NO. If NO visit chase-fraudcenter.com to secure your card.
+25,validation,0,upi,AD-PHONPE-S,Paid Rs.250 to Shree Ganesh Medicals using PhonePe UPI. UPI Ref: 628077120034. Check history in the PhonePe app.
+26,test,0,upi,JD-PAYTMB-S,Rs.90 sent to Raju Auto Rickshaw via Paytm UPI from a/c xx6021 on 07 Oct. UPI Ref 628144039902.
+27,test,0,upi,VM-SBIUPI-S,Dear UPI user A/C X0021 debited by 150.0 on date 06Oct26 trf to CHAI POINT Refno 627900113442. If not u? call {TOLLFREE}. -SBI
+28,test,0,upi,VK-NPCIBH-S,Your UPI PIN has been changed successfully for the account linked to BHIM. If you did not request this call {TOLLFREE} immediately.
+29,validation,1,upi,{MOBILE},You have received a payment request of Rs 4999 as cashback from PhonePe. Enter your UPI PIN to receive the money in your account.
+30,test,1,upi,{MOBILE},"Hello sir, I am from OLX buyer side. Army person. Sending you QR code for payment of Rs 15,000 for sofa, scan and enter PIN to receive amount."
+31,test,1,upi,VM-UPIHLP,Your UPI ID will be blocked today due to KYC non-compliance as per NPCI rules. Re-verify now: npci-upi-kyc.in/verify
+32,test,1,upi,{MOBILE},Google Pay: You won a scratch card of Rs 1500! Claim before midnight at gpay-scratch-reward.click
+33,validation,0,otp,AD-AXISBK-T,Your OTP for Axis Bank NetBanking login is 482913. Valid for 3 minutes. Do not share this OTP with anyone. Axis Bank never asks for OTP.
+34,test,0,otp,VM-FLPKRT-T,778201 is the OTP for your Flipkart account. Do not share it with anyone. Flipkart never calls you asking for OTP.
+35,test,0,otp,JD-IRCTCI-T,OTP to complete your IRCTC booking for PNR 4521788901 is 330912. Valid for 10 minutes. Never share your OTP.
+36,test,0,otp,AX-UIDAI-T,OTP for Aadhaar (XX4412) is 552018 (valid for 10 mins). Do not share with anyone. -UIDAI
+37,validation,1,otp,{MOBILE},This is the Amazon delivery team. We sent you a code to confirm your address change. Please forward that 6 digit code to this number to receive your parcel.
+38,test,1,otp,{MOBILE},"Hi, I am from SBI customer care. Your account will be frozen today due to PAN not linked. You will now receive an OTP, please share it with me to stop the block."
+39,test,1,otp,+44 7700 900461,"Hey, I accidentally sent my WhatsApp verification code to your number. Can you send it back to me please? It's urgent"
+40,test,1,otp,VM-ELECBD,Your electricity KYC is pending. Our officer will call you shortly. Please share the OTP you receive with him to avoid disconnection tonight.
+41,validation,0,delivery,JD-AMAZON-S,Delivered: your package with Philips Trimmer was handed to resident. Track: https://amzn.in/d/5hR2kPq
+42,test,0,delivery,AD-DLVERY-S,Delhivery: Your shipment 1432876512 from Myntra is out for delivery today. Track at https://www.delhivery.com/track/package/1432876512
+43,test,0,delivery,{MOBILE},"Hi I am your Bluedart courier boy, I am at your gate with parcel, nobody is answering bell. Please come down or tell me where to keep it."
+44,test,0,delivery,VM-BLDART-S,"Your BlueDart shipment AWB 77215544 will be delivered on 09-Oct between 10 AM and 6 PM. No OTP or payment is needed, no action required."
+45,validation,1,delivery,{MOBILE},India Post: your parcel is held at the warehouse due to incomplete address. Update within 12 hours: indiapost-redeliver.top/in
+46,test,1,delivery,usps.notice42@icloud.com,USPS: The package arrived at the warehouse but cannot be delivered due to incomplete address information. Please confirm your address in the link: usps-redelivery-help.com
+47,test,1,delivery,{MOBILE},DHL: Your package is on hold. Customs duty of Rs 49 pending. Pay now to release: https://dhl-customs-pay.in/track
+48,test,1,delivery,VM-DELIVR,Your Delhivery parcel could not be delivered. Reschedule delivery using our app: https://bit.ly/delv-app-apk
+49,validation,0,order_food,VM-SWIGGY-S,Your Swiggy order from Meghana Foods is on the way! Arriving in 18 mins. Your delivery partner is Imran.
+50,test,0,order_food,AD-ZOMATO-S,Order delivered! Hope you enjoy your food from Burger Singh. Rate your order: https://zoma.to/r/3kd82
+51,test,0,order_food,JD-FLPKRT-S,"Your order for boAt Airdopes 141 has been shipped. Expected delivery by Sat, 10 Oct. Track: https://www.flipkart.com/account/orders"
+52,test,0,order_food,{MOBILE},"Sir, Zomato delivery partner here. Restaurant is late by 10 min, I am waiting outside, food coming soon."
+53,validation,1,order_food,{MOBILE},Flipkart Big Billion Lucky Draw: your number won an iPhone 16 for Rs 499 only. Pay delivery charge to claim: flipkart-luckydraw.shop
+54,test,1,order_food,AX-OFFERS,Amazon: You are selected for a Rs 5000 gift voucher in our anniversary survey. Complete survey in 2 mins: amazon-rewards-survey.xyz
+55,test,1,order_food,{MOBILE},Dear customer your Swiggy refund of Rs 680 is pending. Call our refund team on {MOBILE} and share UPI to receive money
+56,test,1,order_food,JD-FKRTOF,Flipkart: your order is cancelled due to payment failure. Pay again within 1 hour to avoid cancellation: fkrt-pay-retry.in/order
+57,validation,0,telecom,VM-AIRTEL-S,Your Airtel prepaid plan of Rs 299 expires on 12-Oct. Recharge now on the Airtel Thanks app or i.airtel.in/recharge
+58,test,0,telecom,JD-JIOINF-S,"Recharge successful! Rs 349 plan activated on Jio number 98XXXXXX21, valid till 06-Nov-26. 2GB/day + unlimited calls."
+59,test,0,telecom,AX-VIINTL-S,"Your Vi postpaid bill of Rs 499.00 for Sep is generated, due 18-Oct. Pay on the Vi app. Ignore if paid already."
+60,test,0,telecom,VM-AIRTEL-S,"Dear customer, 80% of your daily 2GB data is used. It will reset at midnight. Need more? Get data packs on the Airtel Thanks app."
+61,validation,1,telecom,{MOBILE},Dear Jio user your SIM will be blocked within 2 hours as your eKYC has expired. Call Jio KYC officer {MOBILE} immediately.
+62,test,1,telecom,VM-TRAIHQ,"TRAI notice: your mobile number will be disconnected in 2 hours due to illegal activity. Press 9 to speak to the officer, else call {MOBILE}"
+63,test,1,telecom,{MOBILE},Airtel: Congratulations! You have won free 84 days unlimited recharge. Activate now: airtel-free-recharge.top
+64,test,1,telecom,{MOBILE},Your Vi number is selected for 5G SIM upgrade. Reply with your 20 digit SIM number printed on the card to activate 5G today.
+65,validation,0,bill,VM-BESCOM-S,"Dear Consumer, Bill for RR No EW12345 for Sep-26 is Rs 1,240.00, due date 20-10-2026. Pay online at bescom.karnataka.gov.in or the BESCOM app."
+66,test,0,bill,AD-TATAPW-S,"Payment of Rs 2,180.00 received for CA No 60012345678 on 05-Oct-26. Thank you. - Tata Power"
+67,test,0,bill,JD-MGLGAS-S,"Your Mahanagar Gas bill of Rs 612 for BP No 3001882 is due on 15/10/2026. Pay via UPI, net banking or the MGL Connect app."
+68,test,0,bill,VK-IGLCNG-S,Reminder: meter reading for your IGL connection is scheduled between 8 and 12 Oct. Please keep the meter accessible. No payment needed now.
+69,validation,1,bill,{MOBILE},Dear consumer your electricity power will be disconnected tonight at 9.30 PM because your previous month bill was not updated. Please immediately contact our electricity officer {MOBILE}
+70,test,1,bill,{MOBILE},Your gas connection is suspended due to unpaid bill of Rs 312. Pay now to avoid disconnection: mgl-billpay.online
+71,test,1,bill,VM-PWRBIL,Electricity bill unpaid. Connection will be cut today. Download the bill update app to pay: https://bit.ly/EB-update-app
+72,test,1,bill,{MOBILE},FASTag KYC expired. Your FASTag will be blacklisted today and Rs 2000 penalty charged. Update KYC at fastag-kyc-update.com
+73,validation,0,travel,JD-IRCTCI-S,"PNR:4521788901,TRN:12627,DOJ:12-10-26,SL,SBC-NDLS,Dep:19:20,B4 32,Fare:1,045,C Fee:17.7+PG. Happy journey -IRCTC"
+74,test,0,travel,AD-INDIGO-S,"Web check-in is open for your IndiGo flight 6E 5321 BLR-DEL on 14 Oct, 07:15. Check in on the IndiGo app or goindigo.in"
+75,test,0,travel,VM-REDBUS-S,"Your redBus ticket TN58291 for Bengaluru to Chennai on 11-Oct, 22:30, seat 14U is confirmed. Boarding point: Madiwala."
+76,test,0,travel,JD-UBERIN-S,Your Uber trip receipt: Rs 286 paid by UPI for the trip from Koramangala to Indiranagar. Thank you for riding with Uber.
+77,validation,1,travel,{MOBILE},IRCTC: your train ticket refund of Rs 1045 is pending. Fill the refund form to receive money: irctc-refund-form.in
+78,test,1,travel,{MOBILE},Congratulations! You won a free Goa trip for 2 from MakeMyTrip. Pay only Rs 999 registration fee. Call {MOBILE} to book
+79,test,1,travel,VM-ECHALN,Parivahan: e-Challan of Rs 1000 issued for your vehicle for over speeding. Pay before due date to avoid court: https://echallan-parivahan.in.net/pay
+80,test,1,travel,{MOBILE},Dear passenger your Indigo flight is cancelled due to technical reasons. For refund or rebooking call our helpline {MOBILE}
+81,validation,0,health,VM-APOLLO-S,Your appointment with Dr. Kavitha R (Dermatology) at Apollo Clinic Indiranagar is confirmed for 09-Oct 5:30 PM. Reply C to cancel.
+82,test,0,health,AD-PRACTO-S,Reminder: video consultation with Dr. Anil Kumar tomorrow at 11:00 AM. Join from the Practo app 5 minutes before.
+83,test,0,health,JM-1MGPHR-S,Your Tata 1mg order of 3 items is packed and will be delivered by tomorrow. Keep your prescription ready for the delivery agent.
+84,test,0,health,VK-CWNVAX-S,Your vaccination certificate is ready. Download it from the CoWIN app or DigiLocker using your registered mobile number.
+85,validation,1,health,{MOBILE},Your Ayushman Bharat health card is ready. Pay Rs 10 processing fee to activate: ayushman-card-activate.in
+86,test,1,health,{MOBILE},"Dear policyholder your LIC policy bonus of Rs 1,24,500 is ready. Send your bank account number and IFSC to claim before 31 Oct."
+87,test,1,health,AD-MEDCLM,Your health insurance claim is rejected due to missing documents. Upload documents within 24 hrs at star-health-claims.top/upload
+88,test,1,health,{MOBILE},"Hi, this is the Apollo hospital billing desk. Your relative was admitted in emergency, deposit Rs 20,000 urgently to UPI apollo.emergency@ybl"
+89,validation,0,account,VM-NETFLX-S,"A new device signed in to your Netflix account (TV, Mumbai). If this was you, no action needed. If not, change your password in the Netflix app."
+90,test,0,account,AD-GOOGLE-S,G-482201 is your Google verification code. Don't share it with anyone.
+91,test,0,account,JD-PAYTM-S,Your Paytm KYC is complete. You can now use all wallet features. No further action is needed.
+92,test,0,account,VK-HDFCBK-S,"Your NetBanking password was changed on 07-10-26 at 10:12 AM. If not done by you, call {TOLLFREE} immediately. -HDFC Bank"
+93,validation,1,account,{MOBILE},Dear user your Netflix account is on hold because we could not process your last payment. Update payment method: netflix-billing-update.com
+94,test,1,account,{MOBILE},Your Paytm KYC is expired. Your wallet will be blocked today. Call executive {MOBILE} to complete video KYC
+95,test,1,account,apple.support.id@gmail.com,Apple ID: your account was locked for security reasons. Verify your identity at https://apple-id-unlock.support to restore access.
+96,test,1,account,VM-SBIKYC,Dear Customer your SBI YONO account will be suspended today. Please update your PAN card immediately. Click http://sbi-yono-pan.ml/
+97,validation,0,government,AD-ITDEPT-S,"Your Income Tax Return for AY 2026-27 has been processed. Refund of Rs 4,320 is determined. Check status on the e-filing portal incometax.gov.in"
+98,test,0,government,VM-EPFOHO-S,"Dear Member, contribution of Rs 3,600 for Sep-26 received in your PF account. UAN XXXX4410. -EPFO"
+99,test,0,government,JD-UIDAIS-S,Your Aadhaar XX4412 update request URN 2026100712345 is completed. Download e-Aadhaar from myaadhaar.uidai.gov.in
+100,test,0,government,AX-GSTIND-S,GSTR-3B for September 2026 is due on 20-10-2026. File on the GST portal to avoid late fee. Ignore if already filed.
+101,validation,1,government,{MOBILE},Income Tax Department: you are eligible for a tax refund of Rs 15490. Submit your bank details to receive it: incometax-refund-gov.in/claim
+102,test,1,government,{MOBILE},This is Mumbai Cyber Crime Cell. A parcel in your name with illegal items was seized. Call Inspector Sharma on {MOBILE} within 2 hours to avoid arrest.
+103,test,1,government,VM-PMYOJN,PM Yojana 2026: Every citizen gets free laptop. Register with Aadhaar before 15 Oct: pm-laptop-yojana.in
+104,test,1,government,{MOBILE},Your PAN card will be deactivated today as it is not linked with Aadhaar. Update now: pan-aadhaar-link.co.in
+105,validation,0,personal,{MOBILE},Hey are we still on for dinner tonight? I'll book a table for 8.
+106,test,0,personal,{MOBILE},"Reached home safely. Thanks for the lovely evening, the kids loved the cake!"
+107,test,0,personal,{MOBILE},Can you pick up milk and bread on your way back? Also the electrician is coming at 6.
+108,test,0,personal,{MOBILE},Happy birthday da! Have a great year ahead. Party pending ;)
+109,validation,1,personal,{MOBILE},"Hi Mum, this is my new number, my phone fell in water. Can you send Rs 8000 to my friend's UPI, I need to pay a bill today. Will return tomorrow"
+110,test,1,personal,+1 (209) 555-0193,"Hi, is this Emma? We met at the wine tasting last week. I'd love to keep in touch, are you free to chat?"
+111,test,1,personal,{MOBILE},"Hi dear, part time job: earn Rs 3000 daily by liking YouTube videos from home. Message me on WhatsApp to start today"
+112,test,1,personal,{MOBILE},Uncle this is Rohan's friend. Rohan met with an accident and is in hospital. Please send Rs 25000 to this number on GPay urgently. Don't tell aunty.
+113,validation,0,promo_legit,VM-MYNTRA-P,"Big Fashion Festival is LIVE! Up to 80% off on 3 lakh+ styles. Shop on the Myntra app. T&C apply. To unsubscribe, SMS STOP to 1909"
+114,test,0,promo_legit,JD-DOMINO-P,Craving pizza? Get 2 Medium pizzas at Rs 399 each this weekend. Order on the Domino's app. T&C. To opt out SMS STOP to 1909
+115,test,0,promo_legit,AD-BIGBSK-P,Fresh fruits and vegetables at up to 40% off this week on bigbasket. Order now: https://bigbasket.com/offers
+116,test,0,promo_legit,VM-HDFCBK-P,Get a Personal Loan up to Rs 10 lakh with instant approval on HDFC Bank MobileBanking. T&C apply. Visit https://www.hdfcbank.com/personal/borrow
+117,validation,1,promo_scam,{MOBILE},"Congratulations! Your mobile number won Rs 25,00,000 in KBC lottery. To claim call Rana Pratap {MOBILE} on WhatsApp"
+118,test,1,promo_scam,VM-LOANPR,Pre-approved instant loan of Rs 5 lakh at 0% interest. No documents. Download app: https://bit.ly/instaloan-apk and get money in 5 mins
+119,test,1,promo_scam,{MOBILE},"Invest Rs 10,000 and get Rs 40,000 in 30 days. Guaranteed returns. Join our VIP stock tips group: t.me/stockking_vip"
+120,test,1,promo_scam,{MOBILE},"Dear user, you have won a Royal Enfield bike in the Amazon lucky draw. Pay Rs 1999 registration to receive it at amzn-lucky-draw.top"
