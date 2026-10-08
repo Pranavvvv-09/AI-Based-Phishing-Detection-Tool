@@ -44,16 +44,22 @@ bandit -c pyproject.toml -r src
 ## Score a message
 ```bash
 python -m phishguard.scorer email path/to/message.eml
-python -m phishguard.scorer sms "Your SBI account is blocked. Update KYC at sbi-kyc-update.in/verify"
+python -m phishguard.scorer sms "Your SBI account is blocked. Update KYC at sbi-kyc-update.in/verify" \
+    --sender "+91 98301 44728"   # optional: the number, short code or sender ID your phone shows
 ```
 Prints a JSON verdict: `score` (0–1), `label` (phishing / suspicious / legitimate),
 `action` (quarantine / review / deliver) and the `reasons`, each with a signed weight
 showing how much it moved the score. For SMS, `components` also shows both model probabilities
-(`sms_model_probability`, `email_model_probability`), which are averaged in log-odds. Errors and partly-analysed messages always
-return `review`, never `deliver`. Full-system results are in `models/scorer_metrics.json`
-(reproduce with `python scripts/evaluate_scorer.py`). How the SMS scoring was chosen, including
+(`sms_model_probability`, `email_model_probability`), which are averaged in log-odds. SMS also get
+their own evidence: a brand-claiming message from a personal number or an email address, links
+outside the brand the message names, and two small capped credits (nothing to act on: no link,
+number, address or reply request; or every link on the named brand's own domains). A sender ID
+like `VM-HDFCBK-S` never earns credit, because outside India sender IDs can be spoofed.
+Errors and partly-analysed messages always return `review`, never `deliver`.
+Full-system results are in `models/scorer_metrics.json` (reproduce with `python scripts/evaluate_scorer.py`). How the SMS scoring was chosen, including
 a leak we found in our own synthetic data and fixed, is in [data/README.md](data/README.md)
-(reproduce with `python scripts/sms_experiment.py`).
+(reproduce with `python scripts/sms_experiment.py`; the Day 6 sender/link rules:
+`python scripts/rules_experiment.py`).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,

@@ -188,9 +188,9 @@ def extract_bare_domains(text: str) -> list[str]:
         if host.startswith("www.") or is_ip(host):
             continue  # www. URLs are handled by extract_urls
         ext = _EXTRACT(host)
-        if not ext.suffix or not ext.domain or len(ext.domain) < 2:
-            continue  # "file.txt", "e.g." and friends are not domains
-        candidate = host + (match.group(2) or "")
+        if not ext.suffix or not ext.domain or (len(ext.domain) < 2 and not match.group(2)):
+            continue  # "file.txt", "e.g." are not domains; "t.me/x" and "a.co/d/x" are
+        candidate = host + (match.group(2) or "").rstrip(".,;:!?)")
         if candidate not in found:
             found.append(candidate)
         if len(found) >= MAX_BARE_DOMAINS:
