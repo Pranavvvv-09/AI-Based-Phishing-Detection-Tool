@@ -26,6 +26,8 @@ The full download is about 1.7 GB, most of it honeypot attachments that are neve
 | `data/curated/modern_lures.csv` | 112 (committed) | modern phishing + legitimate | Hand-written for this project | Same as this repository |
 | `data/curated/sms_transactional_eval.csv` | 72 (committed, frozen) | **evaluation only**: genuine transactional SMS + smishing | Hand-written for this project | Same as this repository |
 | `data/curated/sms_independent_bank.csv` | 12 (committed, frozen) | **evaluation only**: genuine bank SMS | Example SMS from two MIT-licensed open-source parsers | MIT (see `THIRD_PARTY_NOTICES.md`) |
+| `data/curated/sms_eval_v2.csv` | 120 (committed, frozen) | **evaluation only**: genuine SMS + smishing, each with its **sender** and realistic links | Hand-written for this project | Same as this repository |
+| `data/curated/email_eval_v2.csv` | 60 (committed, frozen) | **evaluation only**: modern genuine notices + phishing, each with sender, DMARC result and Reply-To | Hand-written for this project | Same as this repository |
 | `data/curated/sms_templates.csv` | 663 (committed, generated) | experiment data for SMS variants V1/V2 (**not** used by the shipped model) | `scripts/generate_sms_templates.py` | Same as this repository |
 
 **Total training rows: 6,125 phishing and 30,304 legitimate,** plus the curated train half.
@@ -159,6 +161,33 @@ optimistic. The blend costs recall on the public 2011-2022 smishing at the 0.8 l
 (85.1% to 54.0%), although 90.8% is still flagged for review. Genuine transactional SMS
 are still flagged too often (about 1 in 5). The real fix is consented, anonymised
 transactional SMS from your *own* phone, evaluated on a fresh frozen set.
+
+## Fresh frozen sets for the Day 6 rule fixes (`*_eval_v2.csv`)
+The test half of `sms_transactional_eval.csv` was looked at during the SMS experiment,
+so it can't judge a new fix fairly. Before any of the SMS sender/link rules or the email
+false-positive fix was written, two new sets were committed:
+
+* **`sms_eval_v2.csv`**: 120 SMS (60 genuine, 60 smishing) in 16 categories, each with
+  the `sender` as a phone would show it: Indian DLT headers (`VM-HDFCBK-S`), mobile
+  numbers, email addresses (iMessage-style) and fictional foreign numbers. Links are
+  realistic, so the link rules run: genuine messages use the companies' real domains
+  (`amzn.in`, `zoma.to`, `hdfcbank.com`, ...); smishing uses **invented** domains that
+  must never be visited (the project never fetches links). Deliberately hard cases are
+  included on both sides: genuine messages from personal numbers (couriers, delivery
+  partners), genuine SMS with toll-free and "SMS BLOCK" numbers, smishing from
+  header-style senders, and smishing with **no link or number at all** (OTP theft,
+  "Hi Mum", wrong-number).
+* **`email_eval_v2.csv`**: 60 modern emails (30 genuine, 30 phishing) with sender,
+  display name, the DMARC result your provider would record, and Reply-To. Most genuine
+  mail comes from companies outside the built-in brand list (Swiggy, Groww, Myntra,
+  your employer, your college), and most phishing passes DMARC from the attacker's
+  **own** domain, as modern phishing does.
+
+Phone numbers are placeholders (`{MOBILE}`, `{TOLLFREE}`) filled in at load time, so
+no real person's number is published. Each category has a validation third (chooses
+between variants) and a test two-thirds (only reported). The same author wrote the sets
+and the rules, which is a bias we can only limit, not remove: the sets were frozen
+first and include cases written to defeat the rules.
 
 ## Handling rules
 - These files contain **real phishing**, with live malicious links and, in the honeypot,

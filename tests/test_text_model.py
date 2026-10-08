@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from pathlib import Path
 
@@ -492,6 +493,40 @@ def test_frozen_sets_are_never_used_for_training():
     assert "sms_transactional_eval" not in source and "sms_independent_bank" not in source
     generator = (ROOT / "scripts" / "generate_sms_templates.py").read_text()
     assert "sms_transactional_eval" not in generator and "sms_independent_bank" not in generator
+
+
+# ---------- fresh frozen sets for the full scorer (committed before the Day 6 rule fixes) ----
+
+SMS_EVAL_V2 = ROOT / "data" / "curated" / "sms_eval_v2.csv"
+EMAIL_EVAL_V2 = ROOT / "data" / "curated" / "email_eval_v2.csv"
+
+
+@pytest.mark.parametrize("path", [SMS_EVAL_V2, EMAIL_EVAL_V2])
+def test_v2_eval_sets_are_balanced_and_split_per_category(path):
+    df = pd.read_csv(path, dtype=str, keep_default_na=False)
+    assert df["id"].is_unique
+    counts = df.groupby(["label", "split"]).size().to_dict()
+    assert counts[("0", "validation")] == counts[("1", "validation")]
+    assert counts[("0", "test")] == counts[("1", "test")]
+    for _, group in df.groupby(["category", "label"]):
+        assert set(group["split"]) == {"validation", "test"}
+
+
+def test_v2_sms_eval_publishes_no_indian_phone_numbers():
+    # Numbers are placeholders filled in at load time, so no real person's number is
+    # published; +44 7700 900xxx and +1 555-01xx are reserved fictional ranges.
+    df = pd.read_csv(SMS_EVAL_V2, dtype=str, keep_default_na=False)
+    text = " ".join(df["text"]) + " " + " ".join(df["sender"])
+    text = text.replace("+44 7700 900", "")
+    assert not re.search(r"(?<!\d)[6-9]\d{3} ?\d{3} ?\d{3}(?!\d)", text)
+    assert not re.search(r"(?<!\d)1[89]00 ?\d", text)
+
+
+def test_v2_eval_sets_are_never_used_for_training():
+    for path in [ROOT / "src" / "phishguard" / "text_model.py",
+                 ROOT / "scripts" / "generate_sms_templates.py"]:
+        source = path.read_text()
+        assert "sms_eval_v2" not in source and "email_eval_v2" not in source
 
 
 # ---------- synthetic SMS templates + the experiment that chose the SMS scoring ----------
