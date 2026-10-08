@@ -1,12 +1,14 @@
 {
-  "generated_at": "2026-10-07T21:32:33Z",
+  "generated_at": "2026-10-08T14:58:33Z",
   "parameters": {
     "rule_scale": 4.0,
     "text_clip": 4.0,
     "verified_sender_credit": 2.0,
     "aligned_links_credit": 1.0,
     "review_threshold": 0.5,
-    "quarantine_threshold": 0.8
+    "quarantine_threshold": 0.8,
+    "sms_no_contact_credit": 1.0,
+    "sms_aligned_links_credit": 1.0
   },
   "honeypot_future_english": {
     "n": 1005,
@@ -19,7 +21,7 @@
   "honeypot_future_all_languages": {
     "n": 5465,
     "unanalysed_review": 0,
-    "scorer_recall_flagged": 0.9585,
+    "scorer_recall_flagged": 0.9586,
     "scorer_recall_quarantined": 0.6564,
     "text_only_recall_flagged": 0.7321,
     "text_only_recall_quarantined": 0.3758
@@ -88,15 +90,15 @@
     "phishing": {
       "n": 28,
       "unanalysed_review": 0,
-      "scorer_recall_flagged": 0.8571,
-      "scorer_recall_quarantined": 0.7857,
+      "scorer_recall_flagged": 0.8214,
+      "scorer_recall_quarantined": 0.5714,
       "text_only_recall_flagged": 0.8571,
       "text_only_recall_quarantined": 0.7857
     },
     "legitimate": {
       "n": 28,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.2143,
+      "scorer_false_positive_rate_flagged": 0.1071,
       "scorer_false_positive_rate_quarantined": 0.0357,
       "text_only_false_positive_rate_flagged": 0.2143,
       "text_only_false_positive_rate_quarantined": 0.0357
@@ -107,15 +109,15 @@
       "n": 87,
       "unanalysed_review": 0,
       "scorer_recall_flagged": 0.908,
-      "scorer_recall_quarantined": 0.5402,
+      "scorer_recall_quarantined": 0.5057,
       "text_only_recall_flagged": 0.908,
       "text_only_recall_quarantined": 0.5402
     },
     "legitimate": {
       "n": 1005,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.004,
-      "scorer_false_positive_rate_quarantined": 0.001,
+      "scorer_false_positive_rate_flagged": 0.001,
+      "scorer_false_positive_rate_quarantined": 0.0,
       "text_only_false_positive_rate_flagged": 0.004,
       "text_only_false_positive_rate_quarantined": 0.001
     }
@@ -124,16 +126,16 @@
     "smishing": {
       "n": 12,
       "unanalysed_review": 0,
-      "scorer_recall_flagged": 0.75,
-      "scorer_recall_quarantined": 0.5833,
+      "scorer_recall_flagged": 0.5833,
+      "scorer_recall_quarantined": 0.4167,
       "text_only_recall_flagged": 0.75,
       "text_only_recall_quarantined": 0.5833
     },
     "legitimate": {
       "n": 12,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.25,
-      "scorer_false_positive_rate_quarantined": 0.0833,
+      "scorer_false_positive_rate_flagged": 0.0833,
+      "scorer_false_positive_rate_quarantined": 0.0,
       "text_only_false_positive_rate_flagged": 0.25,
       "text_only_false_positive_rate_quarantined": 0.0833
     }
@@ -142,16 +144,16 @@
     "smishing": {
       "n": 24,
       "unanalysed_review": 0,
-      "scorer_recall_flagged": 1.0,
-      "scorer_recall_quarantined": 0.7917,
+      "scorer_recall_flagged": 0.8333,
+      "scorer_recall_quarantined": 0.4583,
       "text_only_recall_flagged": 1.0,
       "text_only_recall_quarantined": 0.7917
     },
     "legitimate": {
       "n": 24,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.2083,
-      "scorer_false_positive_rate_quarantined": 0.0417,
+      "scorer_false_positive_rate_flagged": 0.0417,
+      "scorer_false_positive_rate_quarantined": 0.0,
       "text_only_false_positive_rate_flagged": 0.2083,
       "text_only_false_positive_rate_quarantined": 0.0417
     }
@@ -160,10 +162,82 @@
     "legitimate": {
       "n": 12,
       "unanalysed_review": 0,
-      "scorer_false_positive_rate_flagged": 0.1667,
+      "scorer_false_positive_rate_flagged": 0.0833,
       "scorer_false_positive_rate_quarantined": 0.0,
       "text_only_false_positive_rate_flagged": 0.1667,
       "text_only_false_positive_rate_quarantined": 0.0
+    }
+  },
+  "sms_v2_validation": {
+    "smishing": {
+      "n": 15,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.9333,
+      "scorer_recall_quarantined": 0.9333,
+      "text_only_recall_flagged": 0.9333,
+      "text_only_recall_quarantined": 0.8
+    },
+    "legitimate": {
+      "n": 15,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.0,
+      "scorer_false_positive_rate_quarantined": 0.0,
+      "text_only_false_positive_rate_flagged": 0.0667,
+      "text_only_false_positive_rate_quarantined": 0.0
+    }
+  },
+  "email_v2_validation": {
+    "phishing": {
+      "n": 8,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.875,
+      "scorer_recall_quarantined": 0.75,
+      "text_only_recall_flagged": 0.875,
+      "text_only_recall_quarantined": 0.75
+    },
+    "legitimate": {
+      "n": 8,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.125,
+      "scorer_false_positive_rate_quarantined": 0.125,
+      "text_only_false_positive_rate_flagged": 0.25,
+      "text_only_false_positive_rate_quarantined": 0.25
+    }
+  },
+  "sms_v2_test": {
+    "smishing": {
+      "n": 45,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.8444,
+      "scorer_recall_quarantined": 0.6667,
+      "text_only_recall_flagged": 0.7778,
+      "text_only_recall_quarantined": 0.5778
+    },
+    "legitimate": {
+      "n": 45,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.1333,
+      "scorer_false_positive_rate_quarantined": 0.0,
+      "text_only_false_positive_rate_flagged": 0.1778,
+      "text_only_false_positive_rate_quarantined": 0.0444
+    }
+  },
+  "email_v2_test": {
+    "phishing": {
+      "n": 22,
+      "unanalysed_review": 0,
+      "scorer_recall_flagged": 0.9545,
+      "scorer_recall_quarantined": 0.8636,
+      "text_only_recall_flagged": 0.9545,
+      "text_only_recall_quarantined": 0.8636
+    },
+    "legitimate": {
+      "n": 22,
+      "unanalysed_review": 0,
+      "scorer_false_positive_rate_flagged": 0.1364,
+      "scorer_false_positive_rate_quarantined": 0.0909,
+      "text_only_false_positive_rate_flagged": 0.3636,
+      "text_only_false_positive_rate_quarantined": 0.2727
     }
   },
   "fixtures": {
@@ -196,5 +270,5 @@
       "score": 0.985
     }
   },
-  "runtime_seconds": 290
+  "runtime_seconds": 289
 }
