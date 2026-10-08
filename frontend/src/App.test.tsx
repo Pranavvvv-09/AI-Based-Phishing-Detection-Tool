@@ -62,7 +62,7 @@ async function renderLoaded() {
 }
 
 describe("quarantine table", () => {
-  it("shows the required columns and the KPI strip", async () => {
+  it("shows the required columns and the KPI cards", async () => {
     await renderLoaded();
     for (const name of ["Time", "Type", "Sender", "Score", "Status"]) {
       expect(screen.getByRole("columnheader", { name })).toBeInTheDocument();
@@ -81,6 +81,51 @@ describe("quarantine table", () => {
     await userEvent.click(within(row).getByRole("button", { name: "+1 more" }));
     const safe = screen.getAllByText("Verified sender")[0].closest("[data-direction]")!;
     expect(safe).toHaveAttribute("data-direction", "safe");
+  });
+});
+
+describe("visual layer", () => {
+  it("explains a chip in a tooltip on hover and on keyboard focus", async () => {
+    await renderLoaded();
+    const row = screen.getByText("md.office.desk@gmail.com").closest("tr")!;
+    const chip = within(row).getByText("Text model").closest("[data-direction]") as HTMLElement;
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    await userEvent.hover(chip);
+    const tip = screen.getByRole("tooltip");
+    expect(tip).toHaveTextContent("Wording resembles phishing (96%)");
+    expect(tip).toHaveTextContent("Strong evidence towards phishing, text layer");
+    expect(chip).toHaveAttribute("aria-describedby", tip.id);
+    await userEvent.unhover(chip);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    chip.focus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Wording resembles phishing");
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("shows the poller as a live beacon", async () => {
+    await renderLoaded();
+    const beacon = document.querySelector(".beacon")!;
+    expect(beacon).toHaveAttribute("data-state", "ok");
+    expect(beacon).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("Live")).toBeInTheDocument();
+  });
+
+  it("tilts the KPI cards from the pointer without re-rendering", async () => {
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    await renderLoaded();
+    const card = screen.getByText("Total scanned").closest(".tilt-card") as HTMLElement;
+    card.getBoundingClientRect = () => DOMRect.fromRect({ x: 0, y: 0, width: 200, height: 100 });
+    card.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: 200, clientY: 0, pointerType: "mouse" }));
+    expect(card.style.getPropertyValue("--tilt-y")).toBe("2.50deg");
+    expect(card.style.getPropertyValue("--tilt-x")).toBe("2.50deg");
+    await userEvent.unhover(card);
+    expect(card.style.getPropertyValue("--tilt-y")).toBe("");
   });
 });
 

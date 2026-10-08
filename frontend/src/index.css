@@ -31,11 +31,159 @@
   }
 }
 
+@layer components {
+  /*
+   * Background spotlight: two soft radial glows in the accent colour plus a faint grid that
+   * fades out with them. Plain CSS on a fixed layer, so it costs nothing per frame.
+   */
+  .spotlight {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(56rem 30rem at 50% -6rem, oklch(0.68 0.14 255 / 0.16), transparent 70%),
+      radial-gradient(36rem 24rem at 92% 4rem, oklch(0.68 0.14 255 / 0.06), transparent 70%);
+  }
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(48rem 26rem at 50% 0, black, transparent 75%);
+  }
+
+  /*
+   * KPI cards. StatCards.tsx writes --tilt-x/--tilt-y (degrees) and --glow-x/--glow-y (%)
+   * from the pointer; the transform only applies where it makes sense (see the media query).
+   */
+  .tilt-card {
+    position: relative;
+    isolation: isolate;
+    transition:
+      transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 200ms ease,
+      box-shadow 200ms ease;
+  }
+  .tilt-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      18rem circle at var(--glow-x, 50%) var(--glow-y, 0%),
+      oklch(0.68 0.14 255 / 0.12),
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .tilt-card:hover::before {
+    opacity: 1;
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .tilt-card {
+      transform-style: preserve-3d;
+      transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    }
+    .tilt-card:hover {
+      box-shadow:
+        inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+        0 24px 48px -24px rgb(0 0 0 / 0.7);
+    }
+    .tilt-card .tilt-lift {
+      transform: translateZ(18px);
+    }
+  }
+
+  /*
+   * Poller beacon: a solid light with a soft glow; while the poller is live, two rings ripple
+   * out of it like a radar ping. Colour comes from data-state (ok, warn, error, off).
+   */
+  .beacon {
+    --beacon: var(--color-zinc-500);
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--beacon);
+  }
+  .beacon[data-state="ok"] {
+    --beacon: var(--color-emerald-400);
+  }
+  .beacon[data-state="warn"] {
+    --beacon: var(--color-amber-400);
+  }
+  .beacon[data-state="error"] {
+    --beacon: var(--color-red-400);
+  }
+  .beacon:not([data-state="off"]) {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--beacon) 35%, transparent),
+      0 0 12px 2px color-mix(in oklab, var(--beacon) 55%, transparent);
+  }
+  .beacon::before,
+  .beacon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--beacon);
+    background: color-mix(in oklab, var(--beacon) 30%, transparent);
+    opacity: 0;
+  }
+  .beacon[data-state="ok"]::before,
+  .beacon[data-state="ok"]::after {
+    animation: beacon-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .beacon[data-state="ok"]::after {
+    animation-delay: 1.4s;
+  }
+  .beacon[data-state="warn"]::before {
+    animation: beacon-ping 4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Chip tooltip, rendered in a fixed layer so the table's rounded clip cannot cut it off. */
+  .chip-tooltip {
+    animation: tooltip-in 120ms ease-out;
+  }
+}
+
+@keyframes beacon-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    translate: 0 2px;
+  }
+}
+
 /* The spinner is feedback, but it must still stop for people who ask for less motion. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  /* Decorative loops stop outright; the beacon keeps its steady glow. */
+  .beacon::before,
+  .beacon::after {
+    animation: none !important;
   }
 }
