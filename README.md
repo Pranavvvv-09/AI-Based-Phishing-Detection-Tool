@@ -24,7 +24,7 @@ phishing from your own mailbox.
 - [x] Day 4: URL & attachment checks (punycode, @-trick, obfuscated IPs, link-text mismatch, risky files)
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
-- [ ] Day 7: IMAP poller + quarantine
+- [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
 - [ ] Day 8: Web UI, API, admin dashboard
 - [ ] Day 9: Tests + CI hardening
 - [ ] Day 10: Docs & release
@@ -60,6 +60,22 @@ Full-system results are in `models/scorer_metrics.json` (reproduce with `python 
 a leak we found in our own synthetic data and fixed, is in [data/README.md](data/README.md)
 (reproduce with `python scripts/sms_experiment.py`; the Day 6 sender/link rules:
 `python scripts/rules_experiment.py`).
+
+## Watch your mailbox (Day 7)
+```bash
+python -m phishguard.poller run --once            # one pass (MODE=monitor: report only)
+python -m phishguard.poller run                   # keep polling every IMAP_POLL_SECONDS
+python -m phishguard.poller run --once --backfill 20   # first run: also scan the last 20
+python -m phishguard.poller list                  # quarantined messages
+python -m phishguard.poller restore <incident-id> # move one back to the inbox
+python -m phishguard.poller verify-audit          # detect edited or deleted audit lines
+```
+Start in `MODE=monitor`: the inbox is opened **read-only** and phishing is only reported
+as `would_quarantine`. With `MODE=quarantine`, messages scoring at or above
+`QUARANTINE_THRESHOLD` are **moved** to `IMAP_QUARANTINE_FOLDER`; suspicious ones are only
+reported. Nothing is deleted, marked as read or modified. Reports go to `reports/`
+(one JSON per flagged message, no body text, plus `audit.log`); quarantine records go to
+`quarantine/`. Setup and safety notes: [docs/lab-setup.md](docs/lab-setup.md).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,
