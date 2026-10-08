@@ -1,0 +1,317 @@
+{
+ "email": {
+  "guard": {
+   "min_honeypot_recall": 0.85,
+   "max_legit_fpr": 0.01
+  },
+  "variants": {
+   "E0": {
+    "guard": {
+     "honeypot_future_recall": 0.8786,
+     "legit_test_fpr": 0.004
+    },
+    "validation": {
+     "n_legit": 8,
+     "n_phish": 8,
+     "FP_05": 1,
+     "FP_q": 1,
+     "FPR_05": 0.125,
+     "FPR_q": 0.125,
+     "recall_05": 0.875,
+     "recall_q": 0.75,
+     "F1_05": 0.875
+    },
+    "test": {
+     "n_legit": 22,
+     "n_phish": 22,
+     "FP_05": 5,
+     "FP_q": 4,
+     "FPR_05": 0.2273,
+     "FPR_q": 0.1818,
+     "recall_05": 0.9545,
+     "recall_q": 0.8636,
+     "F1_05": 0.875
+    }
+   },
+   "E1": {
+    "guard": {
+     "honeypot_future_recall": 0.8687,
+     "legit_test_fpr": 0.0034
+    },
+    "validation": {
+     "n_legit": 8,
+     "n_phish": 8,
+     "FP_05": 1,
+     "FP_q": 1,
+     "FPR_05": 0.125,
+     "FPR_q": 0.125,
+     "recall_05": 0.875,
+     "recall_q": 0.75,
+     "F1_05": 0.875
+    },
+    "test": {
+     "n_legit": 22,
+     "n_phish": 22,
+     "FP_05": 5,
+     "FP_q": 3,
+     "FPR_05": 0.2273,
+     "FPR_q": 0.1364,
+     "recall_05": 0.9545,
+     "recall_q": 0.8182,
+     "F1_05": 0.875
+    }
+   },
+   "E2": {
+    "guard": {
+     "honeypot_future_recall": 0.8597,
+     "legit_test_fpr": 0.0037
+    },
+    "validation": {
+     "n_legit": 8,
+     "n_phish": 8,
+     "FP_05": 1,
+     "FP_q": 1,
+     "FPR_05": 0.125,
+     "FPR_q": 0.125,
+     "recall_05": 0.875,
+     "recall_q": 0.75,
+     "F1_05": 0.875
+    },
+    "test": {
+     "n_legit": 22,
+     "n_phish": 22,
+     "FP_05": 4,
+     "FP_q": 2,
+     "FPR_05": 0.1818,
+     "FPR_q": 0.0909,
+     "recall_05": 1.0,
+     "recall_q": 0.8182,
+     "F1_05": 0.9167
+    }
+   }
+  },
+  "eligible": [
+   "E0",
+   "E1",
+   "E2"
+  ],
+  "choice": "E0"
+ },
+ "sms": {
+  "guard": {
+   "max_fpr": 0.01,
+   "min_recall": 0.9
+  },
+  "variants": {
+   "S0": {
+    "validation": {
+     "n_legit": 27,
+     "n_phish": 27,
+     "FP_05": 4,
+     "FP_q": 1,
+     "FPR_05": 0.1481,
+     "FPR_q": 0.037,
+     "recall_05": 0.8519,
+     "recall_q": 0.7407,
+     "F1_05": 0.8519
+    },
+    "public_test_split": {
+     "n_legit": 1005,
+     "n_phish": 87,
+     "FP_05": 4,
+     "FP_q": 1,
+     "FPR_05": 0.004,
+     "FPR_q": 0.001,
+     "recall_05": 0.908,
+     "recall_q": 0.5402,
+     "F1_05": 0.9294
+    },
+    "test": {
+     "n_legit": 45,
+     "n_phish": 45,
+     "FP_05": 8,
+     "FP_q": 2,
+     "FPR_05": 0.1778,
+     "FPR_q": 0.0444,
+     "recall_05": 0.7778,
+     "recall_q": 0.6222,
+     "F1_05": 0.7955
+    },
+    "test_errors_by_category": {
+     "account": 1,
+     "bank_credit": 2,
+     "bank_debit": 1,
+     "bill": 1,
+     "delivery": 1,
+     "government": 2,
+     "health": 2,
+     "otp": 1,
+     "personal": 2,
+     "promo_legit": 1,
+     "promo_scam": 2,
+     "travel": 1,
+     "upi": 1
+    },
+    "old_frozen_test": {
+     "n_legit": 24,
+     "n_phish": 24,
+     "FP_05": 5,
+     "FP_q": 1,
+     "FPR_05": 0.2083,
+     "FPR_q": 0.0417,
+     "recall_05": 1.0,
+     "recall_q": 0.7917,
+     "F1_05": 0.9057
+    },
+    "independent_bank": {
+     "n_legit": 12,
+     "n_phish": 0,
+     "FP_05": 2,
+     "FP_q": 0,
+     "FPR_05": 0.1667,
+     "FPR_q": 0.0
+    }
+   },
+   "S1": {
+    "validation": {
+     "n_legit": 27,
+     "n_phish": 27,
+     "FP_05": 4,
+     "FP_q": 1,
+     "FPR_05": 0.1481,
+     "FPR_q": 0.037,
+     "recall_05": 0.8519,
+     "recall_q": 0.7778,
+     "F1_05": 0.8519
+    },
+    "public_test_split": {
+     "n_legit": 1005,
+     "n_phish": 87,
+     "FP_05": 4,
+     "FP_q": 1,
+     "FPR_05": 0.004,
+     "FPR_q": 0.001,
+     "recall_05": 0.908,
+     "recall_q": 0.5402,
+     "F1_05": 0.9294
+    },
+    "test": {
+     "n_legit": 45,
+     "n_phish": 45,
+     "FP_05": 9,
+     "FP_q": 2,
+     "FPR_05": 0.2,
+     "FPR_q": 0.0444,
+     "recall_05": 0.8222,
+     "recall_q": 0.6667,
+     "F1_05": 0.8132
+    },
+    "test_errors_by_category": {
+     "account": 1,
+     "bank_credit": 1,
+     "bank_debit": 1,
+     "bill": 1,
+     "delivery": 2,
+     "government": 2,
+     "health": 2,
+     "personal": 2,
+     "promo_legit": 1,
+     "promo_scam": 2,
+     "travel": 1,
+     "upi": 1
+    },
+    "old_frozen_test": {
+     "n_legit": 24,
+     "n_phish": 24,
+     "FP_05": 5,
+     "FP_q": 1,
+     "FPR_05": 0.2083,
+     "FPR_q": 0.0417,
+     "recall_05": 1.0,
+     "recall_q": 0.7917,
+     "F1_05": 0.9057
+    },
+    "independent_bank": {
+     "n_legit": 12,
+     "n_phish": 0,
+     "FP_05": 2,
+     "FP_q": 0,
+     "FPR_05": 0.1667,
+     "FPR_q": 0.0
+    }
+   },
+   "S2": {
+    "validation": {
+     "n_legit": 27,
+     "n_phish": 27,
+     "FP_05": 1,
+     "FP_q": 0,
+     "FPR_05": 0.037,
+     "FPR_q": 0.0,
+     "recall_05": 0.7778,
+     "recall_q": 0.7037,
+     "F1_05": 0.8571
+    },
+    "public_test_split": {
+     "n_legit": 1005,
+     "n_phish": 87,
+     "FP_05": 1,
+     "FP_q": 0,
+     "FPR_05": 0.001,
+     "FPR_q": 0.0,
+     "recall_05": 0.908,
+     "recall_q": 0.5057,
+     "F1_05": 0.9461
+    },
+    "test": {
+     "n_legit": 45,
+     "n_phish": 45,
+     "FP_05": 5,
+     "FP_q": 0,
+     "FPR_05": 0.1111,
+     "FPR_q": 0.0,
+     "recall_05": 0.8222,
+     "recall_q": 0.6667,
+     "F1_05": 0.8506
+    },
+    "test_errors_by_category": {
+     "account": 1,
+     "bank_debit": 1,
+     "bill": 1,
+     "delivery": 1,
+     "government": 1,
+     "health": 2,
+     "personal": 2,
+     "promo_scam": 2,
+     "travel": 1,
+     "upi": 1
+    },
+    "old_frozen_test": {
+     "n_legit": 24,
+     "n_phish": 24,
+     "FP_05": 1,
+     "FP_q": 0,
+     "FPR_05": 0.0417,
+     "FPR_q": 0.0,
+     "recall_05": 0.8333,
+     "recall_q": 0.4583,
+     "F1_05": 0.8889
+    },
+    "independent_bank": {
+     "n_legit": 12,
+     "n_phish": 0,
+     "FP_05": 1,
+     "FP_q": 0,
+     "FPR_05": 0.0833,
+     "FPR_q": 0.0
+    }
+   }
+  },
+  "eligible": [
+   "S0",
+   "S1",
+   "S2"
+  ],
+  "choice": "S2"
+ }
+}
