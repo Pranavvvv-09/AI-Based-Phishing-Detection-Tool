@@ -67,6 +67,7 @@ from .parser import (
     extract_urls,
     parse_email,
 )
+from .sms_checks import ALIGNED_SMS_LINKS_CREDIT, NO_CONTACT_CREDIT, check_sms
 from .text_model import MODELS_DIR, ROOT, email_text, load_text_model
 from .url_checks import ESP_TRACKING, LinkReport, check_links, check_url
 from .url_checks import WEIGHTS as LINK_WEIGHTS
@@ -123,7 +124,7 @@ def safe_text(value: object, limit: int = MAX_DETAIL_CHARS) -> str:
 
 @dataclass(frozen=True)
 class Reason:
-    source: str  # "text" | "header" | "link" | "trust" | "system"
+    source: str  # "text" | "header" | "link" | "sender" | "trust" | "system"
     code: str
     detail: str
     weight: float  # signed log-odds contribution: + towards phishing, - towards legitimate
@@ -299,6 +300,24 @@ def _trust_reasons(email: ParsedEmail, header: HeaderReport, links: LinkReport) 
     return reasons
 
 
+def _sms_trust_reasons(sms) -> list[Reason]:
+    """Small, capped credits for what smishing needs and a genuine alert often lacks."""
+    reasons = []
+    if sms.aligned_links:
+        reasons.append(Reason(
+            "trust", "sms_aligned_links",
+            f"All links stay on official {', '.join(sms.brands)} domains",
+            -ALIGNED_SMS_LINKS_CREDIT,
+        ))
+    if not sms.contact_channels and not sms.findings:
+        reasons.append(Reason(
+            "trust", "sms_no_contact_channel",
+            "Nothing to act on: no link, phone number, email address or reply request",
+            -NO_CONTACT_CREDIT,
+        ))
+    return reasons
+
+
 class Scorer:
     """Loads the hash-verified models once; scores emails, SMS and pasted text."""
 
@@ -336,17 +355,19 @@ class Scorer:
             return self._unanalysed("email", "internal_error",
                                     f"Analysis failed ({type(exc).__name__}); needs manual review")
 
-    def scan_sms(self, text: str) -> Verdict:
-        return self.scan_text(text, kind="sms")
+    def scan_sms(self, text: str, sender: str = "") -> Verdict:
+        """Score an SMS. ``sender`` is the number, short code or sender ID the phone shows."""
+        return self.scan_text(text, kind="sms", sender=sender)
 
-    def scan_text(self, text: str, kind: str = "text") -> Verdict:
-        """Score free text: ``kind="sms"`` uses the SMS model, otherwise the email model."""
-        if not isinstance(text, str):
-            raise TypeError("text must be a string")
+    def scan_text(self, text: str, kind: str = "text", sender: str = "") -> Verdict:
+        """Score free text: ``kind="sms"`` uses the SMS models and SMS checks, otherwise
+        the email model. ``sender`` is only used for SMS."""
+        if not isinstance(text, str) or not isinstance(sender, str):
+            raise TypeError("text and sender must be strings")
         truncated = len(text) > MAX_SMS_CHARS
         text = text[:MAX_SMS_CHARS].replace("\x00", " ")
         try:
-            return self._score_text(text, kind, truncated)
+            return self._score_text(text, kind, truncated, sender)
         except Exception as exc:  # noqa: BLE001
             return self._unanalysed(kind, "internal_error",
                                     f"Analysis failed ({type(exc).__name__}); needs manual review")
@@ -387,8 +408,9 @@ class Scorer:
             ))
         return verdict
 
-    def _score_text(self, text: str, kind: str, truncated: bool) -> Verdict:
+    def _score_text(self, text: str, kind: str, truncated: bool, sender: str = "") -> Verdict:
         links = check_text_links(text)
+        sms = check_sms(text, sender, links) if kind == "sms" else None
         if kind == "sms":
             model: TextScorer = BlendedText(self.models["sms"], self.models["email"])
             p_sms = self.models["sms"].predict_proba(text)
@@ -396,14 +418,27 @@ class Scorer:
             text_reason, probability = _text_reason(model, text, BlendedText.blend(p_sms, p_email))
         else:
             text_reason, probability = _text_reason(self.models["email"], text)
-        link_reasons = _layer_reasons(
-            "link", [(code, LINK_WEIGHTS[code], detail) for code, detail in links.findings.items()]
-        )
+        link_items = [(code, LINK_WEIGHTS[code], detail) for code, detail in links.findings.items()]
+        rule_reasons: list[Reason] = []
+        sender_risk, link_risk = 0.0, links.risk
         summary = {"characters": len(text), "links": len(links.urls), "truncated": truncated,
                    "link_domains": sorted({u.domain for u in links.urls if u.domain})[:10]}
-        verdict = self._verdict(kind, probability, text_reason, 0.0, links.risk, link_reasons,
+        if sms is not None:
+            sender_items = [(f.code, f.weight, f.detail) for f in sms.findings
+                            if f.code.startswith("sender_")]
+            link_items += [(f.code, f.weight, f.detail) for f in sms.findings
+                           if not f.code.startswith("sender_")]
+            sender_risk = round(min(1.0, sum(w for _, w, _ in sender_items)), 3)
+            link_risk = round(min(1.0, sum(w for _, w, _ in link_items)), 3)
+            rule_reasons += _layer_reasons("sender", sender_items)
+            rule_reasons += _sms_trust_reasons(sms)
+            summary.update(sender=sender, sender_kind=sms.sender_kind, brands=sms.brands,
+                           contact_channels=sms.contact_channels)
+        rule_reasons += _layer_reasons("link", link_items)
+        verdict = self._verdict(kind, probability, text_reason, 0.0, link_risk, rule_reasons,
                                 summary)
-        if kind == "sms":
+        if sms is not None:
+            verdict.components["sender_risk"] = sender_risk
             verdict.components["sms_model_probability"] = round(p_sms, 4)
             verdict.components["email_model_probability"] = round(p_email, 4)
         return verdict
@@ -452,6 +487,8 @@ def main(argv: list[str] | None = None) -> int:
     email_cmd.add_argument("path", type=Path)
     sms_cmd = sub.add_parser("sms", help="score an SMS text")
     sms_cmd.add_argument("text")
+    sms_cmd.add_argument("--sender", default="",
+                         help="sender as the phone shows it: number, short code or ID")
     args = parser.parse_args(argv)
 
     dotenv = ROOT / ".env"
@@ -466,7 +503,7 @@ def main(argv: list[str] | None = None) -> int:
             raw = handle.read(size_limit + 1)  # bounded read; over-size -> review verdict
         verdict = scorer.scan_email_bytes(raw)
     else:
-        verdict = scorer.scan_sms(args.text)
+        verdict = scorer.scan_sms(args.text, sender=args.sender)
     print(json.dumps(verdict.to_dict(), indent=2, ensure_ascii=False))
     return 0
 

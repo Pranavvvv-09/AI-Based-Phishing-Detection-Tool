@@ -27,7 +27,8 @@ BRANDS: dict[str, frozenset[str]] = {
          "paypal.es"}
     ),
     "amazon": frozenset(
-        {"amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonses.com", "amazonaws.com"}
+        {"amazon.com", "amazon.in", "amazon.co.uk", "amazon.de", "amazonses.com", "amazonaws.com",
+         "amzn.in", "amzn.to", "a.co"}  # the last three: Amazon's own short-link domains
     ),
     "microsoft": frozenset(
         {
@@ -71,7 +72,7 @@ BRANDS: dict[str, frozenset[str]] = {
     "indiapost": frozenset({"indiapost.gov.in"}),
     # --- Indian banks, payments, government (common scam targets) ---
     "sbi": frozenset({"sbi.co.in", "onlinesbi.sbi", "sbi.bank.in"}),
-    "hdfc": frozenset({"hdfcbank.com", "hdfc.bank.in"}),
+    "hdfc": frozenset({"hdfcbank.com", "hdfcbank.net", "hdfc.bank.in"}),  # .net: InstaAlerts
     "icici": frozenset({"icicibank.com", "icici.bank.in"}),
     "axis": frozenset({"axisbank.com", "axis.bank.in"}),
     "kotak": frozenset({"kotak.com"}),
