@@ -1,0 +1,9 @@
+<section id="kpis" hx-get="/partials/kpis" hx-trigger="kpis-changed from:body, every 30s" hx-swap="outerHTML">
+  <div class="kpis">
+    <div class="kpi"><span class="kpi-label">Total scanned</span><b data-kpi="scanned">{{ kpis.scanned }}</b></div>
+    <div class="kpi bad"><span class="kpi-label">Quarantined</span><b data-kpi="quarantined">{{ kpis.quarantined }}</b>
+      <span class="kpi-sub"><span data-kpi="held">{{ kpis.held }}</span> still held</span></div>
+    <div class="kpi good"><span class="kpi-label">Restored</span><b data-kpi="restored">{{ kpis.restored }}</b></div>
+  </div>
+  <p class="status status-{{ poller.state }}"><span class="dot"></span>{{ poller.text }}</p>
+</section>

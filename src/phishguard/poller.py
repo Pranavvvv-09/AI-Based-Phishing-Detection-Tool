@@ -117,6 +117,8 @@ class Poller:
         self.store = store
         self.connect = connect
         self._scorer = scorer
+        self.last_poll_at: str | None = None  # shown on the dashboard
+        self.last_error = ""
 
     @property
     def scorer(self):
@@ -305,24 +307,32 @@ class Poller:
     # ------------------------------------------------------------------ loop
 
     def run(self, once: bool = False, backfill: int = 0,
-            sleep: Callable[[float], None] = time.sleep) -> int:
+            sleep: Callable[[float], None] = time.sleep,
+            stop: threading.Event | None = None) -> int:
+        """Poll until stopped. ``stop`` (set by the web app on shutdown) ends the loop
+        promptly, because the wait between polls is ``stop.wait``."""
+        if stop is not None:
+            sleep = stop.wait
         failures = 0
-        while True:
+        while stop is None or not stop.is_set():
             try:
                 result = self.poll_once(backfill=backfill)
                 backfill = 0  # only on the first pass
                 failures = 0
+                self.last_poll_at, self.last_error = utc_now(), ""
                 log.info("poll done: scanned=%d quarantined=%d would_quarantine=%d review=%d "
                          "skipped=%d errors=%d", result.scanned, result.quarantined,
                          result.would_quarantine, result.flagged_for_review, result.skipped,
                          len(result.errors))
                 delay = self.settings.imap_poll_seconds
             except LoginError as exc:
+                self.last_error = "IMAP login failed - check the app password"
                 self.store.audit.append("login_failed")
                 log.error("%s - stopping (retrying could lock the account)", exc)
                 return 2
             except (MailboxError, OSError) as exc:
                 failures += 1
+                self.last_error = f"last poll failed ({type(exc).__name__})"
                 delay = min(self.settings.imap_poll_seconds * 2 ** failures, MAX_BACKOFF_SECONDS)
                 self.store.audit.append("poll_error", error=type(exc).__name__)
                 log.warning("poll failed (%s: %s); retrying in %ds", type(exc).__name__, exc,
@@ -332,6 +342,31 @@ class Poller:
             if once:
                 return 0
             sleep(delay)
+        return 0
+
+
+class BackgroundPoller:
+    """Runs ``Poller.run`` in a daemon thread for the lifetime of the web app."""
+
+    def __init__(self, poller) -> None:
+        self.poller = poller
+        self.stop = threading.Event()
+        self.thread = threading.Thread(target=self._run, name="phishguard-poller", daemon=True)
+        self.exit_code: int | None = None
+
+    def _run(self) -> None:
+        self.exit_code = self.poller.run(stop=self.stop)
+
+    def start(self) -> None:
+        self.thread.start()
+
+    def shutdown(self, timeout: float = 15) -> None:
+        self.stop.set()
+        self.thread.join(timeout)
+
+    @property
+    def running(self) -> bool:
+        return self.thread.is_alive()
 
 
 # ---------------------------------------------------------------------- CLI

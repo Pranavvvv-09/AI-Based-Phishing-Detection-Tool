@@ -1,65 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · PhishGuard{% endblock %}
 {% block content %}
-<h1>Dashboard <span class="mode">mode: {{ mode }}</span></h1>
-<div class="stats">
-  <div class="stat"><b data-stat="scanned">{{ stats.scanned }}</b> scanned</div>
-  <div class="stat"><b data-stat="quarantined">{{ stats.actions.quarantined }}</b> quarantined</div>
-  <div class="stat"><b>{{ stats.actions.would_quarantine }}</b> would quarantine</div>
-  <div class="stat"><b>{{ stats.actions.flagged_for_review + stats.actions.quarantine_failed }}</b> for review</div>
-  <div class="stat"><b data-stat="held">{{ stats.held }}</b> held now</div>
-  <div class="stat"><b data-stat="restored">{{ stats.restored }}</b> restored</div>
-  <div class="stat"><b>{{ stats.errors }}</b> poll errors</div>
-</div>
-<p class="hint">
-  Last poll: {{ stats.last_poll|when or "never" }} ·
-  Audit log:
-  {% if stats.audit.ok %}<span class="ok">intact ({{ stats.audit.entries }} entries)</span>
-  {% else %}<span class="bad">TAMPERED: {{ stats.audit.problem }}</span>{% endif %}
-  · Quarantine threshold {{ settings.quarantine_threshold }}
-</p>
-
+{% include "_kpis.html" %}
 <section class="card">
-  <h2>Quarantine</h2>
-  <p id="restore-status" class="hint" role="status" aria-live="polite"></p>
-  <table id="quarantine" data-empty="Nothing quarantined.">
+  <div class="card-head">
+    <h2>Quarantine</h2>
+    <span class="muted">mode: <b>{{ mode }}</b></span>
+  </div>
+  <table id="quarantine" class="table">
     <thead><tr><th>Quarantined</th><th>From / subject</th><th class="num">Score</th>
-      <th>Why (top weights)</th><th>Status</th><th></th></tr></thead>
-    <tbody>
-    {% for q in rows %}
-      <tr data-incident="{{ q.incident_id }}">
-        <td class="when"><a href="/incidents/{{ q.incident_id }}">{{ q.quarantined_at|when }}</a></td>
-        <td class="who"><div>{{ q["from"] }}</div><div class="hint">{{ q.subject }}</div></td>
-        <td class="num">{{ q.score_text }}</td>
-        <td><div class="chips">{% for r in q.reasons %}<span class="weight {{ 'up' if r.weight > 0 else 'down' }}" title="{{ r.detail }}">{{ r.code }} {{ "%+.1f"|format(r.weight) }}</span>{% endfor %}</div></td>
-        <td class="status">{% if q.status == "restored" %}restored {{ q.restored_at|when }}{% else %}{{ q.status }}{% endif %}</td>
-        <td>{% if q.status != "restored" %}<button type="button" class="restore" data-restore="{{ q.incident_id }}">Restore</button>{% endif %}</td>
-      </tr>
-    {% else %}
-      <tr class="empty"><td colspan="6" class="hint">Nothing quarantined.</td></tr>
-    {% endfor %}
-    </tbody>
+      <th>Why (ML &amp; rule weights)</th><th>Status</th><th></th></tr></thead>
+    {% include "_quarantine_rows.html" %}
   </table>
-  <p class="hint">Restore moves the message back to your inbox over IMAP. The poller remembers it and won't quarantine it again.</p>
-</section>
-
-<section class="card">
-  <h2>Recent incidents</h2>
-  {% if incidents %}
-  <table>
-    <thead><tr><th>When</th><th>Action</th><th class="num">Score</th><th>From</th><th>Subject</th></tr></thead>
-    <tbody>
-    {% for r in incidents %}
-      <tr>
-        <td class="when"><a href="/incidents/{{ r.incident_id }}">{{ r.created_at|when }}</a></td>
-        <td><span class="tag tag-{{ r.action_taken }}">{{ r.action_taken }}</span></td>
-        <td class="num">{{ r.verdict.score|pct }}</td>
-        <td>{{ r.verdict.summary.get("from", "") }}</td>
-        <td>{{ r.verdict.summary.get("subject", "") }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% else %}<p class="hint">No incidents yet. Run <code>python -m phishguard.poller run --once</code>.</p>{% endif %}
+  <p class="legend">
+    <span class="chip up strong">strong</span><span class="chip up medium">medium</span><span class="chip up weak">weak</span> push towards phishing ·
+    <span class="chip down medium">green</span> pushes towards legitimate · numbers are log-odds weights.
+    Restore moves the message back to your inbox; PhishGuard won't quarantine it again.
+  </p>
 </section>
 {% endblock %}

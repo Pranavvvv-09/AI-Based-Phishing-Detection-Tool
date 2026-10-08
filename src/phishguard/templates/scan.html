@@ -1,24 +1,24 @@
 {% extends "base.html" %}
+{% block title %}Quick Scan · PhishGuard{% endblock %}
 {% block content %}
-<div class="grid">
-  <section class="card">
-    <h1>Scan an email</h1>
-    <form method="post" action="/scan/email" enctype="multipart/form-data">
-      <input type="hidden" name="csrf_token" value="{{ csrf }}">
-      <label>.eml file <input id="eml" name="eml" type="file" accept=".eml,message/rfc822" required></label>
-      <button type="submit">Scan email</button>
-    </form>
-    <p class="hint">Headers, links and attachments are checked without opening anything.</p>
-  </section>
-  <section class="card">
-    <h1>Scan an SMS</h1>
-    <form method="post" action="/scan/sms">
-      <input type="hidden" name="csrf_token" value="{{ csrf }}">
-      <label>SMS text <textarea id="sms-text" name="text" rows="4" required maxlength="5000">{{ sms_text or "" }}</textarea></label>
-      <label>Sender (optional) <input id="sms-sender" name="sender" maxlength="100" value="{{ sms_sender or "" }}" placeholder="e.g. VM-HDFCBK-S or +91 98xxx xxxxx"></label>
-      <button type="submit">Scan SMS</button>
-    </form>
-  </section>
-</div>
-{% if verdict %}{% include "_verdict.html" %}{% endif %}
+<section class="card">
+  <h1>Quick Scan</h1>
+  <p class="muted">Paste an email (raw source with headers, or just the text) or an SMS and see the verdict with its reasons. Nothing is stored.</p>
+  <form method="post" action="/scan" enctype="multipart/form-data" class="scan-form"
+        hx-post="/scan" hx-target="#result" hx-swap="innerHTML" hx-encoding="multipart/form-data" hx-disabled-elt="find button">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <input type="radio" name="kind" value="email" id="kind-email" class="sr-only" checked>
+    <input type="radio" name="kind" value="sms" id="kind-sms" class="sr-only">
+    <div class="segmented" role="group" aria-label="Message type">
+      <label for="kind-email">Email</label><label for="kind-sms">SMS</label>
+    </div>
+    <div class="fields">
+      <label>Message <textarea id="text" name="text" rows="8" maxlength="200000" placeholder="Paste the message here…"></textarea></label>
+      <label class="sms-only">Sender (optional) <input id="sender" name="sender" maxlength="100" placeholder="e.g. VM-HDFCBK-S or +91 98xxx xxxxx"></label>
+      <label class="email-only">…or upload an .eml file <input id="eml" name="eml" type="file" accept=".eml,message/rfc822"></label>
+      <button type="submit" class="btn primary"><span class="label">Scan</span><span class="busy">Scanning…</span></button>
+    </div>
+  </form>
+</section>
+<div id="result" aria-live="polite">{% if verdict %}{% include "_verdict.html" %}{% endif %}</div>
 {% endblock %}

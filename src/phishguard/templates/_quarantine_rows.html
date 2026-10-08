@@ -1,0 +1,6 @@
+<tbody id="qbody" hx-get="/partials/quarantine" hx-trigger="every 60s" hx-swap="outerHTML">
+  {% for row in rows %}{% include "_row.html" %}
+  {% else %}
+  <tr class="empty"><td colspan="6">Nothing quarantined yet. New phishing will appear here automatically.</td></tr>
+  {% endfor %}
+</tbody>

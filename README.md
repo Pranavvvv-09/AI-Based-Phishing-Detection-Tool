@@ -25,7 +25,7 @@ phishing from your own mailbox.
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
-- [x] Day 8: FastAPI web app: scan page, quarantine dashboard showing each message's top ML/rule weights, a **Restore** button that moves the message back to the inbox over IMAP (`POST /api/restore/{id}`) and refreshes the table in place, JSON API (hashed-password login, CSRF on every form and on restore, rate limits, strict CSP with no inline script, fails closed on weak secrets). Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
+- [x] Day 8: dark-mode web console (FastAPI + Jinja + htmx), started together with the mailbox poller by one command: KPI cards, quarantine table with colour-coded explanation chips and a working **Restore** (`POST /api/restore/{id}`, real IMAP move, row and cards update in place), and Quick Scan for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
 - [ ] Day 9: Tests + CI hardening
 - [ ] Day 10: Docs & release
 
@@ -77,48 +77,51 @@ reported. Nothing is deleted, marked as read or modified. Reports go to `reports
 (one JSON per flagged message, no body text, plus `audit.log`); quarantine records go to
 `quarantine/`. Setup and safety notes: [docs/lab-setup.md](docs/lab-setup.md).
 
-## Web app: dashboard, Restore and API (Day 8)
+## Run it (one command)
 ```bash
 pip install -e ".[web]"
-python -c "import secrets; print(secrets.token_urlsafe(32))"   # FLASK_SECRET_KEY, API_KEY
-python -c "from werkzeug.security import generate_password_hash as g; print(g('your-password'))"
-python -m phishguard.web                                         # http://127.0.0.1:5000
+python scripts/bootstrap.py        # first time only: data + models
+cp .env.example .env               # then fill in the values below
+python -m phishguard.web           # open http://127.0.0.1:5000
 ```
-Put the three values in `.env` (`FLASK_SECRET_KEY` signs the session cookie, `API_KEY`,
-`ADMIN_PASSWORD_HASH`), plus `IMAP_USER` and `IMAP_APP_PASSWORD` so Restore can reach
-your mailbox. Run the poller (`python -m phishguard.poller run`) in a second terminal:
-it fills the quarantine, the web app shows and releases it.
-
-* **Scan** (`/`): upload an `.eml` or paste an SMS with its sender; every reason is listed
-  with its weight.
-* **Dashboard** (`/dashboard`): counts, the quarantine with each message's top weights
-  (hover a chip for the detail), recent incidents and whether the audit log is intact.
-* **Restore**: click it, confirm, and the message is moved back to your inbox over IMAP;
-  the row and counters update without reloading, and the table also refreshes every 30 s.
-  The poller remembers released mail by content hash and never quarantines it again.
-
+`.env` needs `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` and `FLASK_SECRET_KEY` (signs the
+session cookie):
 ```bash
-# Restore from a script (the browser uses the session cookie + CSRF token instead)
-curl -s -X POST http://127.0.0.1:5000/api/restore/<incident-id> -H "Authorization: Bearer $API_KEY"
-curl -s http://127.0.0.1:5000/api/quarantine -H "Authorization: Bearer $API_KEY"
-curl -s -X POST http://127.0.0.1:5000/api/v1/scan/sms -H "Authorization: Bearer $API_KEY" \
-     -H "Content-Type: application/json" -d '{"text": "Your KYC expires today...", "sender": "+91 98301 44728"}'
-curl -s -X POST http://127.0.0.1:5000/api/v1/scan/email -H "Authorization: Bearer $API_KEY" \
-     --data-binary @message.eml
+python -c "from werkzeug.security import generate_password_hash as g; print(g('your-password'))"
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
-Restore answers `200` with where the message went, `404` for an unknown incident, `409` if
-it was already restored (or another click is restoring it right now), `502` with the
-reason if the mail server refuses or the message was moved by hand, and `503` if the
-mailbox credentials aren't configured. Every attempt is in the audit log.
+Add `IMAP_USER` and `IMAP_APP_PASSWORD` (a Gmail app password, see
+[docs/lab-setup.md](docs/lab-setup.md)) and the same command also starts the **mailbox
+poller** in the background: it checks the inbox every `IMAP_POLL_SECONDS` and, with
+`MODE=quarantine`, moves phishing to the `PhishGuard-Quarantine` folder.
 
-| Scan with explanation | Dashboard with Restore | Incident |
+**Dashboard** (`/`): three cards (total scanned, quarantined, restored), and the
+quarantine table. Each message shows its score and **colour-coded explanation chips**:
+red pushes towards phishing, green towards legitimate; a solid chip is strong evidence
+(|weight| >= 2), a tinted one medium (>= 1), an outline weak. "All N reasons" expands the
+full explanation. **Restore** asks for confirmation, moves the message back to your inbox
+over IMAP (`POST /api/restore/{id}`), and the row and cards update in place; the table
+also refreshes itself every minute. A restored message is remembered by its content hash,
+so the poller never quarantines it again.
+
+**Quick Scan** (`/scan`): paste an email (raw source with headers, or just the text) or
+an SMS with its sender, or upload an `.eml`, and see the verdict with every reason.
+
+| Dashboard with Restore | Quick Scan | Phone |
 |---|---|---|
-| ![SMS scan](docs/screenshots/web_scan_sms.png) | ![Dashboard](docs/screenshots/web_dashboard.png) | ![Incident](docs/screenshots/web_incident.png) |
+| ![Dashboard](docs/screenshots/web_dashboard.png) | ![Quick Scan](docs/screenshots/web_scan_sms.png) | ![Phone](docs/screenshots/web_dashboard_mobile.png) |
 
-The app won't start with missing, placeholder or short secrets. It binds to `127.0.0.1`
-by default; to reach it from other machines, put it behind a TLS reverse proxy rather
-than setting `WEB_HOST=0.0.0.0`. Because Restore needs the IMAP app password, the web
-app holds the same mailbox access as the poller: keep it on your own machine.
+How the page works: it is server-rendered (FastAPI + Jinja) with
+[htmx](https://htmx.org) for the live parts, so there is no hand-written JavaScript.
+The Restore button is `hx-post="/api/restore/{id}"`; the server answers with the new
+table row and an `HX-Trigger: kpis-changed` header, which makes the cards reload.
+
+Safety: one login from `.env`; the app won't start with a weak secret key or a plain-text
+password; every form and the Restore call carry a CSRF token; login and Restore are rate
+limited; only the app's own script and stylesheet may load (strict CSP); every Restore is
+in the hash-chained audit log. It listens on `127.0.0.1` only; the web app holds your IMAP
+app password, so keep it on your own machine. Headless use without the web page:
+`python -m phishguard.poller run` (see above).
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,

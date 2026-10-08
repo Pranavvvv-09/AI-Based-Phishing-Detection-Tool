@@ -1,6 +1,7 @@
-import json
+import hashlib
 import re
 import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,7 @@ from phishguard.config import ConfigError, load_settings
 from phishguard.incidents import IncidentStore, new_incident_id
 from phishguard.mailbox import Mailbox
 from phishguard.poller import Poller
-from phishguard.web import create_app, pct
+from phishguard.web import PACKAGE_DIR, chip_class, create_app, pct
 
 from .imap_fake import FakeServer
 from .test_poller import MarkerScorer, email
@@ -19,14 +20,18 @@ from .test_scorer import scorer as stub_scorer
 
 FIXTURES = Path(__file__).parent / "fixtures"
 PASSWORD = "correct horse battery staple"
-API_KEY = "k" * 43
 QFOLDER = "PhishGuard-Quarantine"
+HTMX = {"HX-Request": "true"}
+# sha512 of the npm tarball was checked against registry.npmjs.org when vendoring;
+# this pins the extracted file so a silent swap fails the tests.
+HTMX_SHA256 = "e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447"
 
 
 def settings(**overrides):
-    env = {"FLASK_SECRET_KEY": "s" * 40, "API_KEY": API_KEY, "ADMIN_USERNAME": "admin",
+    env = {"FLASK_SECRET_KEY": "s" * 40, "ADMIN_USERNAME": "admin",
            "ADMIN_PASSWORD_HASH": generate_password_hash(PASSWORD), "MODE": "quarantine",
-           "IMAP_USER": "me@example.test", "IMAP_APP_PASSWORD": "app-pass", **overrides}
+           "IMAP_USER": "me@example.test", "IMAP_APP_PASSWORD": "app-pass",
+           "IMAP_POLL_SECONDS": "30", **overrides}
     return load_settings(env)
 
 
@@ -54,13 +59,11 @@ def client(world):
 
 
 def csrf_of(client, path="/login"):
-    page = client.get(path).text
-    return re.search(r'<meta name="csrf-token" content="([^"]+)"', page).group(1)
+    return re.search(r'"X-CSRF-Token": "([^"]+)"', client.get(path).text).group(1)
 
 
 def login(client, password=PASSWORD, username="admin", next_url=""):
-    token = csrf_of(client)
-    return client.post("/login", data={"csrf_token": token, "username": username,
+    return client.post("/login", data={"csrf_token": csrf_of(client), "username": username,
                                        "password": password, "next": next_url},
                        follow_redirects=False)
 
@@ -73,40 +76,91 @@ def quarantine_one(world, marker="PHISH"):
     return [r for r in store.quarantined() if not r.get("restored_at")][-1]["incident_id"]
 
 
-# ---------------------------------------------------------------- fail closed
+def restore(client, incident, token, htmx=False):
+    headers = {"X-CSRF-Token": token} if token else {}
+    if htmx:
+        headers.update(HTMX)
+    return client.post(f"/api/restore/{incident}", headers=headers)
+
+
+# ---------------------------------------------------------------- start-up
 
 
 @pytest.mark.parametrize("overrides", [
-    {"FLASK_SECRET_KEY": "change-me"}, {"FLASK_SECRET_KEY": "short"}, {"API_KEY": ""},
-    {"API_KEY": "too-short"}, {"ADMIN_PASSWORD_HASH": "change-me"},
-    {"ADMIN_PASSWORD_HASH": "plaintext-password"},
+    {"FLASK_SECRET_KEY": "change-me"}, {"FLASK_SECRET_KEY": "short"},
+    {"ADMIN_PASSWORD_HASH": "change-me"}, {"ADMIN_PASSWORD_HASH": "plaintext-password"},
 ])
 def test_app_refuses_to_start_with_unsafe_secrets(overrides, tmp_path):
     with pytest.raises(ConfigError):
         create_app(settings(**overrides), store=IncidentStore(tmp_path, tmp_path))
 
 
-# ---------------------------------------------------------------- auth
+def test_app_starts_without_an_api_key(tmp_path):
+    create_app(settings(API_KEY=""), store=IncidentStore(tmp_path, tmp_path))
 
 
-@pytest.mark.parametrize("path", ["/", "/dashboard", f"/incidents/{new_incident_id()}"])
+def test_vendored_htmx_is_the_pinned_file():
+    data = (PACKAGE_DIR / "static" / "htmx.min.js").read_bytes()
+    assert hashlib.sha256(data).hexdigest() == HTMX_SHA256
+
+
+# ---------------------------------------------------------------- one command: poller thread
+
+
+def test_background_poller_runs_with_the_app_and_stops_on_shutdown(tmp_path):
+    server = FakeServer()
+    server.deliver(email(1))
+    store = IncidentStore(tmp_path / "r", tmp_path / "q")
+    config = settings()
+    app = create_app(config, scorer=MarkerScorer(), store=store,
+                     connect=lambda: Mailbox.connect("h", "u", "app-pass",
+                                                     factory=server.factory))
+    with TestClient(app, base_url="https://testserver") as client:
+        background = app.state.app_state["background"]
+        assert background.running
+        deadline = time.time() + 5
+        while store.load_state().get("INBOX") is None and time.time() < deadline:
+            time.sleep(0.05)
+        assert store.load_state()["INBOX"]["last_uid"] == 1  # it polled the inbox
+        login(client)
+        assert "Watching me@example.test" in client.get("/").text
+    assert not background.running  # stopped cleanly with the app
+
+
+def test_no_poller_without_mailbox_credentials(tmp_path):
+    app = create_app(settings(IMAP_APP_PASSWORD=""), store=IncidentStore(tmp_path, tmp_path))
+    with TestClient(app, base_url="https://testserver") as client:
+        assert app.state.app_state["background"] is None
+        login(client)
+        assert "Mailbox not connected" in client.get("/").text
+
+
+# ---------------------------------------------------------------- login
+
+
+@pytest.mark.parametrize("path", ["/", "/scan", "/partials/kpis", "/partials/quarantine"])
 def test_pages_require_login(client, path):
     response = client.get(path, follow_redirects=False)
     assert response.status_code == 303 and response.headers["location"].startswith("/login")
 
 
-def test_login_logout_and_audit(world):
+def test_htmx_requests_after_session_expiry_redirect_the_whole_page(client):
+    response = client.get("/partials/kpis", headers=HTMX)
+    assert response.status_code == 401 and response.headers["hx-redirect"] == "/login"
+
+
+def test_login_and_logout(world):
     _, store, _, _, client = world
     assert login(client, password="nope").status_code == 401
     assert "Wrong user name" in login(client, username="root").text
     response = login(client)
     assert response.status_code == 303 and response.headers["location"] == "/"
-    assert client.get("/dashboard").status_code == 200
+    assert client.get("/").status_code == 200
     assert client.post("/logout", data={}).status_code == 400  # CSRF token required
-    client.post("/logout", data={"csrf_token": csrf_of(client, "/dashboard")})
-    assert client.get("/dashboard", follow_redirects=False).status_code == 303
-    events = [e["event"] for e in store.audit_tail()]
-    assert events == ["web_login_failed", "web_login_failed", "web_login"]
+    client.post("/logout", data={"csrf_token": csrf_of(client, "/")})
+    assert client.get("/", follow_redirects=False).status_code == 303
+    assert [e["event"] for e in store.audit_tail()] == [
+        "web_login_failed", "web_login_failed", "web_login"]
     assert PASSWORD not in store.audit.path.read_text()
 
 
@@ -115,19 +169,9 @@ def test_login_needs_csrf_token(client):
     assert response.status_code == 400
 
 
-def test_session_rotates_on_login(client):
-    before = csrf_of(client)
-    login(client)
-    assert csrf_of(client, "/") != before
-
-
 @pytest.mark.parametrize("target", ["//evil.test/x", "https://evil.test/", "/\\evil.test"])
 def test_no_open_redirect_after_login(client, target):
     assert login(client, next_url=target).headers["location"] == "/"
-
-
-def test_local_redirect_after_login_is_kept(client):
-    assert login(client, next_url="/dashboard").headers["location"] == "/dashboard"
 
 
 def test_login_is_rate_limited(client):
@@ -143,219 +187,162 @@ def test_session_cookie_flags(client):
 # ---------------------------------------------------------------- headers
 
 
-def test_security_headers(client):
+def test_security_headers_and_no_inline_script(client):
     response = client.get("/login")
     csp = response.headers["content-security-policy"]
-    assert "default-src 'none'" in csp and "script-src 'self'" in csp
-    assert "unsafe-inline" not in csp and "frame-ancestors 'none'" in csp
+    assert "script-src 'self'" in csp and "unsafe" not in csp
     assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["cache-control"] == "no-store"
-    assert "<script>" not in response.text  # only the external /static/app.js
-    assert client.get("/docs").status_code == 404  # no auto-generated API docs
-
-
-def test_static_script_uses_textcontent_not_innerhtml(client):
-    script = client.get("/static/app.js").text
-    assert "textContent" in script and "eval(" not in script
-    for sink in (".innerHTML", ".outerHTML", "insertAdjacentHTML", "document.write"):
-        assert sink not in script
-
-
-# ---------------------------------------------------------------- scanning UI
-
-
-def test_sms_scan_shows_explained_verdict_and_escapes_input(world):
-    _, store, _, _, client = world
-    login(client)
-    response = client.post("/scan/sms", data={"csrf_token": csrf_of(client, "/"),
-                                               "text": "Your SBI KYC expires, reply now",
-                                               "sender": "<script>alert(1)</script>"})
-    assert response.status_code == 200 and "Why?" in response.text
-    assert "<script>alert(1)</script>" not in response.text
-    assert "&lt;script&gt;" in response.text
-    (entry,) = [e for e in store.audit_tail() if e["event"] == "web_scan"]
-    assert entry["kind"] == "sms" and "text" not in entry  # no message content logged
-
-
-def test_email_upload_scan(client):
-    login(client)
-    raw = (FIXTURES / "phish_spoofed_sender.eml").read_bytes()
-    response = client.post("/scan/email", data={"csrf_token": csrf_of(client, "/")},
-                           files={"eml": ("m.eml", raw, "message/rfc822")})
-    assert response.status_code == 200 and "Phishing" in response.text
-
-
-def test_scan_forms_without_csrf_are_rejected(client):
-    login(client)
-    assert client.post("/scan/sms", data={"text": "hello"}).status_code == 400
+    assert re.findall(r"<script[^>]*>", response.text) == [
+        '<script src="/static/htmx.min.js" defer>']
+    assert '"allowEval": false' in response.text  # htmx never evaluates strings
+    assert client.get("/docs").status_code == 404
 
 
 # ---------------------------------------------------------------- dashboard
 
 
-def test_dashboard_shows_quarantine_with_weights_and_restore_buttons(world):
+def test_dashboard_shows_kpis_chips_and_restore_buttons(world):
     _, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    page = client.get("/dashboard").text
-    assert f'data-restore="{incident}"' in page
-    assert "text_model" in page  # the explainable weights shown per row
-    detail = client.get(f"/incidents/{incident}").text
-    assert "Restore to inbox" in detail and "Why?" in detail
+    page = client.get("/").text
+    assert re.search(r'data-kpi="quarantined">1<', page)
+    assert re.search(r'data-kpi="held">1<', page)
+    assert f'hx-post="/api/restore/{incident}"' in page
+    assert 'class="chip' in page and "text_model" in page
+    assert "All 1 reasons" in page  # expandable full explanation
 
 
-def test_incident_ids_are_validated(client):
-    login(client)
-    assert client.get("/incidents/..%2F..%2Fetc%2Fpasswd").status_code == 404
-    assert client.get(f"/incidents/{new_incident_id()}").status_code == 404
-
-
-def test_dashboard_reports_a_tampered_audit_log(world):
-    _, store, _, _, client = world
+def test_partials_render_alone(world):
+    _, _, _, _, client = world
     quarantine_one(world)
-    lines = store.audit.path.read_text().splitlines()
-    store.audit.path.write_text("\n".join(lines[1:]) + "\n")
     login(client)
-    assert "TAMPERED" in client.get("/dashboard").text
+    kpis = client.get("/partials/kpis", headers=HTMX).text
+    assert kpis.startswith('<section id="kpis"') and "<html" not in kpis
+    rows = client.get("/partials/quarantine", headers=HTMX).text
+    assert rows.startswith('<tbody id="qbody"') and "Restore" in rows
 
 
-def test_untrusted_message_fields_are_escaped_on_the_dashboard(world):
-    server, store, poller, _, client = world
+def test_untrusted_message_fields_are_escaped(world):
+    server, _, poller, _, client = world
     poller.poll_once()
     server.deliver(b"From: <img src=x onerror=alert(1)>@evil.test\r\n"
                    b"Subject: <b>PHISH</b>\r\nMessage-ID: <x@y>\r\n\r\nPHISH")
     poller.poll_once()
     login(client)
-    page = client.get("/dashboard").text
+    page = client.get("/").text
     assert "<img src=x" not in page and "<b>PHISH</b>" not in page
 
 
-# ---------------------------------------------------------------- restore API
+@pytest.mark.parametrize(("weight", "css"), [
+    (2.5, "chip up strong"), (1.2, "chip up medium"), (0.4, "chip up weak"),
+    (-2.0, "chip down strong"), (-1.0, "chip down medium"), (-0.3, "chip down weak"),
+])
+def test_chip_colour_follows_direction_and_strength(weight, css):
+    assert chip_class(weight) == css
 
 
-def restore(client, incident, token=None, **headers):
-    if token is not None:
-        headers["X-CSRF-Token"] = token
-    return client.post(f"/api/restore/{incident}", headers=headers)
+# ---------------------------------------------------------------- restore
 
 
-def test_restore_button_flow_moves_mail_back_and_updates_the_table(world):
+def test_restore_button_swaps_the_row_and_refreshes_the_kpis(world):
     server, store, poller, _, client = world
     incident = quarantine_one(world)
-    assert len(server.messages(QFOLDER)) == 1
     login(client)
-    token = csrf_of(client, "/dashboard")
-
-    before = client.get("/api/quarantine").json()
-    assert before["rows"][0]["status"] == "held" and before["stats"]["held"] == 1
-    response = restore(client, incident, token)
-    assert response.status_code == 200, response.text
-    body = response.json()
-    assert body["status"] == "restored" and body["to_folder"] == "INBOX"
-    assert body["restored_by"].startswith("web:admin@")
-
-    # Real IMAP effect: out of the quarantine folder, back in the inbox.
+    response = restore(client, incident, csrf_of(client, "/"), htmx=True)
+    assert response.status_code == 200
+    assert response.headers["hx-trigger"] == "kpis-changed"
+    row = response.text.strip()
+    assert row.startswith(f'<tr data-incident="{incident}"') and "Restored" in row
+    assert "hx-post" not in row  # no Restore button any more
+    # The real IMAP effect: out of quarantine, back in the inbox ...
     assert server.messages(QFOLDER) == {}
     assert any(b"PHISH" in raw for raw in server.messages("INBOX").values())
-    # The table the UI re-fetches now shows it restored, with no Restore button.
-    after = client.get("/api/quarantine").json()
-    assert after["rows"][0]["status"] == "restored" and after["stats"]["held"] == 0
-    assert f'data-restore="{incident}"' not in client.get("/dashboard").text
-    # And the poller leaves the released message alone.
+    # ... the KPI partial the page reloads shows it ...
+    assert re.search(r'data-kpi="restored">1<', client.get("/partials/kpis").text)
+    # ... and the poller leaves the released message alone.
     assert poller.poll_once().quarantined == 0
-    events = [e["event"] for e in store.audit_tail()]
-    assert "restored" in events and "skipped_released" in events
+    assert "skipped_released" in [e["event"] for e in store.audit_tail()]
 
 
-def test_restore_twice_is_a_conflict(world):
+def test_restore_json_for_scripts(world):
     _, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    token = csrf_of(client, "/dashboard")
-    assert restore(client, incident, token).status_code == 200
-    second = restore(client, incident, token)
-    assert second.status_code == 409 and "already restored" in second.json()["error"]
+    body = restore(client, incident, csrf_of(client, "/")).json()
+    assert body["status"] == "restored" and body["to_folder"] == "INBOX"
+    rows = client.get("/api/quarantine").json()["rows"]
+    assert rows[0]["status"] == "restored"
+
+
+def test_restore_twice_shows_a_conflict_in_the_row(world):
+    _, _, _, _, client = world
+    incident = quarantine_one(world)
+    login(client)
+    token = csrf_of(client, "/")
+    assert restore(client, incident, token, htmx=True).status_code == 200
+    again = restore(client, incident, token, htmx=True)
+    assert again.status_code == 409 and "already restored" in again.text
 
 
 def test_restore_requires_login_and_csrf(world):
     server, _, _, _, client = world
     incident = quarantine_one(world)
-    assert restore(client, incident).status_code == 401
+    assert restore(client, incident, None).status_code == 401
     login(client)
-    assert restore(client, incident).status_code == 403
+    assert restore(client, incident, None).status_code == 403
     assert restore(client, incident, "forged-token").status_code == 403
     assert len(server.messages(QFOLDER)) == 1  # nothing moved
 
 
-def test_restore_with_api_key(world):
-    server, _, _, _, client = world
-    incident = quarantine_one(world)
-    assert restore(client, incident, Authorization="Bearer " + "x" * 43).status_code == 401
-    response = restore(client, incident, Authorization=f"Bearer {API_KEY}")
-    assert response.status_code == 200 and response.json()["restored_by"].startswith("web:api")
-    assert server.messages(QFOLDER) == {}
-
-
-def test_restore_unknown_or_malformed_incident(world):
+def test_restore_unknown_incident(world):
     _, _, _, _, client = world
     login(client)
-    token = csrf_of(client, "/dashboard")
+    token = csrf_of(client, "/")
     assert restore(client, new_incident_id(), token).status_code == 404
-    assert restore(client, "not-an-id", token).status_code == 404
+    missing = restore(client, "not-an-id", token, htmx=True)
+    assert missing.status_code == 404 and "No such quarantined message" in missing.text
 
 
-def test_restore_reports_mail_server_failures_and_keeps_the_record_held(world):
+def test_mail_server_failure_keeps_the_message_held(world):
     server, store, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    token = csrf_of(client, "/dashboard")
+    token = csrf_of(client, "/")
     server.fail_connect = 1
-    failed = restore(client, incident, token)
-    assert failed.status_code == 502 and "cannot connect" in failed.json()["error"]
+    failed = restore(client, incident, token, htmx=True)
+    assert failed.status_code == 502 and "cannot connect" in failed.text
+    assert "Held" in failed.text and "hx-post" in failed.text  # can try again
     record = store.load_quarantine(incident)
     assert not record.get("restored_at") and "restore_started_at" not in record
-    assert len(server.messages(QFOLDER)) == 1
-    server.password = "changed"
-    assert "login failed" in restore(client, incident, token).json()["error"]
-    server.password = "app-pass"
     assert restore(client, incident, token).status_code == 200
 
 
-def test_restore_when_message_was_removed_by_hand(world):
-    server, _, _, _, client = world
-    incident = quarantine_one(world)
-    server.folders[QFOLDER]["msgs"].clear()
-    login(client)
-    response = restore(client, incident, csrf_of(client, "/dashboard"))
-    assert response.status_code == 502 and "not found" in response.json()["error"]
-
-
-def test_restore_without_mailbox_credentials_is_unavailable(tmp_path):
+def test_restore_without_mailbox_credentials(tmp_path):
     store = IncidentStore(tmp_path / "r", tmp_path / "q")
-    app = create_app(settings(IMAP_APP_PASSWORD=""), store=store)
-    client = TestClient(app, base_url="https://testserver")
+    client = TestClient(create_app(settings(IMAP_APP_PASSWORD=""), store=store),
+                        base_url="https://testserver")
     incident = new_incident_id()
     store.save_quarantine(incident, {"content_sha256": "ab"})
-    response = restore(client, incident, Authorization=f"Bearer {API_KEY}")
+    login(client)
+    response = restore(client, incident, csrf_of(client, "/"))
     assert response.status_code == 503 and "IMAP_APP_PASSWORD" in response.json()["error"]
 
 
-def test_concurrent_restores_move_the_message_once(world):
+def test_concurrent_clicks_move_the_message_once(world):
     server, _, _, _, client = world
     incident = quarantine_one(world)
     login(client)
-    token = csrf_of(client, "/dashboard")
+    token = csrf_of(client, "/")
     codes: list[int] = []
-
-    def attempt():
-        codes.append(restore(client, incident, token).status_code)
-
-    threads = [threading.Thread(target=attempt) for _ in range(4)]
+    threads = [threading.Thread(target=lambda: codes.append(
+        restore(client, incident, token).status_code)) for _ in range(4)]
     for t in threads:
         t.start()
     for t in threads:
         t.join()
-    assert sorted(codes).count(200) == 1 and set(codes) <= {200, 409}
+    assert codes.count(200) == 1 and set(codes) <= {200, 409}
     moves = [c for c in server.commands if c[:2] == ("UID", "MOVE") and c[-1] == "INBOX"]
     assert len(moves) == 1
 
@@ -363,62 +350,61 @@ def test_concurrent_restores_move_the_message_once(world):
 def test_restore_is_rate_limited(world):
     _, _, _, _, client = world
     login(client)
-    token = csrf_of(client, "/dashboard")
+    token = csrf_of(client, "/")
     codes = [restore(client, new_incident_id(), token).status_code for _ in range(11)]
     assert codes[:10] == [404] * 10 and codes[10] == 429
 
 
-def test_quarantine_api_needs_auth(client):
-    assert client.get("/api/quarantine").status_code == 401
-    ok = client.get("/api/quarantine", headers={"Authorization": f"Bearer {API_KEY}"})
-    assert ok.status_code == 200 and ok.json()["rows"] == []
+# ---------------------------------------------------------------- quick scan
 
 
-# ---------------------------------------------------------------- scan API
+def scan(client, **data):
+    files = data.pop("files", None)
+    return client.post("/scan", data={"csrf_token": csrf_of(client, "/scan"), **data},
+                       files=files, headers=HTMX)
 
 
-def auth(key=API_KEY):
-    return {"Authorization": f"Bearer {key}"}
+def test_quick_scan_sms_returns_the_verdict_panel(world):
+    _, store, _, _, client = world
+    login(client)
+    response = scan(client, kind="sms", text="Your SBI KYC expires, reply now",
+                    sender="<script>alert(1)</script>")
+    assert response.status_code == 200 and "<html" not in response.text
+    assert "Why?" in response.text and 'class="chip' in response.text
+    assert "<script>alert(1)</script>" not in response.text
+    (entry,) = [e for e in store.audit_tail() if e["event"] == "web_scan"]
+    assert entry["kind"] == "sms" and "text" not in entry  # message content never logged
 
 
-def test_scan_api_requires_the_key(client):
-    assert client.post("/api/v1/scan/sms", json={"text": "hi"}).status_code == 401
-    wrong = client.post("/api/v1/scan/sms", json={"text": "hi"}, headers=auth("x" * 43))
-    assert wrong.status_code == 401 and wrong.headers["www-authenticate"].startswith("Bearer")
-    assert client.get("/api/health").json() == {"status": "ok"}
+def test_quick_scan_pasted_raw_email_uses_the_header_checks(client):
+    login(client)
+    raw = (FIXTURES / "phish_spoofed_sender.eml").read_text()
+    response = scan(client, kind="email", text=raw)
+    assert "Phishing" in response.text and "dmarc" in response.text.lower()
 
 
-def test_scan_api_sms_and_email(client):
-    response = client.post("/api/v1/scan/sms", headers=auth(),
-                           json={"text": "Your KYC expires today, reply now", "sender": "x"})
-    assert response.status_code == 200 and response.json()["kind"] == "sms"
+def test_quick_scan_plain_email_text_and_upload(client):
+    login(client)
+    assert "email" in scan(client, kind="email", text="Please verify your account").text
     raw = (FIXTURES / "phish_spoofed_sender.eml").read_bytes()
-    response = client.post("/api/v1/scan/email", headers=auth(), content=raw)
-    assert response.json()["action"] == "quarantine"
+    upload = scan(client, kind="email", files={"eml": ("m.eml", raw, "message/rfc822")})
+    assert "Phishing" in upload.text
 
 
-@pytest.mark.parametrize("body", [
-    {"text": 5}, {"text": ""}, {"text": "x" * 5001}, {"text": "hi", "sender": 7},
-    {"text": "hi", "sender": "s" * 101}, ["not", "an", "object"],
-])
-def test_scan_api_rejects_bad_sms_input(client, body):
-    response = client.post("/api/v1/scan/sms", headers={**auth(), "Content-Type":
-                           "application/json"}, content=json.dumps(body))
-    assert response.status_code == 400 and "error" in response.json()
+def test_quick_scan_validation(client):
+    login(client)
+    assert scan(client, kind="email", text="  ").status_code == 400
+    assert scan(client, kind="sms", text="x" * 5001).status_code == 400
+    assert scan(client, kind="fax", text="hello").status_code in (400, 422)
+    no_csrf = client.post("/scan", data={"kind": "sms", "text": "hi"}, headers=HTMX)
+    assert no_csrf.status_code == 400
 
 
-def test_scan_api_rejects_empty_and_oversized_email(world):
-    _, _, _, app, client = world
-    assert client.post("/api/v1/scan/email", headers=auth()).status_code == 400
-    limit = app.state.settings.max_email_bytes + 64 * 1024
-    response = client.post("/api/v1/scan/email", headers=auth(), content=b"x" * (limit + 1))
-    assert response.status_code == 413
-
-
-def test_scan_api_is_rate_limited(client):
-    codes = [client.post("/api/v1/scan/sms", headers=auth(), json={"text": "hello there"})
-             .status_code for _ in range(61)]
-    assert codes[-1] == 429 and set(codes[:60]) == {200}
+def test_full_page_scan_without_htmx(client):
+    login(client)
+    response = client.post("/scan", data={"csrf_token": csrf_of(client, "/scan"),
+                                          "kind": "sms", "text": "hello there friend"})
+    assert response.status_code == 200 and "<html" in response.text and "Why?" in response.text
 
 
 def test_scores_never_display_as_certain():

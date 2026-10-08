@@ -1,0 +1,38 @@
+{% if row %}
+<tr data-incident="{{ row.incident_id }}" class="{{ 'is-restored' if row.status == 'restored' }}">
+  <td class="when">{{ row.quarantined_at|when }}</td>
+  <td class="who"><div class="from">{{ row["from"] }}</div><div class="muted">{{ row.subject }}</div></td>
+  <td class="num"><span class="score">{{ row.score|pct }}</span></td>
+  <td class="why">
+    {% with reasons = row.reasons, limit = chips_per_row %}{% include "_chips.html" %}{% endwith %}
+    {% if row.reasons %}
+    <details>
+      <summary>All {{ row.reasons|length }} reasons</summary>
+      <table class="reasons">
+        {% for r in row.reasons %}
+        <tr><td><span class="{{ r.weight|chip }}">{{ r.code }}</span></td><td>{{ r.detail }}</td><td class="num">{{ "%+.2f"|format(r.weight) }}</td></tr>
+        {% endfor %}
+      </table>
+    </details>
+    {% endif %}
+  </td>
+  <td class="state">
+    {% if row.status == "restored" %}<span class="badge good">Restored</span><div class="muted">{{ row.restored_at|when }}</div>
+    {% elif row.status == "restoring" %}<span class="badge warn">Restoring…</span>
+    {% else %}<span class="badge bad">Held</span>{% endif %}
+    {% if error %}<div class="row-error" role="alert">{{ error }}</div>{% endif %}
+  </td>
+  <td class="action">
+    {% if row.status != "restored" %}
+    <button type="button" class="btn primary restore"
+            hx-post="/api/restore/{{ row.incident_id }}"
+            hx-confirm="Move this message back to your inbox? Only do this if you are sure it is not phishing."
+            hx-target="closest tr" hx-swap="outerHTML" hx-disabled-elt="this">
+      <span class="label">Restore</span><span class="busy">Restoring…</span>
+    </button>
+    {% endif %}
+  </td>
+</tr>
+{% else %}
+<tr><td colspan="6"><div class="row-error" role="alert">{{ error or "Not found." }}</div></td></tr>
+{% endif %}

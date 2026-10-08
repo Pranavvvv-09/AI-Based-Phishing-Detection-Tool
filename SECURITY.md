@@ -6,7 +6,7 @@ PhishGuard is a **defensive, detection-only** tool.
 - Analysis is static: the analyser never fetches, resolves or opens URLs or attachments.
 - Quarantine moves messages and never deletes them. Every action is reversible and audited.
 - The web app's only mailbox action is Restore (move back to the inbox), which needs a
-  logged-in session plus a CSRF token, or the API key.
+  logged-in session plus a CSRF token.
 - It operates only on mailboxes the operator owns and has configured.
 - Secrets are loaded from environment variables and never logged.
 
