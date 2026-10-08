@@ -25,7 +25,7 @@ phishing from your own mailbox.
 - [x] Day 5: Email ML model (TF-IDF + LogReg on 36k emails incl. 2022–26 honeypot phishing; 87.9% recall on future real phishing; shortcut-learning fixes)
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
-- [ ] Day 8: Web UI, API, admin dashboard
+- [x] Day 8: Web UI, JSON API and read-only admin dashboard (login with hashed password, CSRF on every form, rate-limited login and API, constant-time API-key check, strict CSP with no JavaScript, fails closed on weak secrets)
 - [ ] Day 9: Tests + CI hardening
 - [ ] Day 10: Docs & release
 
@@ -76,6 +76,31 @@ as `would_quarantine`. With `MODE=quarantine`, messages scoring at or above
 reported. Nothing is deleted, marked as read or modified. Reports go to `reports/`
 (one JSON per flagged message, no body text, plus `audit.log`); quarantine records go to
 `quarantine/`. Setup and safety notes: [docs/lab-setup.md](docs/lab-setup.md).
+
+## Web UI, API and dashboard (Day 8)
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"   # FLASK_SECRET_KEY, API_KEY
+python -c "from werkzeug.security import generate_password_hash as g; print(g('your-password'))"
+python -m phishguard.web                                         # http://127.0.0.1:5000
+```
+Log in to scan an uploaded `.eml` or a pasted SMS (with its sender) and see every reason
+with its weight. `/dashboard` shows scan counts, recent incidents, the quarantine and
+whether the audit log is intact. It is **read-only**: releasing mail stays a deliberate
+`python -m phishguard.poller restore` on the command line.
+
+```bash
+curl -s -X POST http://127.0.0.1:5000/api/v1/scan/sms -H "Authorization: Bearer $API_KEY" \
+     -H "Content-Type: application/json" -d '{"text": "Your KYC expires today...", "sender": "+91 98301 44728"}'
+curl -s -X POST http://127.0.0.1:5000/api/v1/scan/email -H "Authorization: Bearer $API_KEY" \
+     --data-binary @message.eml
+```
+| Scan with explanation | Dashboard | Incident |
+|---|---|---|
+| ![SMS scan](docs/screenshots/web_scan_sms.png) | ![Dashboard](docs/screenshots/web_dashboard.png) | ![Incident](docs/screenshots/web_incident.png) |
+
+The app won't start with missing or placeholder secrets. It binds to `127.0.0.1` by
+default; to reach it from other machines, put it behind a TLS reverse proxy rather than
+setting `WEB_HOST=0.0.0.0`.
 
 ## Train the model yourself
 See **[docs/PhishGuard_Model_Training_Guide.pdf](docs/PhishGuard_Model_Training_Guide.pdf)** (22 pages): both models,

@@ -24,9 +24,15 @@ import os
 import re
 import secrets
 import tempfile
+from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:  # Windows: single-process use only
+    fcntl = None
 
 GENESIS = "0" * 64
 _INCIDENT_ID = re.compile(r"^\d{8}T\d{6}Z-[0-9a-f]{8}$")
@@ -89,13 +95,17 @@ class AuditLog:
         return json.loads(last)["hash"]
 
     def append(self, event: str, **fields: object) -> dict:
-        entry = {"ts": utc_now(), "event": event, **fields, "prev": self._last_hash()}
-        line = {**entry, "hash": _entry_hash(entry)}
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT
-        fd = os.open(self.path, flags, 0o600)
+        fd = os.open(self.path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
         with os.fdopen(fd, "a", encoding="utf-8") as handle:
+            # The poller and the web app may append at the same time: hold an exclusive
+            # lock from reading the last hash until the new line is written.
+            if fcntl is not None:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            entry = {"ts": utc_now(), "event": event, **fields, "prev": self._last_hash()}
+            line = {**entry, "hash": _entry_hash(entry)}
             handle.write(json.dumps(line, sort_keys=True, ensure_ascii=True) + "\n")
+            handle.flush()
         return line
 
     def verify(self) -> tuple[bool, int, str]:
@@ -163,6 +173,40 @@ class IncidentStore:
         """Content hashes of messages a person released: never re-quarantine them."""
         return {r["content_sha256"] for r in self.quarantined()
                 if r.get("restored_at") and r.get("content_sha256")}
+
+    # ------------------------------------------------------------ read side (web)
+
+    def recent_reports(self, limit: int = 100) -> list[dict]:
+        """Newest incident reports first (IDs start with a UTC timestamp)."""
+        paths = sorted((p for p in self.reports_dir.glob("*.json") if valid_incident_id(p.stem)),
+                       key=lambda p: p.stem, reverse=True)
+        reports = []
+        for path in paths[:limit]:
+            with contextlib.suppress(OSError, ValueError):
+                reports.append(read_json(path))
+        return reports
+
+    def load_report(self, incident_id: str) -> dict:
+        if not valid_incident_id(incident_id):
+            raise KeyError(incident_id)
+        path = self.reports_dir / f"{incident_id}.json"
+        if not path.exists():
+            raise KeyError(incident_id)
+        return read_json(path)
+
+    def audit_tail(self, limit: int = 5000) -> list[dict]:
+        """The last ``limit`` audit entries (unverified; see ``audit.verify``)."""
+        if not self.audit.path.exists():
+            return []
+        with self.audit.path.open(encoding="utf-8") as handle:
+            lines = deque(handle, maxlen=limit)  # streams: memory bounded by ``limit``
+        entries = []
+        for raw in lines:
+            with contextlib.suppress(ValueError):
+                entry = json.loads(raw)
+                if isinstance(entry, dict):
+                    entries.append(entry)
+        return entries
 
     # ------------------------------------------------------------ poller state
 
