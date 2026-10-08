@@ -1,5 +1,7 @@
 # PhishGuard: AI-Based Phishing Detection Tool
 
+[![CI](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml)
+
 > 🚧 Work in progress: a 10-day build of an explainable phishing detector for email and SMS.
 
 AI has made scams look genuine: phishing emails now have perfect grammar and are
@@ -26,7 +28,7 @@ phishing from your own mailbox.
 - [x] Day 6: SMS model + explainable scorer (log-odds fusion of text, header, link and trust evidence; 94% of future real phishing flagged, 0.5% of legitimate mail). SMS wording is judged by blending the SMS and email models, chosen by a pre-registered experiment on frozen test sets: genuine bank/OTP/delivery SMS wrongly flagged fell from 37.5% to 20.8%. SMS sender and link-vs-brand evidence plus two capped credits, chosen by a second pre-registered experiment on fresh frozen sets: genuine SMS flagged 17.8% → 11.1% and none at quarantine level, smishing caught 77.8% → 82.2%; 13 Indian consumer brands added (modern genuine email flagged 22.7% → 13.6%, measured post-hoc)
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
 - [x] Day 8: dark-mode web console (FastAPI + Jinja + htmx), started together with the mailbox poller by one command: KPI cards, quarantine table with colour-coded explanation chips and a working **Restore** (`POST /api/restore/{id}`, real IMAP move, row and cards update in place), and Quick Scan for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
-- [ ] Day 9: Tests + CI hardening
+- [x] Day 9: Tests + CI hardening (GitHub Actions on Python 3.11 and 3.13: ruff, bandit, 369 tests with a 85% coverage floor (92% measured, without the datasets), pip-audit; least-privilege token, SHA-pinned actions, Dependabot; timing tests made CI-safe)
 - [ ] Day 10: Docs & release
 
 ## Development setup
@@ -36,10 +38,22 @@ pip install -e ".[web,dev]"
 python scripts/bootstrap.py   # download datasets + train email and SMS models (~7 min first run)
 cp .env.example .env          # then fill in secrets (see docs/lab-setup.md)
 pre-commit install
-pytest
-ruff check .
-bandit -c pyproject.toml -r src
 ```
+
+## Checks (the same ones CI runs)
+```bash
+ruff check .                                   # lint
+bandit -q -c pyproject.toml -r src             # security lint
+pytest --cov=phishguard                        # tests; fails below 85% coverage
+pip-audit --skip-editable                      # known vulnerabilities in dependencies
+```
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs these on every push and pull
+request, on Python 3.11 (oldest supported) and 3.13. CI has no datasets or trained models:
+the few tests that need them skip themselves, everything else uses small stand-in models
+and an in-memory IMAP server (`tests/imap_fake.py`), plus one test that feeds real
+`imaplib` the exact bytes an IMAP server sends (`tests/test_imap_wire.py`).
+The workflow is locked down: read-only token, actions pinned to commit SHAs (kept current
+by [Dependabot](.github/dependabot.yml)), no stored credentials, 15-minute timeout.
 
 ## Score a message
 ```bash
