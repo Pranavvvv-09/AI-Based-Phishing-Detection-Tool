@@ -82,9 +82,10 @@
         "tp": 930
       }
     },
-    "sha256": "c27789bba68910c5e2fe895abb90433e5c8f2af2ba50683ce9b86990a0b79476",
+    "normalizer": "email",
+    "sha256": "b1960bfc07042967cff1b4e3b88d96436895446598a39aaf014d5d5e08638fc6",
     "sklearn_version": "1.9.1",
-    "trained_at": "2026-10-07T19:25:40Z"
+    "trained_at": "2026-10-08T14:43:17Z"
   },
   "sms_model": {
     "file": "sms_model.joblib",
@@ -136,8 +137,8 @@
       }
     },
     "normalizer": "sms",
-    "sha256": "69a348584abe81b56ccf56ab06012da16418d2337ec5225b38341c97544ebe4f",
+    "sha256": "602f4dfd78c6e63596357f7ea6c9947b3c510dbe644579f6961f425016dd614c",
     "sklearn_version": "1.9.1",
-    "trained_at": "2026-10-07T21:30:03Z"
+    "trained_at": "2026-10-08T14:43:17Z"
   }
 }
