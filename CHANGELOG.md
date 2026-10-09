@@ -6,17 +6,6 @@ All notable changes to PhishGuard. Format based on
 
 ## [Unreleased]
 
-### Added
-- **SMS screenshot scanning** in Quick Scan: upload a PNG, JPEG or WebP screenshot on the
-  SMS tab and its text is read with OCR, scored like a pasted SMS, and shown above the
-  verdict. Offline (RapidOCR, models bundled), optional (`pip install -e ".[ocr]"`), and
-  hardened against hostile uploads: 5 MB cap, content-based type check, a pixel limit
-  checked before decoding (decompression bombs), and the image is never stored.
-
-### Fixed
-- Training no longer crashes when an antivirus quarantines a honeypot sample mid-run;
-  the file is skipped, like an unparseable one.
-
 ## [0.1.0] - 2026-10-09
 
 First release: the result of the 10-day build.
@@ -42,11 +31,20 @@ First release: the result of the 10-day build.
 - **Web console** (`python -m phishguard.web`): a React + Tailwind dark-mode dashboard with
   explainability chips and Restore to Inbox, plus a Quick Scan page for emails and SMS.
   Single login, CSRF, rate limits, strict CSP, listens on `127.0.0.1` only.
+- **SMS screenshot scanning** in Quick Scan: upload a PNG, JPEG or WebP screenshot on the
+  SMS tab and its text is read with OCR, scored like a pasted SMS, and shown above the
+  verdict. Offline (RapidOCR, models bundled), optional (`pip install -e ".[ocr]"`), and
+  hardened against hostile uploads: 5 MB cap, content-based type check, a pixel limit
+  checked before decoding (decompression bombs), and the image is never stored.
+- **Training on Windows**: honeypot samples that an antivirus quarantines mid-run are
+  skipped instead of crashing training.
 - **CI**: GitHub Actions on Python 3.11 and 3.13 with ruff, bandit, pytest (85% coverage
-  floor), pip-audit and a check that the built dashboard matches `frontend/`.
-  Least-privilege token, SHA-pinned actions, Dependabot.
+  floor), pip-audit, Playwright browser tests against the running app, and a check that
+  the built dashboard matches `frontend/`. Least-privilege token, SHA-pinned actions,
+  Dependabot.
 - **Docs**: README quick start for Linux/macOS and Windows,
   [architecture overview](docs/architecture.md), [lab setup](docs/lab-setup.md),
   and the [model training guide](docs/PhishGuard_Model_Training_Guide.pdf).
 
+[Unreleased]: https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/releases/tag/v0.1.0
