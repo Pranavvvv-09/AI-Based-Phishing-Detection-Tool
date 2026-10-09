@@ -26,6 +26,11 @@ web = [
     "itsdangerous>=2.2",
     "werkzeug>=3.0",  # password hashing (ADMIN_PASSWORD_HASH format)
 ]
+ocr = [  # Quick Scan of SMS screenshots; OCR models ship in the wheel, so it stays offline
+    "rapidocr>=3.10",
+    "onnxruntime>=1.20",
+    "pillow>=11",
+]
 dev = [
     "pytest>=8",
     "pytest-cov>=5",

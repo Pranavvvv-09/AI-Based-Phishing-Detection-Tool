@@ -4,6 +4,13 @@
     <span class="score big">{{ verdict.score|pct }}</span>
   </div>
   <p class="muted">Recommended action: <b>{{ verdict.action }}</b> · {{ verdict.kind }}</p>
+  {% if extracted %}
+  <details class="ocr-text" open>
+    <summary>Text read from the screenshot</summary>
+    <pre>{{ extracted }}</pre>
+    <p class="legend">Misread? Copy it into Message, correct it and scan again.</p>
+  </details>
+  {% endif %}
   {% with reasons = verdict.reasons, limit = 99 %}{% include "_chips.html" %}{% endwith %}
   <h3>Why?</h3>
   <table class="reasons">
