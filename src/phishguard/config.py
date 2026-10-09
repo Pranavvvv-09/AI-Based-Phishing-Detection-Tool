@@ -32,7 +32,7 @@ class Settings:
     quarantine_threshold: float
     max_email_bytes: int
     admin_username: str
-    intel_enabled: bool
+    intel_enabled: bool  # reserved: validated, but no code reads it yet (fully offline)
     trusted_authserv_id: str
     extra_brands_file: str
     web_host: str

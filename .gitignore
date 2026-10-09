@@ -51,3 +51,8 @@ Thumbs.db
 
 # ---------- Frontend (React dashboard) ----------
 frontend/node_modules/
+
+# ---------- Browser tests (Playwright) ----------
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/

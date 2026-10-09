@@ -39,7 +39,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip setuptools
-          python -m pip install -e ".[web,dev]"
+          python -m pip install -e ".[web,dev,ocr]"  # ocr: screenshot tests run for real
 
       - name: Lint (ruff)
         run: ruff check .
@@ -92,3 +92,59 @@ jobs:
             echo "::error::The committed dashboard is out of date: run 'npm run build' in frontend/ and commit it"
             exit 1
           fi
+
+  e2e:
+    name: Browser tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install the app
+        run: python -m pip install -e ".[web]"
+
+      # Throwaway secrets for this run only; no mailbox, so the poller stays off.
+      # The browser talks plain http to 127.0.0.1, hence WEB_COOKIE_SECURE=false.
+      - name: Write a test .env
+        run: |
+          password="$(python -c 'import secrets; print(secrets.token_urlsafe(24))')"
+          echo "::add-mask::$password"
+          echo "PHISHGUARD_PASSWORD=$password" >> "$GITHUB_ENV"
+          {
+            echo "FLASK_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+            echo "ADMIN_USERNAME=admin"
+            echo "ADMIN_PASSWORD_HASH=$(python -c 'import sys; from werkzeug.security import generate_password_hash as g; print(g(sys.argv[1]))' "$password")"
+            echo "WEB_COOKIE_SECURE=false"
+          } > .env
+
+      - name: Start the app
+        run: |
+          python -m phishguard.web > web.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:5000/login && exit 0; sleep 1; done
+          cat web.log; exit 1
+
+      - name: Install Playwright (lockfile only, no install scripts) and Chromium
+        working-directory: e2e
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+
+      - name: Browser tests
+        working-directory: e2e
+        run: npx playwright test --reporter=list
+
+      - name: Server log on failure
+        if: failure()
+        run: cat web.log
