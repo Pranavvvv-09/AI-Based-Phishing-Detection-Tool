@@ -3,7 +3,7 @@
 {% block content %}
 <section class="card">
   <h1>Quick Scan</h1>
-  <p class="muted">Paste an email (raw source with headers, or just the text) or an SMS and see the verdict with its reasons. Nothing is stored.</p>
+  <p class="muted">Paste an email (raw source with headers, or just the text) or an SMS, or upload a screenshot of an SMS, and see the verdict with its reasons. Nothing is stored.</p>
   <form method="post" action="/scan" enctype="multipart/form-data" class="scan-form"
         hx-post="/scan" hx-target="#result" hx-swap="innerHTML" hx-encoding="multipart/form-data" hx-disabled-elt="find button">
     <input type="hidden" name="csrf_token" value="{{ csrf }}">
@@ -15,6 +15,7 @@
     <div class="fields">
       <label>Message <textarea id="text" name="text" rows="8" maxlength="200000" placeholder="Paste the message here…"></textarea></label>
       <label class="sms-only">Sender (optional) <input id="sender" name="sender" maxlength="100" placeholder="e.g. VM-HDFCBK-S or +91 98xxx xxxxx"></label>
+      <label class="sms-only">…or upload a screenshot of the SMS <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp"></label>
       <label class="email-only">…or upload an .eml file <input id="eml" name="eml" type="file" accept=".eml,message/rfc822"></label>
       <button type="submit" class="btn primary"><span class="label">Scan</span><span class="busy">Scanning…</span></button>
     </div>

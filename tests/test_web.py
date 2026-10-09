@@ -414,6 +414,57 @@ def test_quick_scan_validation(client):
     assert no_csrf.status_code == 400
 
 
+def screenshot_client(tmp_path, ocr):
+    store = IncidentStore(tmp_path, tmp_path)
+    app = create_app(settings(IMAP_APP_PASSWORD=""), scorer=stub_scorer(p_email=0.9, p_sms=0.9),
+                     store=store, ocr=ocr)
+    client = TestClient(app, base_url="https://testserver")
+    login(client)
+    return client, store
+
+
+PNG = ("sms.png", b"\x89PNG fake bytes", "image/png")
+
+
+def test_quick_scan_sms_screenshot_scores_the_text_read_from_it(tmp_path):
+    seen = []
+
+    def ocr(data):
+        seen.append(data)
+        return "Your SBI KYC expires <b>today</b>\nupdate at sbi-kyc.in"
+
+    client, store = screenshot_client(tmp_path, ocr)
+    response = scan(client, kind="sms", sender="+91 98301 44728", files={"image": PNG})
+    assert response.status_code == 200 and "Why?" in response.text
+    assert seen == [PNG[1]]
+    assert "Text read from the screenshot" in response.text
+    assert "&lt;b&gt;today&lt;/b&gt;" in response.text and "<b>today</b>" not in response.text
+    (entry,) = [e for e in store.audit_tail() if e["event"] == "web_scan"]
+    assert entry["kind"] == "sms" and "text" not in entry  # neither text nor image logged
+
+
+def test_quick_scan_screenshot_errors(tmp_path):
+    from phishguard.ocr import ImageError, OCRUnavailable
+
+    def failing(exc):
+        def ocr(data):
+            raise exc
+        return ocr
+
+    client, _ = screenshot_client(tmp_path, lambda data: "hello")
+    assert scan(client, kind="email", files={"image": PNG}).status_code == 400  # SMS only
+    client, _ = screenshot_client(tmp_path, lambda data: "  \n ")
+    assert "No text was found" in scan(client, kind="sms", files={"image": PNG}).text
+    client, _ = screenshot_client(tmp_path, lambda data: "x" * 5001)
+    assert scan(client, kind="sms", files={"image": PNG}).status_code == 400
+    client, _ = screenshot_client(tmp_path, failing(ImageError("That file is not a PNG")))
+    response = scan(client, kind="sms", files={"image": PNG})
+    assert response.status_code == 400 and "not a PNG" in response.text
+    client, _ = screenshot_client(tmp_path, failing(OCRUnavailable("missing")))
+    response = scan(client, kind="sms", files={"image": PNG})
+    assert response.status_code == 503 and "[ocr]" in response.text
+
+
 def test_full_page_scan_without_htmx(client):
     login(client)
     response = client.post("/scan", data={"csrf_token": csrf_of(client, "/scan"),

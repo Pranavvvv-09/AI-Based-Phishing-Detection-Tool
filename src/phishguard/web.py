@@ -11,11 +11,15 @@ Pages (login required)
 ----------------------
 * ``/``          Dashboard: KPI cards, and the quarantine table with colour-coded
                  explanation chips and a Restore button per message.
-* ``/scan``      Quick Scan: paste an email or SMS (or upload an ``.eml``) and see why.
+* ``/scan``      Quick Scan: paste an email or SMS, upload an ``.eml``, or upload an SMS
+                 screenshot (read by OCR, optional ``.[ocr]`` extra) and see why.
 
-The browser side uses **htmx** (a small vendored script): Restore posts to
-``/api/restore/{id}`` and swaps in the updated table row; the KPI cards reload when
-the server signals ``kpis-changed``; the table refreshes itself every 30 seconds.
+The dashboard is a React app (``frontend/``, built into ``static/app/``): it reads
+``GET /api/session`` (CSRF token, poller status) and ``GET /api/quarantine``, refreshes
+every minute while the tab is visible, and Restore posts to ``/api/restore/{id}`` with
+an ``X-CSRF-Token`` header, then updates the row and the KPI cards in place. Login and
+Quick Scan stay server-rendered (Jinja), with **htmx** (a small vendored script) for
+the scan form.
 
 Security, kept deliberately simple
 ----------------------------------
@@ -53,6 +57,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .config import ConfigError, Settings, load_settings
 from .incidents import IncidentStore, valid_incident_id
 from .mailbox import Mailbox, MailboxError
+from .ocr import MAX_IMAGE_BYTES, ImageError, OCRUnavailable
 from .scorer import MAX_SMS_CHARS
 from .sms_checks import MAX_SENDER_CHARS
 
@@ -223,8 +228,8 @@ class LoginRequired(Exception):
 
 
 def create_app(settings: Settings | None = None, scorer=None,
-               store: IncidentStore | None = None, connect=None) -> FastAPI:
-    """Build the app. ``scorer``, ``store`` and ``connect`` are replaceable for tests."""
+               store: IncidentStore | None = None, connect=None, ocr=None) -> FastAPI:
+    """Build the app. ``scorer``, ``store``, ``connect`` and ``ocr`` are replaceable for tests."""
     if settings is None:
         dotenv = ROOT / ".env"
         settings = load_settings(dotenv_path=dotenv if dotenv.exists() else None)
@@ -233,7 +238,7 @@ def create_app(settings: Settings | None = None, scorer=None,
     limiter = RateLimiter()
     templates = Jinja2Templates(directory=str(PACKAGE_DIR / "templates"))
     templates.env.filters.update(pct=pct, when=when, chip=chip_class)
-    state: dict = {"scorer": scorer, "poller": None, "background": None}
+    state: dict = {"scorer": scorer, "poller": None, "background": None, "ocr": ocr}
 
     def get_scorer():
         if state["scorer"] is None:
@@ -246,6 +251,22 @@ def create_app(settings: Settings | None = None, scorer=None,
                     503, "Models are not available. Run: python scripts/bootstrap.py"
                 ) from None
         return state["scorer"]
+
+    def read_screenshot(data: bytes) -> str:
+        if state["ocr"] is None:
+            from .ocr import extract_text
+
+            state["ocr"] = extract_text
+        try:
+            text = state["ocr"](data)
+        except OCRUnavailable:
+            raise HTTPException(503, "Image scanning is not installed. Run: "
+                                     "pip install -e \".[ocr]\"") from None
+        except ImageError as exc:
+            raise HTTPException(400, str(exc)) from None
+        if not text.strip():
+            raise HTTPException(400, "No text was found in the image.")
+        return text
 
     def get_poller():
         if state["poller"] is None:
@@ -422,15 +443,26 @@ def create_app(settings: Settings | None = None, scorer=None,
              text: Annotated[str, Form(max_length=MAX_PASTE_CHARS)] = "",
              sender: Annotated[str, Form(max_length=MAX_SENDER_CHARS)] = "",
              eml: Annotated[UploadFile | None, File()] = None,
+             image: Annotated[UploadFile | None, File()] = None,
              csrf: Annotated[str, Form(alias="csrf_token")] = ""):
         require_login(request)
         if not csrf_ok(request, csrf):
             raise HTTPException(400, "Your form expired, please reload the page.")
         raw = eml.file.read(settings.max_email_bytes + 1) if eml and eml.filename else b""
+        picture = image.file.read(MAX_IMAGE_BYTES + 1) if image and image.filename else b""
+        extracted = None
         if raw:
             verdict = get_scorer().scan_email_bytes(raw)
+        elif picture:
+            if kind != "sms":
+                raise HTTPException(400, "Screenshots can be scanned as SMS only.")
+            extracted = read_screenshot(picture)
+            if len(extracted) > MAX_SMS_CHARS:
+                raise HTTPException(400, f"The screenshot holds more than {MAX_SMS_CHARS} "
+                                         "characters; crop it to one message.")
+            verdict = get_scorer().scan_sms(extracted, sender)
         elif not text.strip():
-            raise HTTPException(400, "Paste a message or choose an .eml file.")
+            raise HTTPException(400, "Paste a message, or choose an .eml file or a screenshot.")
         elif kind == "sms":
             if len(text) > MAX_SMS_CHARS:
                 raise HTTPException(400, f"An SMS can be at most {MAX_SMS_CHARS} characters.")
@@ -443,7 +475,7 @@ def create_app(settings: Settings | None = None, scorer=None,
                            score=None if verdict.score is None else round(verdict.score, 4))
         data = verdict.to_dict()
         page = "_verdict.html" if is_htmx(request) else "scan.html"
-        return render(request, page, tab="scan", verdict=data)
+        return render(request, page, tab="scan", verdict=data, extracted=extracted)
 
     # ------------------------------------------------------------- restore API
 

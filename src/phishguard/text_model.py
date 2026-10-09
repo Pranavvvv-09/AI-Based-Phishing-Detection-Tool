@@ -264,6 +264,8 @@ def load_honeypot(raw_dir: Path = RAW_DIR, cache_dir: Path = PROCESSED_DIR) -> p
                 text = normalize_text(_HONEYPOT_PLACEHOLDER.sub(" ", raw_text))
             except EmailParseError:
                 continue  # over-limit or not an email: skipped, never crashes training
+            except OSError:
+                continue  # removed or locked mid-run (e.g. antivirus quarantine): skipped
             rows.append((int(number), text, is_english(text)))
         df = pd.DataFrame(rows, columns=["sample_no", "text", "english"])
         cache_dir.mkdir(parents=True, exist_ok=True)

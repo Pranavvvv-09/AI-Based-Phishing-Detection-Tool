@@ -124,6 +124,10 @@ table.reasons td { padding: 6px 8px; border-top: 1px solid var(--line); vertical
 .badge.good { color: var(--good); background: var(--good-bg); }
 .badge.warn { color: var(--warn); background: var(--warn-bg); }
 .legend { color: var(--muted); font-size: 12px; margin: 14px 0 0; line-height: 2; }
+.ocr-text { margin: 12px 0; }
+.ocr-text summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.ocr-text pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0 0; padding: 10px 12px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); font-size: 13px; }
 
 /* ---------- explanation chips: colour = direction, fill = strength */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }

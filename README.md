@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml/badge.svg)](https://github.com/Pranavvvv-09/AI-Based-Phishing-Detection-Tool/actions/workflows/ci.yml)
 
-> 🚧 Work in progress: a 10-day build of an explainable phishing detector for email and SMS.
+> v0.1.0: an explainable phishing detector for email and SMS, built in 10 days.
+> See [CHANGELOG.md](CHANGELOG.md) and the [architecture overview](docs/architecture.md).
 
 AI has made scams look genuine: phishing emails now have perfect grammar and are
 personalised at scale. PhishGuard combines **technical evidence AI can't fake**
@@ -10,7 +11,7 @@ personalised at scale. PhishGuard combines **technical evidence AI can't fake**
 model of scam intent**. It explains every verdict and can automatically quarantine
 phishing from your own mailbox.
 
-## Planned features
+## Features
 - 📥 Automatic scanning of your own Gmail over IMAP, plus `.eml` upload and SMS text
 - 🔍 Header checks (SPF/DKIM/DMARC, Reply-To mismatch, display-name spoofing)
 - 🔗 URL checks (punycode, IP hosts, `@` tricks, shorteners, link-text mismatch)
@@ -29,7 +30,30 @@ phishing from your own mailbox.
 - [x] Day 7: IMAP poller + reversible quarantine (TLS-only, read without marking as read, move never delete, restore that is never undone by the next poll, JSON incident reports, hash-chained audit log; monitor mode opens the inbox read-only)
 - [x] Day 8: dark-mode web console started together with the mailbox poller by one command: a React + Tailwind dashboard (quarantine table with colour-coded explainability chips and **Restore to Inbox** with confirmation and a loading spinner, `POST /api/restore/{id}`, real IMAP move, in-place update) and a Quick Scan page for emails and SMS. Verified end to end against a real TLS IMAP server (Dovecot) in a real browser
 - [x] Day 9: Tests + CI hardening (GitHub Actions on Python 3.11 and 3.13: ruff, bandit, 369 tests with a 85% coverage floor (92% measured, without the datasets), pip-audit; least-privilege token, SHA-pinned actions, Dependabot; timing tests made CI-safe)
-- [ ] Day 10: Docs & release
+- [x] Day 10: Docs & release (architecture overview, Windows quick start, CHANGELOG, v0.1.0)
+
+## Quick start
+Linux / macOS:
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[web]"
+python scripts/bootstrap.py   # first time only: datasets + models (~7 min)
+cp .env.example .env          # set ADMIN_PASSWORD_HASH and FLASK_SECRET_KEY (see "Run it")
+python -m phishguard.web      # open http://127.0.0.1:5000
+```
+Windows (PowerShell):
+```powershell
+py -m venv .venv; .venv\Scripts\Activate.ps1
+pip install -e ".[web]"
+python scripts/bootstrap.py
+Copy-Item .env.example .env
+python -m phishguard.web
+```
+Without a mailbox in `.env` the dashboard and Quick Scan still work; the poller just
+stays off. Without the trained models the dashboard loads but Quick Scan answers
+"Models are not available" until you run `bootstrap.py`. If login keeps returning to the
+login page over plain `http://` (some browsers drop `Secure` cookies there), set
+`WEB_COOKIE_SECURE=false` for local use only.
 
 ## Development setup
 ```bash
@@ -122,6 +146,13 @@ never quarantines it again.
 
 **Quick Scan** (`/scan`): paste an email (raw source with headers, or just the text) or
 an SMS with its sender, or upload an `.eml`, and see the verdict with every reason.
+On the SMS tab you can also upload a **screenshot** (PNG, JPEG or WebP, up to 5 MB): its
+text is read offline with OCR, scored like a pasted SMS, and shown above the verdict so you
+can check it was read correctly. This needs the optional extra: `pip install -e ".[ocr]"`
+(RapidOCR; its models ship inside the package, so nothing is downloaded at scan time).
+The image is never stored.
+
+![Quick Scan of an SMS screenshot](docs/screenshots/web_scan_screenshot.png)
 
 | Dashboard | Confirm | Restoring | Phone |
 |---|---|---|---|
